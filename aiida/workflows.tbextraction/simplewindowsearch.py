@@ -12,7 +12,7 @@ from aiida.orm import (
 from .runwindow import RunwindowWorkflow
 
 @validate_input
-# @parameter('window', DataFactory('parameter'))
+@parameter('window_parameters', DataFactory('parameter'))
 @inherit_parameters(RunwindowWorkflow, ignore=['window'])
 class SimplewindowsearchWorkflow(Workflow):
     """
@@ -21,37 +21,58 @@ class SimplewindowsearchWorkflow(Workflow):
     def __init__(self, **kwargs):
         super(SimplewindowsearchWorkflow, self).__init__(**kwargs)
 
-    # @Workflow.step
-    # def start(self):
-    #     extraction_params = self.inherited_parameters(TbextractionWorkflow)
-    #     # set the energy window
-    #     wannier_settings = extraction_params['wannier_settings'].get_dict()
-    #     wannier_settings.update(self.get_parameter('window').get_dict())
-    #     wannier_settings_data = DataFactory('parameter')(dict=wannier_settings)
-    #     wannier_settings_data.store()
-    #     extraction_params['wannier_settings'] = wannier_settings_data
-    #     wf = TbextractionWorkflow(params=extraction_params)
-    #     wf.store()
-    #     wf.start()
-    #     self.attach_workflow(wf)
-    #     self.next(self.bandeval)
-    #
-    # @Workflow.step
-    # def bandeval(self):
-    #     extraction_wf = self.get_step_workflows(self.start)[0]
-    #     band_params = self.inherited_parameters(BandevaluationWorkflow)
-    #     # set the tight-binding model from the extraction
-    #     tb_model = extraction_wf.get_result('tb_model')
-    #     band_params['tb_model'] = tb_model
-    #     self.add_result('tb_model', tb_model)
-    #     wf = BandevaluationWorkflow(params=band_params)
-    #     wf.store()
-    #     wf.start()
-    #     self.attach_workflow(wf)
-    #     self.next(self.finalize)
-    #
-    # @Workflow.step
-    # def finalize(self):
-    #     eval_wf = self.get_step_workflows(self.bandeval)[0]
-    #     self.add_result('difference', eval_wf.get_result('difference'))
-    #     self.next(self.exit)
+    def _count_bands(self, limits):
+        lower, upper = sorted(limits)
+        bands = self.get_parameter('reference_bands').get_bands()
+        band_count = np.sum(
+            np.logical_and(lower <= bands, bands <= upper),
+            axis=-1
+        )
+        return np.min(band_count), np.max(band_count)
+
+    def _window_valid(self, window):
+        win_min = window['dis_win_min']
+        win_max = window['dis_win_max']
+        froz_min = window['dis_froz_min']
+        froz_max = window['dis_froz_max']
+        num_wann = self.get_parameter('wannier_settings')['num_wann']
+
+        # max >= min
+        if win_min > win_max or froz_min > froz_max:
+            return False
+
+        # outer window contains the inner window
+        if win_min > froz_min or win_max < froz_max:
+            return False
+
+        # check number of bands in froz <= num_wann
+        if self._count_bands(limits=(froz_min, froz_max))[1] > num_wann:
+            return False
+        # check number of bands in win >= num_wann
+        if self._count_bands(limits=(win_min, win_max))[0] < num_wann:
+            return False
+        return True
+
+    @Workflow.step
+    def start(self):
+        window_params = self.get_parameter('window_parameters')
+        window_keys = sorted(window_params.keys())
+        all_windows = [
+            {k: v for k, v in zip(window_keys, vals)}
+            for vals in itertools.product(*[window_params[key] for key in window_keys])
+        ]
+        runwindow_params = self.inherited_parameters(RunwindowWorkflow)
+        for window in all_windows:
+            if self._window_valid(window):
+                params = copy.copy(runwindow_params)
+                params['window'] = DataFactory('parameter')(dict=window)
+                wf = RunwindowWorkflow(params=params)
+                wf.store()
+                wf.start()
+                self.attach_workflow(wf)
+
+        self.next(self.finalize)
+
+    @Workflow.step
+    def finalize(self):
+        # find best result for the difference
