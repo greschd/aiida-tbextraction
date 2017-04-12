@@ -96,7 +96,7 @@ def run_extraction(slice=True, symmetries=True):
         slice_idx = DataFactory('tbmodels.list')(value=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         slice_idx.store()
         params['slice_idx'] = slice_idx
-    wfobj = WorkflowFactory('tbmodels.tbextraction')(params=params)
+    wfobj = WorkflowFactory('tbextraction.tbextraction')(params=params)
     wfobj.store()
     wfobj.start()
     print('Submitted workflow {}'.format(wfobj.pk))

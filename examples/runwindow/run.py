@@ -124,7 +124,7 @@ def run(slice=True, symmetries=True):
         params['slice_idx'] = slice_idx
 
     params['reference_bands'] = get_bandsdata()
-    wfobj = WorkflowFactory('tbmodels.runwindow')(params=params)
+    wfobj = WorkflowFactory('tbextraction.runwindow')(params=params)
     wfobj.store()
     wfobj.start()
     print('Submitted workflow {}'.format(wfobj.pk))
