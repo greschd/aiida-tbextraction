@@ -9,7 +9,12 @@ import argparse
 import itertools
 
 import numpy as np
-from aiida.orm import QueryBuilder
+from aiida.orm import Code
+from aiida.orm.data.base import Str
+from aiida.orm.querybuilder import QueryBuilder
+from aiida.work.run import run
+
+from aiida_tbextraction.work.tbextraction import TbExtraction
 
 def get_input_archive():
     archive_description = u'InSb Wannier90 input from HF VASP calculation'
@@ -59,9 +64,9 @@ def run_extraction(slice=True, symmetries=True):
     params['wannier_data'] = get_input_archive()
 
     # wannier code and queue settings
-    params['wannier_queue'] = 'dphys_compute'
-    params['wannier_code'] = 'Wannier90_2.1.0'
-    params['tbmodels_code'] = 'tbmodels_dev'
+    params['wannier_queue'] = Str('dphys_compute')
+    params['wannier_code'] = Code.get_from_string('Wannier90_2.1.0@Monch')
+    params['tbmodels_code'] = Code.get_from_string('tbmodels_dev@localhost')
     k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
     k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
     wannier_settings = DataFactory('parameter')(
@@ -96,10 +101,11 @@ def run_extraction(slice=True, symmetries=True):
         slice_idx = DataFactory('tbmodels.list')(value=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         slice_idx.store()
         params['slice_idx'] = slice_idx
-    wfobj = WorkflowFactory('tbextraction.tbextraction')(params=params)
-    wfobj.store()
-    wfobj.start()
-    print('Submitted workflow {}'.format(wfobj.pk))
+    pid = run(
+        TbExtraction,
+        **params
+    ).pid
+    print('Submitted workflow {}'.format(pid))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

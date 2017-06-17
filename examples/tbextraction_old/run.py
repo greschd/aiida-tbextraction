@@ -10,7 +10,6 @@ import itertools
 
 import numpy as np
 from aiida.orm.querybuilder import QueryBuilder
-from aiida.tools.codespecific.bandstructure_utils.io import read_bands
 
 def get_input_archive():
     archive_description = u'InSb Wannier90 input from HF VASP calculation'
@@ -55,25 +54,7 @@ def get_singlefile_instance(description, path):
         res = res[0][0]
     return res
 
-def get_bandsdata():
-    qb = QueryBuilder()
-    BandsData = DataFactory('array.bands')
-    description = 'InSb bands from TB model.'
-    qb.append(
-        BandsData,
-        filters={'description': {'==': description}}
-    )
-    res = qb.all()
-    if len(res) == 0:
-        res = read_bands('reference_input/bands.hdf5')
-        res.store()
-    elif len(res) > 1:
-        raise ValueError('Query returned more than one matching BandsData instance.')
-    else:
-        res = res[0][0]
-    return res
-
-def run(slice=True, symmetries=True):
+def run_extraction(slice=True, symmetries=True):
     params = dict()
     params['wannier_data'] = get_input_archive()
 
@@ -81,25 +62,18 @@ def run(slice=True, symmetries=True):
     params['wannier_queue'] = 'dphys_compute'
     params['wannier_code'] = 'Wannier90_2.1.0'
     params['tbmodels_code'] = 'tbmodels_dev'
-    params['bandstructure_utils_code'] = 'bandstructure_utils_dev'
     k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
     k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
-    window = DataFactory('parameter')(
-        dict=dict(
-            dis_win_min=-4.5,
-            dis_win_max=16.,
-            dis_froz_min=-4.,
-            dis_froz_max=6.5,
-        )
-    )
-    window.store()
-    params['window'] = window
     wannier_settings = DataFactory('parameter')(
         dict=dict(
             num_wann=14,
             num_bands=36,
             dis_num_iter=1000,
             num_iter=0,
+            dis_win_min=-4.5,
+            dis_win_max=16.,
+            dis_froz_min=-4.,
+            dis_froz_max=6.5,
             spinors=True,
             unit_cell_cart=[
                 [0, 3.2395, 3.2395],
@@ -122,12 +96,15 @@ def run(slice=True, symmetries=True):
         slice_idx = DataFactory('tbmodels.list')(value=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         slice_idx.store()
         params['slice_idx'] = slice_idx
-
-    params['reference_bands'] = get_bandsdata()
-    wfobj = WorkflowFactory('tbextraction.runwindow')(params=params)
+    wfobj = WorkflowFactory('tbextraction.tbextraction')(params=params)
     wfobj.store()
     wfobj.start()
     print('Submitted workflow {}'.format(wfobj.pk))
 
 if __name__ == '__main__':
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--slice', dest='slice', action='store_true')
+    parser.add_argument('--symmetries', dest='symmetries', action='store_true')
+    args = parser.parse_args()
+
+    run_extraction(**vars(args))
