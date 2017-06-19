@@ -3,57 +3,46 @@
 #
 # Author:  Dominik Gresch <greschd@gmx.ch>
 
-from past.builtins import basestring
-from aiida_tools.validate_input import validate_input, parameter, inherit_parameters
-from aiida.orm import (
-    Code, Computer, DataFactory, CalculationFactory, QueryBuilder, Workflow, WorkflowFactory
-)
+from aiida.orm import DataFactory
+from aiida.work.workchain import WorkChain
+from aiida_tbmodels.work.bandevaluation import BandEvaluation
 
-from .tbextraction import TbextractionWorkflow
-BandevaluationWorkflow = WorkflowFactory('tbmodels.bandevaluation')
+from .tbextraction import TbExtraction
 
-@validate_input
-@parameter('window', DataFactory('parameter'))
-@inherit_parameters(BandevaluationWorkflow, ignore=['tb_model'])
-@inherit_parameters(TbextractionWorkflow)
-class RunwindowWorkflow(Workflow):
+class RunWindow(WorkChain):
     """
-    This workflow runs the tight-binding extraction and analysis for a given energy window.
+    This workchain runs the tight-binding extraction and analysis for a given energy window.
     """
-    def __init__(self, **kwargs):
-        super(RunwindowWorkflow, self).__init__(**kwargs)
+    @classmethod
+    def define(cls, spec):
+        super(RunWindow, cls).define(spec)
+        spec.input('window', valid_type=DataFactory('parameter'))
+        spec.inherit_inputs(TbExtraction)
+        spec.inherit_inputs(BandEvaluation, ignore=['tb_model'])
 
-    @Workflow.step
-    def start(self):
-        extraction_params = self.inherited_parameters(TbextractionWorkflow)
+        spec.outline(
+            self.extract_model, self.evaluate_bands, self.finalize
+        )
+
+    def extract_model(self):
+        inputs = self.inherited_inputs(TbextractionWorkflow)
         # set the energy window
-        wannier_settings = extraction_params['wannier_settings'].get_dict()
-        wannier_settings.update(self.get_parameter('window').get_dict())
-        wannier_settings_data = DataFactory('parameter')(dict=wannier_settings)
-        wannier_settings_data.store()
-        extraction_params['wannier_settings'] = wannier_settings_data
-        wf = TbextractionWorkflow(params=extraction_params)
-        wf.store()
-        wf.start()
-        self.attach_workflow(wf)
-        self.next(self.bandeval)
+        wannier_settings = inputs.pop('wannier_settings').get_dict()
+        wannier_settings.update(self.inputs.window.get_dict())
+        inputs['wannier_settings'] = DataFactory('parameter')(dict=wannier_settings)
+        return ToContext(
+            tbextraction_calc=submit(TbExtraction, **inputs)
+        )
 
-    @Workflow.step
-    def bandeval(self):
-        extraction_wf = self.get_step_workflows(self.start)[0]
-        band_params = self.inherited_parameters(BandevaluationWorkflow)
-        # set the tight-binding model from the extraction
-        tb_model = extraction_wf.get_result('tb_model')
-        band_params['tb_model'] = tb_model
-        self.add_result('tb_model', tb_model)
-        wf = BandevaluationWorkflow(params=band_params)
-        wf.store()
-        wf.start()
-        self.attach_workflow(wf)
-        self.next(self.finalize)
+    def evaluate_bands(self):
+        inputs = BandEvaluation.get_inputs_template()
+        inputs.update(self.inherited_inputs(BandEvaluation))
+        tb_model = self.ctx.tbextraction_calc.out.tb_model
+        inputs.tb_model = tb_model
+        self.out('tb_model': tb_model)
+        return ToContext(
+            bandeval_calc=submit(BandEvaluation, **inputs)
+        )
 
-    @Workflow.step
     def finalize(self):
-        eval_wf = self.get_step_workflows(self.bandeval)[0]
-        self.add_result('difference', eval_wf.get_result('difference'))
-        self.next(self.exit)
+        self.out('difference', self.ctx.bandeval_calc.out.difference)
