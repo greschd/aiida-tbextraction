@@ -46,7 +46,7 @@ class TbExtraction(WorkChain):
         wannier_settings = self.inputs.wannier_settings.get_dict()
         wannier_settings.setdefault('write_hr', True)
         wannier_settings.setdefault('use_ws_distance', True)
-        print("Running Wannier90 calculation...")
+        self.report("Running Wannier90 calculation...")
         pid = submit(
             CalculationFactory('vasp.wswannier').process(),
             code=self.inputs.wannier_code,
@@ -72,7 +72,7 @@ class TbExtraction(WorkChain):
     def parse(self):
         process, inputs = self.setup_tbmodels('tbmodels.parse')
         inputs.wannier_folder = self.ctx.wannier_calc.out.tb_model
-        print("Parsing Wannier90 output to tbmodels format...")
+        self.report("Parsing Wannier90 output to tbmodels format...")
         pid = submit(
             process,
             **inputs
@@ -83,7 +83,7 @@ class TbExtraction(WorkChain):
         process, inputs = self.setup_tbmodels('tbmodels.slice')
         inputs.tb_model = self.tb_model
         inputs.slice_idx = self.inputs.slice_idx
-        print("Slicing tight-binding model...")
+        self.report("Slicing tight-binding model...")
         pid = submit(
             process,
             **inputs
@@ -94,7 +94,7 @@ class TbExtraction(WorkChain):
         process, inputs = self.setup_tbmodels('tbmodels.symmetrize')
         inputs.tb_model = self.tb_model
         inputs.symmetries = self.inputs.symmetries
-        print("Symmetrizing tight-binding model...")
+        self.report("Symmetrizing tight-binding model...")
         pid = submit(
             process,
             **inputs
@@ -103,4 +103,4 @@ class TbExtraction(WorkChain):
 
     def finalize(self):
         self.out("tb_model", self.tb_model)
-        print('Added final tb_model to results.')
+        self.report('Added final tb_model to results.')
