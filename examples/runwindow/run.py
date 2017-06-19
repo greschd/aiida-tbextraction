@@ -9,8 +9,13 @@ import argparse
 import itertools
 
 import numpy as np
+from aiida.work.run import run
+from aiida.orm import Code
+from aiida.orm.data.base import Str
 from aiida.orm.querybuilder import QueryBuilder
-from aiida.tools.codespecific.bandstructure_utils.io import read_bands
+from aiida_bandstructure_utils.io import read_bands
+
+from aiida_tbextraction.work.runwindow import RunWindow
 
 def get_input_archive():
     archive_description = u'InSb Wannier90 input from HF VASP calculation'
@@ -73,15 +78,15 @@ def get_bandsdata():
         res = res[0][0]
     return res
 
-def run(slice=True, symmetries=True):
-    params = dict()
-    params['wannier_data'] = get_input_archive()
+def run_window(slice=True, symmetries=True):
+    inputs = dict()
+    inputs['wannier_data'] = get_input_archive()
 
     # wannier code and queue settings
-    params['wannier_queue'] = 'dphys_compute'
-    params['wannier_code'] = 'Wannier90_2.1.0'
-    params['tbmodels_code'] = 'tbmodels_dev'
-    params['bandstructure_utils_code'] = 'bandstructure_utils_dev'
+    inputs['wannier_queue'] = Str('dphys_compute')
+    inputs['wannier_code'] = Code.get_from_string('Wannier90_2.1.0@Monch')
+    inputs['tbmodels_code'] = Code.get_from_string('tbmodels_dev@localhost')
+    inputs['bandstructure_utils_code'] = Code.get_from_string('bandstructure_utils_dev')
     k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
     k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
     window = DataFactory('parameter')(
@@ -93,7 +98,7 @@ def run(slice=True, symmetries=True):
         )
     )
     window.store()
-    params['window'] = window
+    inputs['window'] = window
     wannier_settings = DataFactory('parameter')(
         dict=dict(
             num_wann=14,
@@ -115,19 +120,21 @@ def run(slice=True, symmetries=True):
         )
     )
     wannier_settings.store()
-    params['wannier_settings'] = wannier_settings
+    inputs['wannier_settings'] = wannier_settings
     if symmetries:
-        params['symmetries'] = get_singlefile_instance(u'Symmetries for InAs', 'reference_input/symmetries.hdf5')
+        inputs['symmetries'] = get_singlefile_instance(u'Symmetries for InAs', 'reference_input/symmetries.hdf5')
     if slice:
         slice_idx = DataFactory('tbmodels.list')(value=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         slice_idx.store()
-        params['slice_idx'] = slice_idx
+        inputs['slice_idx'] = slice_idx
 
-    params['reference_bands'] = get_bandsdata()
-    wfobj = WorkflowFactory('tbextraction.runwindow')(params=params)
-    wfobj.store()
-    wfobj.start()
-    print('Submitted workflow {}'.format(wfobj.pk))
+    inputs['reference_bands'] = get_bandsdata()
+
+    print(run(
+        RunWindow,
+        **inputs
+    ))
+    # print('Submitted workflow {}'.format(wfobj.pk))
 
 if __name__ == '__main__':
-    run()
+    run_window()
