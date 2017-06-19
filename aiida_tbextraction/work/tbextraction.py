@@ -31,7 +31,7 @@ class TbExtraction(WorkChain):
         spec.outline(
             cls.run_wswannier,
             cls.parse,
-            if_(cls.has_slice)(cls.run_slice),
+            if_(cls.has_slice)(cls.slice),
             if_(cls.has_symmetries)(cls.symmetrize),
             cls.finalize
         )
@@ -46,6 +46,7 @@ class TbExtraction(WorkChain):
         wannier_settings = self.inputs.wannier_settings.get_dict()
         wannier_settings.setdefault('write_hr', True)
         wannier_settings.setdefault('use_ws_distance', True)
+        print("Running Wannier90 calculation...")
         pid = submit(
             CalculationFactory('vasp.wswannier').process(),
             code=self.inputs.wannier_code,
@@ -54,16 +55,52 @@ class TbExtraction(WorkChain):
             data=self.inputs.wannier_data,
             settings=DataFactory('parameter')(dict=wannier_settings)
         )
-        return ToContext(wannier_output=pid)
+        return ToContext(wannier_calc=pid)
+
+    def setup_tbmodels(self, calc_string):
+        process = CalculationFactory(calc_string).process()
+        inputs = process.get_inputs_template()
+        inputs.code = self.inputs.tbmodels_code
+        inputs._options.resources = {'num_machines': 1}
+        inputs._options.withmpi = False
+        return process, inputs
+
+    @property
+    def tb_model(self):
+        return self.ctx.tbmodels_calc.out.tb_model
 
     def parse(self):
-        raise NotImplemented
+        process, inputs = self.setup_tbmodels('tbmodels.parse')
+        inputs.wannier_folder = self.ctx.wannier_calc.out.tb_model
+        print("Parsing Wannier90 output to tbmodels format...")
+        pid = submit(
+            process,
+            **inputs
+        )
+        return ToContext(tbmodels_calc=pid)
 
-    def run_slice(self):
-        raise NotImplemented
+    def slice(self):
+        process, inputs = self.setup_tbmodels('tbmodels.slice')
+        inputs.tb_model = self.tb_model
+        inputs.slice_idx = self.inputs.slice_idx
+        print("Slicing tight-binding model...")
+        pid = submit(
+            process,
+            **inputs
+        )
+        return ToContext(tbmodels_calc=pid)
 
     def symmetrize(self):
-        raise NotImplemented
+        process, inputs = self.setup_tbmodels('tbmodels.symmetrize')
+        inputs.tb_model = self.tb_model
+        inputs.symmetries = self.inputs.symmetries
+        print("Symmetrizing tight-binding model...")
+        pid = submit(
+            process,
+            **inputs
+        )
+        return ToContext(tbmodels_calc=pid)
 
     def finalize(self):
-        raise NotImplemented
+        self.out("tb_model", self.tb_model)
+        print('Added final tb_model to results.')

@@ -12,7 +12,7 @@ import numpy as np
 from aiida.orm import Code
 from aiida.orm.data.base import Str
 from aiida.orm.querybuilder import QueryBuilder
-from aiida.work.run import run
+from aiida.work.run import submit
 
 from aiida_tbextraction.work.tbextraction import TbExtraction
 
@@ -101,11 +101,11 @@ def run_extraction(slice=True, symmetries=True):
         slice_idx = DataFactory('tbmodels.list')(value=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         slice_idx.store()
         params['slice_idx'] = slice_idx
-    pid = run(
+    pid = submit(
         TbExtraction,
         **params
     ).pid
-    print('Submitted workflow {}'.format(pid))
+    print('Submitted workchain {}'.format(pid))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
