@@ -31,23 +31,22 @@ class RunWindow(WorkChain):
         wannier_settings = inputs.pop('wannier_settings').get_dict()
         wannier_settings.update(self.inputs.window.get_dict())
         inputs['wannier_settings'] = DataFactory('parameter')(dict=wannier_settings)
-        print("Extracting tight-binding model...")
+        self.report("Extracting tight-binding model...")
         return ToContext(
             tbextraction_calc=submit(TbExtraction, **inputs)
         )
 
     def evaluate_bands(self):
-        inputs = BandEvaluation.get_inputs_template()
-        inputs.update(self.inherited_inputs(BandEvaluation))
         tb_model = self.ctx.tbextraction_calc.out.tb_model
-        inputs.tb_model = tb_model
-        print("Adding tight-binding model to output.")
+        self.report("Adding tight-binding model to output.")
         self.out('tb_model', tb_model)
-        print("Running band evaluation...")
-        return ToContext(
-            bandeval_calc=submit(BandEvaluation, **inputs)
-        )
+        self.report("Running band evaluation...")
+        return ToContext(bandeval_calc=submit(
+            BandEvaluation,
+            tb_model=tb_model,
+            **self.inherited_inputs(BandEvaluation)
+        ))
 
     def finalize(self):
-        print("Adding band difference to output.")
+        self.report("Adding band difference to output.")
         self.out('difference', self.ctx.bandeval_calc.out.difference)
