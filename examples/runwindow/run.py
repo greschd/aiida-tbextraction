@@ -130,11 +130,11 @@ def run_window(slice=True, symmetries=True):
 
     inputs['reference_bands'] = get_bandsdata()
 
-    print(run(
+    res = run(
         RunWindow,
         **inputs
-    ))
-    # print('Submitted workflow {}'.format(wfobj.pk))
+    )
+    print('Got result {}'.format(res))
 
 if __name__ == '__main__':
     run_window()
