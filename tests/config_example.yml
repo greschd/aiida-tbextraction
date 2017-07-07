@@ -1,0 +1,20 @@
+computers:
+    - name: localhost
+      hostname: localhost
+      description: localhost
+      transport: local
+      scheduler: direct
+      work_directory: /tmp/test_aiida_tbextraction_run
+
+codes:
+    - label: tbmodels
+      description: tbmodels
+      default_plugin: tbmodels.parse
+      remote_computer: localhost
+      remote_abspath: /home/greschd/.virtualenvs/tbmodels_test/bin/tbmodels
+
+    - label: bandstructure_utils
+      description: bandstructure_utils
+      default_plugin: bandstructure_utils.difference
+      remote_computer: localhost
+      remote_abspath: /home/greschd/.virtualenvs/bandstructure_utils_test/bin/bandstructure_utils
