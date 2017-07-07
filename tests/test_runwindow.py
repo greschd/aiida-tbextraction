@@ -12,7 +12,7 @@ import numpy as np
 def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
-    from aiida.work import run 
+    from aiida.work import run
     from aiida_bandstructure_utils.io import read_bands
     from aiida_tbextraction.work.runwindow import RunWindow
 
@@ -59,6 +59,7 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
         )
     )
     inputs['wannier_settings'] = wannier_settings
+    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(dict=dict(_options={'resources': {'num_machines': 1, 'tot_num_mpiprocs': 1}, 'withmpi': False}))
     if symmetries:
         inputs['symmetries'] = DataFactory('singlefile')(file=sample('symmetries.hdf5'))
     if slice:
@@ -70,3 +71,4 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
         RunWindow,
         **inputs
     )
+    assert all(key in result for key in ['difference', 'tb_model'])

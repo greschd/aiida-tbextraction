@@ -83,10 +83,9 @@ def run_window(slice=True, symmetries=True):
     inputs['wannier_data'] = get_input_archive()
 
     # wannier code and queue settings
-    inputs['wannier_queue'] = Str('dphys_compute')
-    inputs['wannier_code'] = Code.get_from_string('Wannier90_2.1.0@Monch')
-    inputs['tbmodels_code'] = Code.get_from_string('tbmodels_dev@localhost')
-    inputs['bandstructure_utils_code'] = Code.get_from_string('bandstructure_utils_dev')
+    inputs['wannier_code'] = Code.get_from_string('wannier90')
+    inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
+    inputs['bandstructure_utils_code'] = Code.get_from_string('bandstructure_utils')
     k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
     k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
     window = DataFactory('parameter')(
@@ -121,6 +120,12 @@ def run_window(slice=True, symmetries=True):
     )
     wannier_settings.store()
     inputs['wannier_settings'] = wannier_settings
+    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(
+        dict=dict(
+            _options={'resources': {'num_machines': 1}, 'withmpi': False}
+        )
+    )
+
     if symmetries:
         inputs['symmetries'] = get_singlefile_instance(u'Symmetries for InAs', 'reference_input/symmetries.hdf5')
     if slice:
