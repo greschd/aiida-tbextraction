@@ -18,10 +18,11 @@ class TbExtraction(WorkChain):
     def define(cls, spec):
         super(TbExtraction, cls).define(spec)
 
+        ParameterData = DataFactory('parameter')
         spec.input('wannier_code', valid_type=Code)
         spec.input('wannier_data', valid_type=DataFactory('vasp.archive'))
-        spec.input('wannier_queue', valid_type=Str)
-        spec.input('wannier_settings', valid_type=DataFactory('parameter'))
+        spec.input('wannier_calculation_kwargs', valid_type=ParameterData, default=ParameterData())
+        spec.input('wannier_settings', valid_type=ParameterData)
 
         spec.input('tbmodels_code', valid_type=Code)
 
@@ -50,10 +51,9 @@ class TbExtraction(WorkChain):
         pid = submit(
             CalculationFactory('vasp.wswannier').process(),
             code=self.inputs.wannier_code,
-            _options=dict(resources=dict(num_machines=1, tot_num_mpiprocs=1), queue_name=self.inputs.wannier_queue.value),
-            # queue_name=self.inputs.wannier_queue,
             data=self.inputs.wannier_data,
-            settings=DataFactory('parameter')(dict=wannier_settings)
+            settings=DataFactory('parameter')(dict=wannier_settings),
+            **self.inputs.wannier_calculation_kwargs.value
         )
         return ToContext(wannier_calc=pid)
 
