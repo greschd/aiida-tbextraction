@@ -20,14 +20,29 @@ class TbExtraction(WorkChain):
 
         ParameterData = DataFactory('parameter')
         spec.input('wannier_code', valid_type=Code)
-        spec.input('wannier_data', valid_type=DataFactory('vasp.archive'))
-        spec.input('wannier_calculation_kwargs', valid_type=ParameterData, default=ParameterData(dict={'_options': {}}))
+        spec.input(
+            'wannier_data',
+            valid_type=DataFactory('vasp.archive')
+        )
+        spec.input(
+            'wannier_calculation_kwargs',
+            valid_type=ParameterData,
+            default=ParameterData(dict={'_options': {}})
+        )
         spec.input('wannier_settings', valid_type=ParameterData)
 
         spec.input('tbmodels_code', valid_type=Code)
 
-        spec.input('slice_idx', valid_type=DataFactory('tbmodels.list'), required=False)
-        spec.input('symmetries', valid_type=DataFactory('singlefile'), required=False)
+        spec.input(
+            'slice_idx',
+            valid_type=DataFactory('tbmodels.list'),
+            required=False
+        )
+        spec.input(
+            'symmetries',
+            valid_type=DataFactory('singlefile'),
+            required=False
+        )
 
         spec.outline(
             cls.run_wswannier,

@@ -64,9 +64,8 @@ def run_extraction(slice=True, symmetries=True):
     params['wannier_data'] = get_input_archive()
 
     # wannier code and queue settings
-    params['wannier_queue'] = Str('dphys_compute')
-    params['wannier_code'] = Code.get_from_string('Wannier90_2.1.0@Monch')
-    params['tbmodels_code'] = Code.get_from_string('tbmodels_dev@localhost')
+    params['wannier_code'] = Code.get_from_string('wannier90')
+    params['tbmodels_code'] = Code.get_from_string('tbmodels')
     k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
     k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
     wannier_settings = DataFactory('parameter')(
@@ -95,6 +94,11 @@ def run_extraction(slice=True, symmetries=True):
     )
     wannier_settings.store()
     params['wannier_settings'] = wannier_settings
+    params['wannier_calculation_kwargs'] = DataFactory('parameter')(
+        dict=dict(
+            _options={'resources': {'num_machines': 1}, 'withmpi': False}
+        )
+    )
     if symmetries:
         params['symmetries'] = get_singlefile_instance(u'Symmetries for InAs', 'reference_input/symmetries.hdf5')
     if slice:
