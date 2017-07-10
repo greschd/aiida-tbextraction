@@ -66,10 +66,10 @@ class WindowSearch(WorkChain):
         if win_min > froz_min or win_max < froz_max:
             return False
 
-        # check number of bands in froz <= num_wann
+        # check number of bands in inner window <= num_wann
         if self._count_bands(limits=(froz_min, froz_max))[1] > num_wann:
             return False
-        # check number of bands in win >= num_wann
+        # check number of bands in outer window >= num_wann
         if self._count_bands(limits=(win_min, win_max))[0] < num_wann:
             return False
         return True
@@ -85,7 +85,7 @@ class WindowSearch(WorkChain):
 
     def check_windows(self):
         self.report('Evaluating calculated windows.')
-        window_calcs = [calc for key, calc in self.ctx.iteritems() if key.startswith('window_')]
+        window_calcs = [self.ctx[key] for key in self.ctx if key.startswith('window_')]
         window_calcs = sorted(window_calcs, key=lambda calc: calc.out.difference.value)
         optimal_calc = window_calcs[0]
         self.out('tb_model', optimal_calc.out.tb_model)

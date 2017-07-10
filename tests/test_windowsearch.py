@@ -29,9 +29,9 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     inputs['bandstructure_utils_code'] = Code.get_from_string('bandstructure_utils')
 
     window_values = DataFactory('parameter')(dict=dict(
-        dis_win_min=[-5, -4.5, -4],
+        dis_win_min=[-4.5, -3.9],
         dis_win_max=[16.],
-        dis_froz_min=[-4.2, -4, -3.8],
+        dis_froz_min=[-4, -3.8],
         dis_froz_max=[6.5]
     ))
     inputs['window_values'] = window_values
