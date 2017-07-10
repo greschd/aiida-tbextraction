@@ -4,13 +4,13 @@
 import copy
 import itertools
 
+import numpy as np
 from aiida.orm import DataFactory
 from aiida.work.run import submit
-from aiida.work.workchain import WorkChain, _while
+from aiida.work.workchain import WorkChain, while_
 
 from .runwindow import RunWindow
 
-@inherit_parameters(RunwindowWorkflow, ignore=['window'])
 class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.
@@ -35,15 +35,16 @@ class WindowSearch(WorkChain):
         for window in valid_windows:
             inputs = copy.copy(runwindow_inputs)
             inputs['window'] = DataFactory('parameter')(dict=window)
+            self.report('Submitting calculation with window={}.'.format(window))
             pid = submit(RunWindow, **inputs)
             window_runs.append(pid)
-        return ToContext(**{
+        return self.to_context(**{
             'window_{}'.format(i): pid
             for i, pid in enumerate(window_runs)
         })
 
     def _get_valid_windows(self):
-        window_values = self.inputs.window_values
+        window_values = self.inputs.window_values.get_dict()
         all_windows = [
             {key: val for key, val in zip(window_values.keys(), window_choice)}
             for window_choice in itertools.product(*window_values.values())
@@ -55,7 +56,7 @@ class WindowSearch(WorkChain):
         win_max = window['dis_win_max']
         froz_min = window['dis_froz_min']
         froz_max = window['dis_froz_max']
-        num_wann = self.get_parameter('wannier_settings')['num_wann']
+        num_wann = self.inputs.wannier_settings.get_attr('num_wann')
 
         # max >= min
         if win_min > win_max or froz_min > froz_max:
@@ -75,7 +76,7 @@ class WindowSearch(WorkChain):
 
     def _count_bands(self, limits):
         lower, upper = sorted(limits)
-        bands = self.get_parameter('reference_bands').get_bands()
+        bands = self.inputs.reference_bands.get_bands()
         band_count = np.sum(
             np.logical_and(lower <= bands, bands <= upper),
             axis=-1
@@ -83,9 +84,11 @@ class WindowSearch(WorkChain):
         return np.min(band_count), np.max(band_count)
 
     def check_windows(self):
-        window_calcs = [calc for key, calc in self.ctx.items() if key.startswith('window_')]
+        self.report('Evaluating calculated windows.')
+        window_calcs = [calc for key, calc in self.ctx.iteritems() if key.startswith('window_')]
         window_calcs = sorted(window_calcs, key=lambda calc: calc.out.difference.value)
         optimal_calc = window_calcs[0]
         self.out('tb_model', optimal_calc.out.tb_model)
         self.out('difference', optimal_calc.out.difference)
         self.out('window', optimal_calc.inp.window)
+        self.report('Finished!')
