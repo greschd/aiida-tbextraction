@@ -12,7 +12,7 @@ computers:
     transport: ssh
     scheduler: slurm
     work_directory: /mnt/lnec/{username}/test_aiida_tbextraction_run/
-    num_cpus: 10
+    num_cpus: 20
 
 codes:
   - label: tbmodels
@@ -29,7 +29,7 @@ codes:
 
   - label: wannier90
     description: Wannier90
-    default_plugin: vasp.wswannier
+    default_plugin: wannier90.wannier90
     remote_computer: localhost
     remote_abspath: /home/greschd/software/wannier90-latest/wannier90.x
 

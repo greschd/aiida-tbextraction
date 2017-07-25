@@ -32,10 +32,12 @@ if __name__ == '__main__':
         install_requires=[
             'aiida-core',
             'aiida-vasp',
+            'aiida-wannier90'
             'aiida-bandstructure-utils',
             'aiida-tbmodels'
         ],
         extras_require={
+            'test': ['pymatgen', 'aiida-pytest']
         },
         entry_points={
         },
