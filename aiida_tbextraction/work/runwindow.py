@@ -28,9 +28,9 @@ class RunWindow(WorkChain):
     def extract_model(self):
         inputs = self.inherited_inputs(TbExtraction)
         # set the energy window
-        wannier_settings = inputs.pop('wannier_settings').get_dict()
-        wannier_settings.update(self.inputs.window.get_dict())
-        inputs['wannier_settings'] = DataFactory('parameter')(dict=wannier_settings)
+        wannier_parameters = inputs.pop('wannier_parameters').get_dict()
+        wannier_parameters.update(self.inputs.window.get_dict())
+        inputs['wannier_parameters'] = DataFactory('parameter')(dict=wannier_parameters)
         self.report("Extracting tight-binding model...")
         return ToContext(
             tbextraction_calc=submit(TbExtraction, **inputs)
