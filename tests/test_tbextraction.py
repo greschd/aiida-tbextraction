@@ -27,8 +27,10 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
 
+    k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
+    k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
     wannier_kpoints = DataFactory('array.kpoints')()
-    wannier_kpoints.set_kpoints_mesh([6, 6, 6])
+    wannier_kpoints.set_kpoints(k_points)
     inputs['wannier_kpoints'] = wannier_kpoints
 
     a = 3.2395
@@ -51,6 +53,7 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
             dis_froz_min=-4,
             dis_froz_max=6.5,
             spinors=True,
+            mp_grid=[6, 6, 6]
         )
     )
     inputs['wannier_parameters'] = wannier_parameters

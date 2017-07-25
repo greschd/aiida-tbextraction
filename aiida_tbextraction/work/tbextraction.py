@@ -58,6 +58,7 @@ class TbExtraction(WorkChain):
             kpoints=self.inputs.wannier_kpoints,
             projections=self.inputs.get('wannier_projections', None),
             structure=self.inputs.get('wannier_structure', None),
+            settings=DataFactory('parameter')(dict={'retrieve_hoppings': True}),
             **self.inputs.wannier_calculation_kwargs.get_dict()
         )
         return ToContext(wannier_calc=pid)
@@ -76,7 +77,7 @@ class TbExtraction(WorkChain):
 
     def parse(self):
         process, inputs = self.setup_tbmodels('tbmodels.parse')
-        inputs.wannier_folder = self.ctx.wannier_calc.retrieved
+        inputs.wannier_folder = self.ctx.wannier_calc.out.retrieved
         self.report("Parsing Wannier90 output to tbmodels format...")
         pid = submit(
             process,
