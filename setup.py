@@ -32,7 +32,7 @@ if __name__ == '__main__':
         install_requires=[
             'aiida-core',
             'aiida-vasp',
-            'aiida-wannier90'
+            'aiida-wannier90',
             'aiida-bands-inspect',
             'aiida-tbmodels'
         ],
