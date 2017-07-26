@@ -58,17 +58,7 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
             dis_num_iter=1000,
             num_iter=0,
             spinors=True,
-            unit_cell_cart=[
-                [0, 3.2395, 3.2395],
-                [3.2395, 0, 3.2395],
-                [3.2395, 3.2395, 0]
-            ],
-            atoms_cart=[
-                ['In       0.0000000     0.0000000     0.0000000'],
-                ['Sb       1.6197500     1.6197500     1.6197500']
-            ],
-            mp_grid='6 6 6',
-            kpoints=k_points
+            mp_grid=[6, 6, 6],
         )
     )
     inputs['wannier_parameters'] = wannier_parameters
