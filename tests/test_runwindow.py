@@ -14,7 +14,7 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.work import run
-    from aiida_bandstructure_utils.io import read_bands
+    from aiida_bands_inspect.io import read_bands
     from aiida_tbextraction.work.runwindow import RunWindow
 
     inputs = dict()
@@ -27,7 +27,7 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
 
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
-    inputs['bandstructure_utils_code'] = Code.get_from_string('bandstructure_utils')
+    inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
 
     window = DataFactory('parameter')(dict=dict(
         dis_win_min=-4.5,

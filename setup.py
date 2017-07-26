@@ -33,7 +33,7 @@ if __name__ == '__main__':
             'aiida-core',
             'aiida-vasp',
             'aiida-wannier90'
-            'aiida-bandstructure-utils',
+            'aiida-bands-inspect',
             'aiida-tbmodels'
         ],
         extras_require={

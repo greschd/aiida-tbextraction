@@ -21,11 +21,11 @@ codes:
     remote_computer: localhost
     remote_abspath: /home/greschd/.virtualenvs/tbmodels_test/bin/tbmodels
 
-  - label: bandstructure_utils
-    description: bandstructure_utils
-    default_plugin: bandstructure_utils.difference
+  - label: bands_inspect
+    description: bands_inspect
+    default_plugin: bands_inspect.difference
     remote_computer: localhost
-    remote_abspath: /home/greschd/.virtualenvs/bandstructure_utils_test/bin/bandstructure_utils
+    remote_abspath: /home/greschd/.virtualenvs/bands_inspect/bin/bands_inspect
 
   - label: wannier90
     description: Wannier90
