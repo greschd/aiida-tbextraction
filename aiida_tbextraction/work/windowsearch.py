@@ -56,7 +56,7 @@ class WindowSearch(WorkChain):
         win_max = window['dis_win_max']
         froz_min = window['dis_froz_min']
         froz_max = window['dis_froz_max']
-        num_wann = self.inputs.wannier_settings.get_attr('num_wann')
+        num_wann = self.inputs.wannier_parameters.get_attr('num_wann')
 
         # max >= min
         if win_min > win_max or froz_min > froz_max:
