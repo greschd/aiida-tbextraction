@@ -3,6 +3,11 @@
 #
 # Author:  Dominik Gresch <greschd@gmx.ch>
 
+try:
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
+
 from aiida.orm.data.base import Str, List
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
@@ -23,6 +28,7 @@ class TbExtraction(WorkChain):
         spec.input('wannier_input_folder', valid_type=DataFactory('folder'))
         spec.input('wannier_calculation_kwargs', valid_type=ParameterData, default=ParameterData(dict={'_options': {}}))
         spec.input('wannier_parameters', valid_type=ParameterData)
+        spec.input('wannier_settings', valid_type=ParameterData, required=False)
         spec.input('wannier_structure', valid_type=DataFactory('structure'), required=False)
         spec.input('wannier_projections', valid_type=(DataFactory('orbital'), List), required=False)
         spec.input('wannier_kpoints', valid_type=DataFactory('array.kpoints'))
@@ -58,7 +64,12 @@ class TbExtraction(WorkChain):
             kpoints=self.inputs.wannier_kpoints,
             projections=self.inputs.get('wannier_projections', None),
             structure=self.inputs.get('wannier_structure', None),
-            settings=DataFactory('parameter')(dict={'retrieve_hoppings': True}),
+            settings=DataFactory('parameter')(
+                dict=ChainMap(
+                    self.inputs.get('wannier_settings', {}),
+                    {'retrieve_hoppings': True}
+                )
+            ),
             **self.inputs.wannier_calculation_kwargs.get_dict()
         )
         return ToContext(wannier_calc=pid)

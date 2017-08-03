@@ -34,7 +34,8 @@ if __name__ == '__main__':
             'aiida-vasp',
             'aiida-wannier90',
             'aiida-bands-inspect',
-            'aiida-tbmodels'
+            'aiida-tbmodels',
+            'chainmap'
         ],
         extras_require={
             'test': ['pymatgen', 'aiida-pytest']
