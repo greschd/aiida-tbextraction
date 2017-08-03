@@ -38,7 +38,7 @@ if __name__ == '__main__':
             'chainmap'
         ],
         extras_require={
-            'test': ['pymatgen', 'aiida-pytest']
+            'test': ['pymatgen', 'aiida-pytest', 'ase']
         },
         entry_points={
         },
