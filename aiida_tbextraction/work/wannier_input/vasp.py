@@ -16,7 +16,7 @@ class VaspToWannier90(ToWannier90Base):
         )
 
     def submit_calculation(self):
-        self.report("Submitting VASP calculation.")
+        self.report("Submitting VASP2W90 calculation.")
         return ToContext(
             vasp_calc=submit(
                 CalculationFactory('vasp.vasp2w90').process(),
@@ -27,9 +27,7 @@ class VaspToWannier90(ToWannier90Base):
                 code=self.inputs.code,
                 wannier_parameters=self.inputs.get('wannier_parameters', None),
                 wannier_projections=self.inputs.get('wannier_projections', None),
-                **self.inputs.get(
-                    'calculation_kwargs', DataFactory('parameter')()
-                ).get_dict()
+                **self.inputs.calculation_kwargs.get_dict()
         ))
 
     def get_result(self):

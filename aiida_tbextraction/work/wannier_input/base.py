@@ -20,10 +20,7 @@ class ToWannier90Base(WorkChain):
         spec.input_group('potentials')
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
-        spec.input(
-            'calculation_kwargs', valid_type=ParameterData,
-            required=False
-        )
+        spec.input('calculation_kwargs', valid_type=ParameterData)
 
         spec.input(
             'wannier_parameters', valid_type=ParameterData,
