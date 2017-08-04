@@ -47,7 +47,10 @@ class VaspHybridsBands(ReferenceBandsBase):
 
     def get_bands(self):
         bands = self.ctx.vasp_calc.out.bands
-        cropped_bands = crop_bands(bands=bands, kpoints=self.inputs.kpoints)[1]['bands']
+        cropped_bands = crop_bands_inline(
+            bands=bands,
+            kpoints=self.inputs.kpoints
+        )[1]['bands']
         self.out('bands', cropped_bands)
 
 @make_inline
@@ -74,10 +77,12 @@ def crop_bands_inline(bands, kpoints):
     kpoints_array = kpoints.get_kpoints()
     band_slice = slice(-len(kpoints_array), None)
     cropped_bands_kpoints = bands.get_kpoints()[band_slice]
-    assert np.allclose(cropped_band_kpoints, kpoints_array)
+    assert np.allclose(cropped_bands_kpoints, kpoints_array)
 
     cropped_bands = DataFactory('array.bands')()
     cropped_bands.set_kpointsdata(kpoints)
-    cropped_bands_array = bands.get_bands()[band_slice]
+    bands_array = bands.get_bands()
+    assert len(bands_array) == 1
+    cropped_bands_array = bands_array[0, band_slice]
     cropped_bands.set_bands(cropped_bands_array)
     return {'bands': cropped_bands}

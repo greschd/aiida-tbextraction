@@ -61,8 +61,9 @@ def test_vasp_hf_to_wannier90(configure_with_daemon, sample, assert_finished):
         calculation_kwargs=DataFactory('parameter')(dict=dict(
             _options=dict(
                 resources={'num_machines': 2, 'num_mpiprocs_per_machine': 18},
-                queue_name='dphys_compute',
-                withmpi=True
+                queue_name='express_compute',
+                withmpi=True,
+                max_wallclock_seconds=600
             )
         ))
     )

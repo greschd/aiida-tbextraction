@@ -55,10 +55,12 @@ def test_vasp_hybrid_bands(configure_with_daemon, sample, assert_finished):
         calculation_kwargs=DataFactory('parameter')(dict=dict(
             _options=dict(
                 resources={'num_machines': 2, 'num_mpiprocs_per_machine': 18},
-                queue_name='dphys_compute',
-                withmpi=True
+                queue_name='express_compute',
+                withmpi=True,
+                max_wallclock_seconds=600
             )
         ))
     )
     assert_finished(pid)
     assert 'bands' in result
+    assert result['bands'].get_bands().shape == (10, 36)
