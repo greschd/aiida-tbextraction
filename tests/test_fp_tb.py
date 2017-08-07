@@ -18,18 +18,18 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
 
     inputs = dict()
 
-    # inputs['wannier_code'] = Code.get_from_string('wannier90')
-    # inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
-    # inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
-    #
-    # window_values = DataFactory('parameter')(dict=dict(
-    #     dis_win_min=[-4.5, -3.9],
-    #     dis_win_max=[16.],
-    #     dis_froz_min=[-4, -3.8],
-    #     dis_froz_max=[6.5]
-    # ))
-    # inputs['window_values'] = window_values
-    #
+    inputs['wannier_code'] = Code.get_from_string('wannier90')
+    inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
+    inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
+
+    window_values = DataFactory('parameter')(dict=dict(
+        dis_win_min=[-4.5, -3.9],
+        dis_win_max=[16.],
+        dis_froz_min=[-4, -3.8],
+        dis_froz_max=[6.5]
+    ))
+    inputs['window_values'] = window_values
+
     # k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
     # k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
     # wannier_kpoints = DataFactory('array.kpoints')()

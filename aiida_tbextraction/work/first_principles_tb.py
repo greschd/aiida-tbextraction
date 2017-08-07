@@ -90,7 +90,8 @@ class FirstPrinciplesTbExtraction(WorkChain):
             namespace='window_search',
             exclude=(
                 'wannier_input_folder',
-                'reference_bands'
+                'reference_bands',
+                'wannier_parameters',
             )
         )
 
@@ -122,6 +123,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         return ToContext(windowsearch=submit(
             WindowSearch,
             wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
+            wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
             reference_bands=self.ctx.reference_bands.out.bands,
             **self.inherited_inputs(WindowSearch)
         ))

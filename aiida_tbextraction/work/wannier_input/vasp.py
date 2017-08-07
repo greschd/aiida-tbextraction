@@ -32,9 +32,11 @@ class VaspToWannier90(ToWannier90Base):
 
     def get_result(self):
         self.report("Adding Wannier90 input folder to output.")
-        retrieved_folder = self.ctx.vasp_calc.out.retrieved
+        vasp_calc_output = self.ctx.vasp_calc.out
+        retrieved_folder = vasp_calc_output.retrieved
         folder_list = retrieved_folder.get_folder_list()
         assert all(filename in folder_list for filename in [
             'wannier90.amn', 'wannier90.mmn', 'wannier90.eig'
         ])
         self.out('wannier_input_folder', retrieved_folder)
+        self.out('wannier_parameters', vasp_calc_output.wannier_parameters)

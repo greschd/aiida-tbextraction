@@ -31,6 +31,5 @@ class ToWannier90Base(WorkChain):
             valid_type=(DataFactory('orbital'), List), required=False
         )
 
-        spec.output(
-            'wannier_input_folder', valid_type=DataFactory('folder')
-        )
+        spec.output('wannier_input_folder', valid_type=DataFactory('folder'))
+        spec.output('wannier_parameters', valid_type=ParameterData)
