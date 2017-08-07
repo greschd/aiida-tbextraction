@@ -12,13 +12,13 @@ if __name__ == '__main__':
         description='AiiDA Plugin for extracting tight-binding models',
         author='Dominik Gresch',
         author_email='greschd@gmx.ch',
-        license='GPL',
+        license='MIT',
         classifiers=[
             'Development Status :: 3 - Alpha',
             'Environment :: Plugins',
             'Framework :: AiiDA',
             'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'License :: OSI Approved :: MIT License',
             'Programming Language :: Python :: 2.7',
             'Topic :: Scientific/Engineering :: Physics'
         ],
