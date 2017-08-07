@@ -32,7 +32,7 @@ class TbExtraction(WorkChain):
         spec.input('wannier_kpoints', valid_type=DataFactory('array.kpoints'))
 
         spec.input('tbmodels_code', valid_type=Code)
-        spec.input('slice_idx', valid_type=DataFactory('tbmodels.list'), required=False)
+        spec.input('slice_idx', valid_type=List, required=False)
         spec.input('symmetries', valid_type=DataFactory('singlefile'), required=False)
 
         spec.outline(

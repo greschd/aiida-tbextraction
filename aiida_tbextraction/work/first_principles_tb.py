@@ -4,8 +4,9 @@ except ImportError:
     from singledispatch import singledispatch
 
 import plum.util
+from aiida.work.run import submit
 from aiida.orm.data.base import Str
-from aiida.work.workchain import WorkChain
+from aiida.work.workchain import WorkChain, ToContext
 
 from .windowsearch import WindowSearch
 from .reference_bands.base import ReferenceBandsBase
@@ -40,10 +41,16 @@ class FirstPrinciplesTbExtraction(WorkChain):
     def define(cls, spec):
         super(FirstPrinciplesTbExtraction, cls).define(spec)
 
-        # TODO: Scope inherited inputs
-        spec.inherit_inputs(WindowSearch)
-        spec.inherit_inputs(ReferenceBandsBase)
-        spec.inherit_inputs(ToWannier90Base)
+        spec.inherit_inputs(ReferenceBandsBase, namespace='reference_bands')
+        spec.inherit_inputs(ToWannier90Base, namespace='to_wannier90')
+        spec.inherit_inputs(
+            WindowSearch,
+            namespace='window_search',
+            exclude=(
+                'wannier_input_folder',
+                'reference_bands'
+            )
+        )
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('to_wannier90_workflow', **WORKCHAIN_INPUT_KWARGS)
@@ -55,10 +62,29 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
 
     def run_dft(self):
-        pass
+        reference_bands_pid = submit(
+            self.get_deserialized_input('reference_bands_workflow'),
+            **self.inherited_inputs(ReferenceBandsBase)
+        )
+        to_wannier90_pid = submit(
+            self.get_deserialized_input('to_wannier90_workflow'),
+            **self.inherited_inputs(ToWannier90Base)
+        )
+        return ToContext(
+            reference_bands=reference_bands_pid,
+            to_wannier90=to_wannier90_pid
+        )
 
     def run_windowsearch(self):
-        pass
+        return ToContext(windowsearch=submit(
+            WindowSearch,
+            wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
+            reference_bands=self.ctx.reference_bands.out.bands,
+            **self.inherited_inputs(WindowSearch)
+        ))
 
     def finalize(self):
-        pass
+        window_wf = self.ctx.windowsearch
+        self.out('tb_model', window_wf.out.tb_model)
+        self.out('difference', window_wf.out.difference)
+        self.out('window', window_wf.out.window)

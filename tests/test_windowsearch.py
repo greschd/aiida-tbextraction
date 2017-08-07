@@ -13,6 +13,7 @@ import numpy as np
 def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
+    from aiida.orm.data.base import List
     from aiida.work import run
     from aiida_bands_inspect.io import read_bands
     from aiida_tbextraction.work.windowsearch import WindowSearch
@@ -66,7 +67,9 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     if symmetries:
         inputs['symmetries'] = DataFactory('singlefile')(file=sample('symmetries.hdf5'))
     if slice:
-        inputs['slice_idx'] = DataFactory('tbmodels.list')(value=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
+        slice_idx = List()
+        slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
+        inputs['slice_idx'] = slice_idx
 
     inputs['reference_bands'] = read_bands(sample('bands.hdf5'))
 
