@@ -22,7 +22,7 @@ class VaspToWannier90(ToWannier90Base):
                 CalculationFactory('vasp.vasp2w90').process(),
                 structure=self.inputs.structure,
                 paw=self.inputs.potentials,
-                kpoints=self.inputs.kpoints,
+                kpoints=self.inputs.kpoints_mesh,
                 parameters=self.inputs.parameters,
                 code=self.inputs.code,
                 wannier_parameters=self.inputs.get('wannier_parameters', None),

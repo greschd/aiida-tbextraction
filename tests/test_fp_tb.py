@@ -54,9 +54,9 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     #         mp_grid=[6, 6, 6],
     #     )
     # )
-    # inputs['wannier_parameters'] = wannier_parameters
-    # inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(dict=dict(_options={'resources': {'num_machines': 1, 'tot_num_mpiprocs': 1}, 'withmpi': False}))
-    # inputs['symmetries'] = DataFactory('singlefile')(file=sample('symmetries.hdf5'))
+    inputs['wannier_parameters'] = wannier_parameters
+    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(dict=dict(_options={'resources': {'num_machines': 1, 'tot_num_mpiprocs': 1}, 'withmpi': False}))
+    inputs['symmetries'] = DataFactory('singlefile')(file=sample('symmetries.hdf5'))
 
     slice_idx = List()
     slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])

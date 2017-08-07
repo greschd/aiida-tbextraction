@@ -41,8 +41,50 @@ class FirstPrinciplesTbExtraction(WorkChain):
     def define(cls, spec):
         super(FirstPrinciplesTbExtraction, cls).define(spec)
 
-        spec.inherit_inputs(ReferenceBandsBase, namespace='reference_bands')
-        spec.inherit_inputs(ToWannier90Base, namespace='to_wannier90')
+        # inputs which are inherited at the top level
+        spec.inherit_inputs(
+            ReferenceBandsBase,
+            exclude=(
+                'code',
+                'parameters',
+                'calculation_kwargs',
+            )
+        )
+        # inputs which are inherited at the namespace level
+        spec.inherit_inputs(
+            ReferenceBandsBase,
+            namespace='reference_bands',
+            exclude=(
+                'structure',
+                'potentials',
+                'kpoints',
+                'kpoints_mesh',
+            )
+        )
+
+        # Inputs which are inherited at the top level
+        spec.inherit_inputs(
+            ToWannier90Base,
+            exclude=(
+                'code',
+                'parameters',
+                'calculation_kwargs',
+            )
+        )
+        # inputs which are inherited at the namespace level
+        spec.inherit_inputs(
+            ToWannier90Base,
+            namespace='to_wannier90'
+            exclude=(
+                'code',
+                'structure',
+                'potentials',
+                'kpoints_mesh',
+                'wannier_projections',
+                'wannier_parameters',
+            )
+        )
+
         spec.inherit_inputs(
             WindowSearch,
             namespace='window_search',
@@ -68,6 +110,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
         to_wannier90_pid = submit(
             self.get_deserialized_input('to_wannier90_workflow'),
+            code=self.inputs.wannier_code,
             **self.inherited_inputs(ToWannier90Base)
         )
         return ToContext(

@@ -16,7 +16,7 @@ class ToWannier90Base(WorkChain):
 
         ParameterData = DataFactory('parameter')
         spec.input('structure', valid_type=DataFactory('structure'))
-        spec.input('kpoints', valid_type=DataFactory('array.kpoints'))
+        spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'))
         spec.input_group('potentials')
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
