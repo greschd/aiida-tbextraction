@@ -74,9 +74,8 @@ class FirstPrinciplesTbExtraction(WorkChain):
         # inputs which are inherited at the namespace level
         spec.inherit_inputs(
             ToWannier90Base,
-            namespace='to_wannier90'
+            namespace='to_wannier90',
             exclude=(
-                'code',
                 'structure',
                 'potentials',
                 'kpoints_mesh',
@@ -85,13 +84,14 @@ class FirstPrinciplesTbExtraction(WorkChain):
             )
         )
 
+        # top-level scope
         spec.inherit_inputs(
             WindowSearch,
-            namespace='window_search',
             exclude=(
-                'wannier_input_folder',
                 'reference_bands',
+                'wannier_kpoints',
                 'wannier_parameters',
+                'wannier_input_folder',
             )
         )
 
@@ -122,14 +122,15 @@ class FirstPrinciplesTbExtraction(WorkChain):
     def run_windowsearch(self):
         return ToContext(windowsearch=submit(
             WindowSearch,
-            wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
-            wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
             reference_bands=self.ctx.reference_bands.out.bands,
+            wannier_kpoints=self.inputs.kpoints_mesh,
+            wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
+            wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
             **self.inherited_inputs(WindowSearch)
         ))
 
     def finalize(self):
-        window_wf = self.ctx.windowsearch
-        self.out('tb_model', window_wf.out.tb_model)
-        self.out('difference', window_wf.out.difference)
-        self.out('window', window_wf.out.window)
+        windowsearch = self.ctx.windowsearch
+        self.out('tb_model', windowsearch.out.tb_model)
+        self.out('difference', windowsearch.out.difference)
+        self.out('window', windowsearch.out.window)

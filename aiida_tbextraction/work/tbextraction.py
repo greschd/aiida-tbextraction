@@ -22,12 +22,12 @@ class TbExtraction(WorkChain):
         super(TbExtraction, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
+        spec.input('structure', valid_type=DataFactory('structure'), required=False)
         spec.input('wannier_code', valid_type=Code)
         spec.input('wannier_input_folder', valid_type=DataFactory('folder'))
         spec.input('wannier_calculation_kwargs', valid_type=ParameterData, default=ParameterData(dict={'_options': {}}))
         spec.input('wannier_parameters', valid_type=ParameterData)
         spec.input('wannier_settings', valid_type=ParameterData, required=False)
-        spec.input('wannier_structure', valid_type=DataFactory('structure'), required=False)
         spec.input('wannier_projections', valid_type=(DataFactory('orbital'), List), required=False)
         spec.input('wannier_kpoints', valid_type=DataFactory('array.kpoints'))
 
@@ -61,7 +61,7 @@ class TbExtraction(WorkChain):
             parameters=DataFactory('parameter')(dict=wannier_parameters),
             kpoints=self.inputs.wannier_kpoints,
             projections=self.inputs.get('wannier_projections', None),
-            structure=self.inputs.get('wannier_structure', None),
+            structure=self.inputs.get('structure', None),
             settings=DataFactory('parameter')(
                 dict=ChainMap(
                     self.inputs.get('wannier_settings', {}),

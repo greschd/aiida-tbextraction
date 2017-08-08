@@ -35,13 +35,13 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
     inputs['wannier_kpoints'] = wannier_kpoints
 
     a = 3.2395
-    wannier_structure = DataFactory('structure')()
-    wannier_structure.set_pymatgen_structure(pymatgen.Structure(
+    structure = DataFactory('structure')()
+    structure.set_pymatgen_structure(pymatgen.Structure(
         lattice=[[0, a, a], [a, 0, a], [a, a, 0]],
         species=['In', 'Sb'],
         coords=[[0] * 3, [0.25] * 3]
     ))
-    inputs['wannier_structure'] = wannier_structure
+    inputs['structure'] = structure
 
     wannier_parameters = DataFactory('parameter')(
         dict=dict(
