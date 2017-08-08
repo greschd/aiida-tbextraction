@@ -18,6 +18,8 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
 
     inputs = dict()
 
+    inputs['reference_bands_code'] = Code.get_from_string('vasp')
+    inputs['to_wannier90_code'] = Code.get_from_string('vasp')
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
     inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
@@ -44,16 +46,17 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     #     coords=[[0] * 3, [0.25] * 3]
     # ))
     # inputs['structure'] = structure
-    # wannier_parameters = DataFactory('parameter')(
-    #     dict=dict(
-    #         num_wann=14,
-    #         num_bands=36,
-    #         dis_num_iter=1000,
-    #         num_iter=0,
-    #         spinors=True,
-    #         mp_grid=[6, 6, 6],
-    #     )
-    # )
+
+    wannier_parameters = DataFactory('parameter')(
+        dict=dict(
+            num_wann=14,
+            num_bands=36,
+            dis_num_iter=1000,
+            num_iter=0,
+            spinors=True,
+            mp_grid=[6, 6, 6],
+        )
+    )
     inputs['wannier_parameters'] = wannier_parameters
     inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(dict=dict(_options={'resources': {'num_machines': 1, 'tot_num_mpiprocs': 1}, 'withmpi': False}))
     inputs['symmetries'] = DataFactory('singlefile')(file=sample('symmetries.hdf5'))

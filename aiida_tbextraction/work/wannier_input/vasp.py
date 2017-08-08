@@ -40,3 +40,4 @@ class VaspToWannier90(ToWannier90Base):
         ])
         self.out('wannier_input_folder', retrieved_folder)
         self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
+        self.out('wannier_kpoints', vasp_calc_output.wannier_kpoints)

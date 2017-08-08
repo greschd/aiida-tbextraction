@@ -123,7 +123,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         return ToContext(windowsearch=submit(
             WindowSearch,
             reference_bands=self.ctx.reference_bands.out.bands,
-            wannier_kpoints=self.inputs.kpoints_mesh,
+            wannier_kpoints=self.ctx.to_wannier90.out.wannier_kpoints,
             wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
             wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
             **self.inherited_inputs(WindowSearch)
