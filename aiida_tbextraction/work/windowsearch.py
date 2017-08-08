@@ -29,7 +29,9 @@ class WindowSearch(WorkChain):
 
     def run_windows(self):
         valid_windows = self._get_valid_windows()
-
+        if not valid_windows:
+            self.report('No valid energy windows found, aborting.')
+            raise AssertionError
         runwindow_inputs = self.inherited_inputs(RunWindow)
         window_runs = []
         for window in valid_windows:

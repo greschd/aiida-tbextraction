@@ -111,7 +111,6 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
         to_wannier90_pid = submit(
             self.get_deserialized_input('to_wannier90_workflow'),
-            code=self.inputs.wannier_code,
             **self.inherited_inputs(ToWannier90Base)
         )
         return ToContext(
