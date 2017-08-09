@@ -55,10 +55,10 @@ def test_runwindow(
     inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
 
     window_values = DataFactory('parameter')(dict=dict(
-        dis_win_min=[-4.5, -3.9],
-        dis_win_max=[16.],
-        dis_froz_min=[-4, -3.8],
-        dis_froz_max=[6.5]
+        dis_win_min=[-10, -7, -4.5, -3.9, -3],
+        dis_win_max=[15, 16., 17],
+        dis_froz_min=[-4, -4, -3.8, -1],
+        dis_froz_max=[2, 6, 6.5, 7]
     ))
     inputs['window_values'] = window_values
 

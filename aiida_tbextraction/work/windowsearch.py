@@ -19,8 +19,9 @@ class WindowSearch(WorkChain):
     def define(cls, spec):
         super(WindowSearch, cls).define(spec)
 
-        spec.inherit_inputs(RunWindow, exclude=['window'])
+        spec.inherit_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
         spec.input('window_values', valid_type=DataFactory('parameter'))
+        spec.input('wannier_bands', valid_type=DataFactory('array.bands'))
 
         # TODO: Generalize to allow iterative window search
         spec.outline(
@@ -34,9 +35,11 @@ class WindowSearch(WorkChain):
             raise AssertionError
         runwindow_inputs = self.inherited_inputs(RunWindow)
         window_runs = []
+        wannier_kpoints = self.inputs.wannier_bands
         for window in valid_windows:
             inputs = copy.copy(runwindow_inputs)
             inputs['window'] = DataFactory('parameter')(dict=window)
+            inputs['wannier_kpoints'] = wannier_kpoints
             self.report('Submitting calculation with window={}.'.format(window))
             pid = submit(RunWindow, **inputs)
             window_runs.append(pid)
@@ -51,7 +54,10 @@ class WindowSearch(WorkChain):
             {key: val for key, val in zip(window_values.keys(), window_choice)}
             for window_choice in itertools.product(*window_values.values())
         ]
-        return [window for window in all_windows if self._window_is_valid(window)]
+        return [
+            window for window in all_windows
+            if self._window_is_valid(window)
+        ]
 
     def _window_is_valid(self, window):
         win_min = window['dis_win_min']
@@ -69,21 +75,21 @@ class WindowSearch(WorkChain):
             return False
 
         # check number of bands in inner window <= num_wann
-        if self._count_bands(limits=(froz_min, froz_max))[1] > num_wann:
+        if np.max(self._count_bands(limits=(froz_min, froz_max))) > num_wann:
             return False
         # check number of bands in outer window >= num_wann
-        if self._count_bands(limits=(win_min, win_max))[0] < num_wann:
+        if np.min(self._count_bands(limits=(win_min, win_max))) < num_wann:
             return False
         return True
 
     def _count_bands(self, limits):
         lower, upper = sorted(limits)
-        bands = self.inputs.reference_bands.get_bands()
+        bands = self.inputs.wannier_bands.get_bands()
         band_count = np.sum(
             np.logical_and(lower <= bands, bands <= upper),
             axis=-1
         )
-        return np.min(band_count), np.max(band_count)
+        return band_count
 
     def check_windows(self):
         self.report('Evaluating calculated windows.')

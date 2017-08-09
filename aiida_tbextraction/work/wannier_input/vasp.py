@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 from aiida.work.run import submit
 from aiida.orm import DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
@@ -31,13 +33,23 @@ class VaspToWannier90(ToWannier90Base):
         ))
 
     def get_result(self):
-        self.report("Adding Wannier90 input folder to output.")
-        vasp_calc_output = self.ctx.vasp_calc.out
-        retrieved_folder = vasp_calc_output.retrieved
-        folder_list = retrieved_folder.get_folder_list()
-        assert all(filename in folder_list for filename in [
-            'wannier90.amn', 'wannier90.mmn', 'wannier90.eig'
-        ])
-        self.out('wannier_input_folder', retrieved_folder)
-        self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
-        self.out('wannier_kpoints', vasp_calc_output.wannier_kpoints)
+        try:
+            vasp_calc_output = self.ctx.vasp_calc.out
+            retrieved_folder = vasp_calc_output.retrieved
+            folder_list = retrieved_folder.get_folder_list()
+            assert all(filename in folder_list for filename in [
+                'wannier90.amn', 'wannier90.mmn', 'wannier90.eig'
+            ])
+            self.report("Adding Wannier90 input folder to output.")
+            self.out('wannier_input_folder', retrieved_folder)
+            self.report("Adding Wannier90 parameters to output.")
+            self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
+            assert np.allclose(
+                vasp_calc_output.wannier_kpoints.get_kpoints(),
+                vasp_calc_output.bands.get_kpoints()
+            )
+            self.report("Adding Wannier90 input bands to output.")
+            self.out('wannier_bands', vasp_calc_output.bands)
+        except Exception as e:
+            self.report('{}: {}'.format(type(e).__name__, e))
+            raise e

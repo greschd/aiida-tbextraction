@@ -28,6 +28,6 @@ def test_vasp_hf_to_wannier90(configure_with_daemon, assert_finished, get_insb_i
         **get_insb_input()
     )
     assert_finished(pid)
-    assert 'wannier_input_folder' in result
+    assert all(key in result for key in ['wannier_input_folder', 'wannier_parameters', 'wannier_bands'])
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(filename in folder_list for filename in ['wannier90.amn', 'wannier90.mmn', 'wannier90.eig'])
