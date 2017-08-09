@@ -7,9 +7,10 @@ import itertools
 import numpy as np
 from aiida.orm import DataFactory
 from aiida.work.run import submit
-from aiida.work.workchain import WorkChain, while_
+from aiida.work.workchain import WorkChain, while_, ToContext
 
 from .runwindow import RunWindow
+from ._utils import check_workchain_step
 
 class WindowSearch(WorkChain):
     """
@@ -28,22 +29,24 @@ class WindowSearch(WorkChain):
             cls.run_windows, cls.check_windows
         )
 
+    @check_workchain_step
     def run_windows(self):
         valid_windows = self._get_valid_windows()
         if not valid_windows:
             self.report('No valid energy windows found, aborting.')
             raise AssertionError
+        else:
+            self.report('Found {} valid window configurations.'.format(len(valid_windows)))
         runwindow_inputs = self.inherited_inputs(RunWindow)
         window_runs = []
-        wannier_kpoints = self.inputs.wannier_bands
         for window in valid_windows:
             inputs = copy.copy(runwindow_inputs)
             inputs['window'] = DataFactory('parameter')(dict=window)
-            inputs['wannier_kpoints'] = wannier_kpoints
+            inputs['wannier_kpoints'] = self.inputs.wannier_bands
             self.report('Submitting calculation with window={}.'.format(window))
             pid = submit(RunWindow, **inputs)
             window_runs.append(pid)
-        return self.to_context(**{
+        return ToContext(**{
             'window_{}'.format(i): pid
             for i, pid in enumerate(window_runs)
         })
@@ -64,7 +67,7 @@ class WindowSearch(WorkChain):
         win_max = window['dis_win_max']
         froz_min = window['dis_froz_min']
         froz_max = window['dis_froz_max']
-        num_wann = self.inputs.wannier_parameters.get_attr('num_wann')
+        num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
 
         # max >= min
         if win_min > win_max or froz_min > froz_max:
@@ -91,6 +94,7 @@ class WindowSearch(WorkChain):
         )
         return band_count
 
+    @check_workchain_step
     def check_windows(self):
         self.report('Evaluating calculated windows.')
         window_calcs = [self.ctx[key] for key in self.ctx if key.startswith('window_')]

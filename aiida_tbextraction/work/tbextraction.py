@@ -13,6 +13,8 @@ from aiida.orm import (
     Code, Computer, DataFactory, CalculationFactory
 )
 
+from ._utils import check_workchain_step
+
 class TbExtraction(WorkChain):
     """
     This workchain takes a Wannier90 input and a symmetry file as input and returns the symmetrized TBmodels model.
@@ -49,11 +51,12 @@ class TbExtraction(WorkChain):
     def has_symmetries(self):
         return 'symmetries' in self.inputs
 
+    @check_workchain_step
     def run_wswannier(self):
         wannier_parameters = self.inputs.wannier_parameters.get_dict()
         wannier_parameters.setdefault('write_hr', True)
         wannier_parameters.setdefault('use_ws_distance', True)
-        self.report("Running Wannier90 calculation...")
+        self.report("Running Wannier90 calculation.")
         pid = submit(
             CalculationFactory('wannier90.wannier90').process(),
             code=self.inputs.wannier_code,
@@ -84,38 +87,42 @@ class TbExtraction(WorkChain):
     def tb_model(self):
         return self.ctx.tbmodels_calc.out.tb_model
 
+    @check_workchain_step
     def parse(self):
         process, inputs = self.setup_tbmodels('tbmodels.parse')
         inputs.wannier_folder = self.ctx.wannier_calc.out.retrieved
-        self.report("Parsing Wannier90 output to tbmodels format...")
+        self.report("Parsing Wannier90 output to tbmodels format.")
         pid = submit(
             process,
             **inputs
         )
         return ToContext(tbmodels_calc=pid)
 
+    @check_workchain_step
     def slice(self):
         process, inputs = self.setup_tbmodels('tbmodels.slice')
         inputs.tb_model = self.tb_model
         inputs.slice_idx = self.inputs.slice_idx
-        self.report("Slicing tight-binding model...")
+        self.report("Slicing tight-binding model.")
         pid = submit(
             process,
             **inputs
         )
         return ToContext(tbmodels_calc=pid)
 
+    @check_workchain_step
     def symmetrize(self):
         process, inputs = self.setup_tbmodels('tbmodels.symmetrize')
         inputs.tb_model = self.tb_model
         inputs.symmetries = self.inputs.symmetries
-        self.report("Symmetrizing tight-binding model...")
+        self.report("Symmetrizing tight-binding model.")
         pid = submit(
             process,
             **inputs
         )
         return ToContext(tbmodels_calc=pid)
 
+    @check_workchain_step
     def finalize(self):
         self.out("tb_model", self.tb_model)
         self.report('Added final tb_model to results.')

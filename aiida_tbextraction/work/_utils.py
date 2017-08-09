@@ -2,6 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import functools
+
+def check_workchain_step(func):
+    @functools.wraps(func)
+    def inner(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except Exception as e:
+            self.report('{} in {}: {}'.format(type(e).__name__, func.__name__, e))
+            raise e
+    return inner
 
 def create_workchain(typename, template, **kwargs):
     """

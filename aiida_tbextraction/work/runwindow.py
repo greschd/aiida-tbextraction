@@ -7,6 +7,7 @@ from aiida.work.workchain import WorkChain, ToContext
 from aiida_tbmodels.work.bandevaluation import BandEvaluation
 
 from .tbextraction import TbExtraction
+from ._utils import check_workchain_step
 
 class RunWindow(WorkChain):
     """
@@ -23,17 +24,19 @@ class RunWindow(WorkChain):
             cls.extract_model, cls.evaluate_bands, cls.finalize
         )
 
+    @check_workchain_step
     def extract_model(self):
         inputs = self.inherited_inputs(TbExtraction)
         # set the energy window
         wannier_parameters = inputs.pop('wannier_parameters').get_dict()
         wannier_parameters.update(self.inputs.window.get_dict())
         inputs['wannier_parameters'] = DataFactory('parameter')(dict=wannier_parameters)
-        self.report("Extracting tight-binding model...")
+        self.report("Extracting tight-binding model.")
         return ToContext(
             tbextraction_calc=submit(TbExtraction, **inputs)
         )
 
+    @check_workchain_step
     def evaluate_bands(self):
         tb_model = self.ctx.tbextraction_calc.out.tb_model
         self.report("Adding tight-binding model to output.")
@@ -45,6 +48,7 @@ class RunWindow(WorkChain):
             **self.inherited_inputs(BandEvaluation)
         ))
 
+    @check_workchain_step
     def finalize(self):
         self.report("Adding band difference to output.")
         self.out('difference', self.ctx.bandeval_calc.out.difference)

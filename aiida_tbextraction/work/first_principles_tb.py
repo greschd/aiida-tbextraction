@@ -11,6 +11,7 @@ from aiida.work.workchain import WorkChain, ToContext
 from .windowsearch import WindowSearch
 from .reference_bands.base import ReferenceBandsBase
 from .wannier_input.base import ToWannier90Base
+from ._utils import check_workchain_step
 
 @singledispatch
 def _get_fullname(cls_obj):
@@ -105,6 +106,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             cls.finalize
         )
 
+    @check_workchain_step
     def run_dft(self):
         reference_bands_pid = submit(
             self.get_deserialized_input('reference_bands_workflow'),
@@ -119,6 +121,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             to_wannier90=to_wannier90_pid
         )
 
+    @check_workchain_step
     def run_windowsearch(self):
         return ToContext(windowsearch=submit(
             WindowSearch,
@@ -129,6 +132,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             **self.inherited_inputs(WindowSearch)
         ))
 
+    @check_workchain_step
     def finalize(self):
         windowsearch = self.ctx.windowsearch
         self.out('tb_model', windowsearch.out.tb_model)
