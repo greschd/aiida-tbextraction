@@ -1,11 +1,15 @@
 try:
     from functools import singledispatch
+    from collections import ChainMap
 except ImportError:
     from singledispatch import singledispatch
+    from chainmap import ChainMap
 
 import plum.util
 from aiida.work.run import submit
 from aiida.orm.data.base import Str
+from aiida.orm.data.parameter import ParameterData
+from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
 from .windowsearch import WindowSearch
@@ -123,13 +127,27 @@ class FirstPrinciplesTbExtraction(WorkChain):
 
     @check_workchain_step
     def run_windowsearch(self):
+        # check for wannier_settings from to_wannier90 workflow
+        inherited_inputs = self.inherited_inputs(WindowSearch)
+        wannier_settings_explicit = inherited_inputs.pop(
+            'wannier_settings', ParameterData()
+        )
+        wannier_settings_from_wf = self.ctx.to_wannier90.get_outputs_dict().get(
+            'wannier_settings', ParameterData()
+        )
+        wannier_settings = merge_parameterdata_inline(
+            wannier_settings_explicit,
+            wannier_settings_from_wf
+        )
+
         return ToContext(windowsearch=submit(
             WindowSearch,
             reference_bands=self.ctx.reference_bands.out.bands,
             wannier_bands=self.ctx.to_wannier90.out.wannier_bands,
             wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
             wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
-            **self.inherited_inputs(WindowSearch)
+            wannier_settings=wannier_settings,
+            **inherited_inputs
         ))
 
     @check_workchain_step
@@ -138,3 +156,9 @@ class FirstPrinciplesTbExtraction(WorkChain):
         self.out('tb_model', windowsearch.out.tb_model)
         self.out('difference', windowsearch.out.difference)
         self.out('window', windowsearch.out.window)
+
+@make_inline
+def merge_parameterdata_inline(param_primary, param_secondary):
+    return {'result': ParameterData(dict=ChainMap(
+        param_primary.get_dict(), param_secondary.get_dict()
+    ))}
