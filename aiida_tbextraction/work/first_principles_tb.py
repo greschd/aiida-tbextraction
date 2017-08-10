@@ -7,7 +7,7 @@ except ImportError:
 
 import plum.util
 from aiida.work.run import submit
-from aiida.orm.data.base import Str
+from aiida.orm.data.base import Str, List
 from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
@@ -103,6 +103,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('to_wannier90_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input('slice_reference_bands', valid_type=List, required=False)
 
         spec.outline(
             cls.run_dft,
@@ -142,15 +143,25 @@ class FirstPrinciplesTbExtraction(WorkChain):
             param_secondary=wannier_settings_from_wf
         )[1]['result']
 
+        # prefer wannier_projections from to_wannier90 workflow if it exists
         wannier_projections = self.ctx.to_wannier90.get_outputs_dict().get(
             'wannier_projections',
             inherited_inputs.pop('wannier_projections', None)
         )
 
+        # slice reference bands if necessary
+        reference_bands = self.ctx.reference_bands.out.bands
+        slice_reference_bands = self.inputs.get('slice_reference_bands', None)
+        if slice_reference_bands is not None:
+            reference_bands = slice_bands_inline(
+                bands=reference_bands,
+                slice_idx=slice_reference_bands
+            )[1]['result']
+
         self.report("Starting WindowSearch workflow.")
         return ToContext(windowsearch=submit(
             WindowSearch,
-            reference_bands=self.ctx.reference_bands.out.bands,
+            reference_bands=reference_bands,
             wannier_bands=self.ctx.to_wannier90.out.wannier_bands,
             wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
             wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
@@ -172,3 +183,13 @@ def merge_parameterdata_inline(param_primary, param_secondary):
     return {'result': ParameterData(dict=ChainMap(
         param_primary.get_dict(), param_secondary.get_dict()
     ))}
+
+@make_inline
+def slice_bands_inline(bands, slice_idx):
+    result = bands.copy()
+    result.set_bands(
+        result.get_bands()[:, slice_idx.get_attr('list')]
+    )
+    return {
+        'result': result
+    }

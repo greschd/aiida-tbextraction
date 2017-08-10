@@ -43,7 +43,7 @@ class WindowSearch(WorkChain):
             inputs = copy.copy(runwindow_inputs)
             inputs['window'] = DataFactory('parameter')(dict=window)
             inputs['wannier_kpoints'] = self.inputs.wannier_bands
-            self.report('Submitting calculation with window={}.'.format(window))
+            self.report('Submitting calculation with outer window=({0[dis_win_min]}, {0[dis_win_max]}), inner window=({0[dis_froz_min]}, {0[dis_froz_max]}).'.format(window))
             pid = submit(RunWindow, **inputs)
             window_runs.append(pid)
         return ToContext(**{

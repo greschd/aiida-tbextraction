@@ -25,7 +25,7 @@ codes:
     description: bands_inspect
     default_plugin: bands_inspect.difference
     remote_computer: localhost
-    remote_abspath: /home/greschd/.virtualenvs/bands_inspect/bin/bands_inspect
+    remote_abspath: /home/greschd/.virtualenvs/bands_inspect/bin/bands-inspect
 
   - label: wannier90
     description: Wannier90
@@ -44,4 +44,4 @@ pseudo_families:
   - command_name: aiida_vasp.commands.paw._Paw
     folder: /home/greschd/software/VASP-5.4.1/potpaw_PBE.54
     group_name: pbe
-    group_description: VASP 5.4 potpaw_PBE 
+    group_description: VASP 5.4 potpaw_PBE
