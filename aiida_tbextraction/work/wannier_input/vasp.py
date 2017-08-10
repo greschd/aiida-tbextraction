@@ -43,13 +43,12 @@ class VaspToWannier90(ToWannier90Base):
         assert all(filename in folder_list for filename in [
             'wannier90.amn', 'wannier90.mmn', 'wannier90.eig'
         ])
-        self.report("Adding Wannier90 input folder to output.")
+        self.report("Adding Wannier90 inputs to output.")
         self.out('wannier_input_folder', retrieved_folder)
-        self.report("Adding Wannier90 parameters to output.")
         self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
         assert np.allclose(
             vasp_calc_output.wannier_kpoints.get_kpoints(),
             vasp_calc_output.bands.get_kpoints()
         )
-        self.report("Adding Wannier90 input bands to output.")
         self.out('wannier_bands', vasp_calc_output.bands)
+        self.out('wannier_projections', vasp_calc_output.wannier_projections)

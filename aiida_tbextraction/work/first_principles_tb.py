@@ -112,6 +112,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
 
     @check_workchain_step
     def run_dft(self):
+        self.report("Starting DFT workflows.")
         reference_bands_pid = submit(
             self.get_deserialized_input('reference_bands_workflow'),
             **self.inherited_inputs(ReferenceBandsBase)
@@ -129,6 +130,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
     def run_windowsearch(self):
         # check for wannier_settings from to_wannier90 workflow
         inherited_inputs = self.inherited_inputs(WindowSearch)
+        self.report("Merging 'wannier_settings' from input and to_wannier90 workflow.")
         wannier_settings_explicit = inherited_inputs.pop(
             'wannier_settings', ParameterData()
         )
@@ -136,10 +138,16 @@ class FirstPrinciplesTbExtraction(WorkChain):
             'wannier_settings', ParameterData()
         )
         wannier_settings = merge_parameterdata_inline(
-            wannier_settings_explicit,
-            wannier_settings_from_wf
+            param_primary=wannier_settings_explicit,
+            param_secondary=wannier_settings_from_wf
+        )[1]['result']
+
+        wannier_projections = self.ctx.to_wannier90.get_outputs_dict().get(
+            'wannier_projections',
+            inherited_inputs.pop('wannier_projections', None)
         )
 
+        self.report("Starting WindowSearch workflow.")
         return ToContext(windowsearch=submit(
             WindowSearch,
             reference_bands=self.ctx.reference_bands.out.bands,
@@ -147,11 +155,13 @@ class FirstPrinciplesTbExtraction(WorkChain):
             wannier_parameters=self.ctx.to_wannier90.out.wannier_parameters,
             wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
             wannier_settings=wannier_settings,
+            wannier_projections=wannier_projections,
             **inherited_inputs
         ))
 
     @check_workchain_step
     def finalize(self):
+        self.report("Adding outputs from WindowSearch workflow.")
         windowsearch = self.ctx.windowsearch
         self.out('tb_model', windowsearch.out.tb_model)
         self.out('difference', windowsearch.out.difference)

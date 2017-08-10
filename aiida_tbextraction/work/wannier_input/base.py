@@ -35,3 +35,4 @@ class ToWannier90Base(WorkChain):
         spec.output('wannier_parameters', valid_type=ParameterData)
         spec.output('wannier_bands', valid_type=DataFactory('array.bands'))
         spec.output('wannier_settings', valid_type=ParameterData, required=False)
+        spec.output('wannier_projections', valid_type=List, required=False)

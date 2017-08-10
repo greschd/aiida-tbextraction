@@ -67,7 +67,9 @@ class TbExtraction(WorkChain):
             structure=self.inputs.get('structure', None),
             settings=DataFactory('parameter')(
                 dict=ChainMap(
-                    self.inputs.get('wannier_settings', {}),
+                    self.inputs.get(
+                        'wannier_settings', DataFactory('parameter')()
+                    ).get_dict(),
                     {'retrieve_hoppings': True}
                 )
             ),
