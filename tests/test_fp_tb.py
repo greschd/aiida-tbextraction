@@ -86,9 +86,9 @@ def test_runwindow(
     slice_reference_bands.extend(list(range(14)))
     inputs['slice_reference_bands'] = slice_reference_bands
 
-    slice_idx = List()
-    slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
-    inputs['slice_idx'] = slice_idx
+    slice_tb_model = List()
+    slice_tb_model.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
+    inputs['slice_tb_model'] = slice_tb_model
 
     result = run(
         FirstPrinciplesTbExtraction,

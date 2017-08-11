@@ -98,12 +98,14 @@ class FirstPrinciplesTbExtraction(WorkChain):
                 'wannier_kpoints',
                 'wannier_parameters',
                 'wannier_input_folder',
+                'slice_idx',
             )
         )
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('to_wannier90_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('slice_reference_bands', valid_type=List, required=False)
+        spec.input('slice_tb_model', valid_type=List, required=False)
 
         spec.outline(
             cls.run_dft,
@@ -130,9 +132,9 @@ class FirstPrinciplesTbExtraction(WorkChain):
     @check_workchain_step
     def run_windowsearch(self):
         # check for wannier_settings from to_wannier90 workflow
-        inherited_inputs = self.inherited_inputs(WindowSearch)
+        inputs = self.inherited_inputs(WindowSearch)
         self.report("Merging 'wannier_settings' from input and to_wannier90 workflow.")
-        wannier_settings_explicit = inherited_inputs.pop(
+        wannier_settings_explicit = inputs.pop(
             'wannier_settings', ParameterData()
         )
         wannier_settings_from_wf = self.ctx.to_wannier90.get_outputs_dict().get(
@@ -146,7 +148,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         # prefer wannier_projections from to_wannier90 workflow if it exists
         wannier_projections = self.ctx.to_wannier90.get_outputs_dict().get(
             'wannier_projections',
-            inherited_inputs.pop('wannier_projections', None)
+            inputs.pop('wannier_projections', None)
         )
 
         # slice reference bands if necessary
@@ -158,6 +160,11 @@ class FirstPrinciplesTbExtraction(WorkChain):
                 slice_idx=slice_reference_bands
             )[1]['result']
 
+        # get slice_idx for windowsearch
+        slice_idx = self.inputs.get('slice_tb_model', None)
+        if slice_idx is not None:
+            inputs['slice_idx'] = slice_idx
+
         self.report("Starting WindowSearch workflow.")
         return ToContext(windowsearch=submit(
             WindowSearch,
@@ -167,7 +174,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             wannier_input_folder=self.ctx.to_wannier90.out.wannier_input_folder,
             wannier_settings=wannier_settings,
             wannier_projections=wannier_projections,
-            **inherited_inputs
+            **inputs
         ))
 
     @check_workchain_step
