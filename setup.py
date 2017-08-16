@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-"""
-setup: usage: pip install -e .
-"""
 
+import re
 from setuptools import setup, find_packages
+
+# Get the version number
+with open('./aiida_tbextraction/__init__.py') as f:
+    match_expr = "__version__[^'\"]+(['\"])([^'\"]+)"
+    version = re.search(match_expr, f.read()).group(2).strip()
 
 if __name__ == '__main__':
     setup(
         name='aiida-tbextraction',
-        version='0.0.0a1',
+        version=version,
         description='AiiDA Plugin for extracting tight-binding models',
         author='Dominik Gresch',
         author_email='greschd@gmx.ch',
