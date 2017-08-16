@@ -5,7 +5,7 @@ import pytest
 from ase.io.vasp import read_vasp
 
 @pytest.fixture
-def get_insb_input(configure, sample, queue_name):
+def get_insb_input(configure, sample, get_queue_name_from_code):
     def inner():
         from aiida.orm import DataFactory
         from aiida.orm.code import Code
@@ -47,7 +47,7 @@ def get_insb_input(configure, sample, queue_name):
         res['calculation_kwargs'] = DataFactory('parameter')(dict=dict(
             _options=dict(
                 resources={'num_machines': 2, 'num_mpiprocs_per_machine': 18},
-                queue_name=queue_name,
+                queue_name=get_queue_name_from_code('vasp'),
                 withmpi=True,
                 max_wallclock_seconds=600
             )
