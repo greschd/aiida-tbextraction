@@ -38,6 +38,7 @@ if __name__ == '__main__':
             'aiida-wannier90',
             'aiida-bands-inspect',
             'aiida-tbmodels',
+            'aiida-strain',
         ],
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],
