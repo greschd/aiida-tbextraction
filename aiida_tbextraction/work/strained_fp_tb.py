@@ -15,7 +15,7 @@ class StrainedFpTbExtraction(WorkChain):
         super(StrainedFpTbExtraction, cls).define(spec)
 
         spec.inherit_inputs(ApplyStrainsWithSymmetry)
-        spec.inherit_inputs(FirstPrinciplesTbExtraction, exclude=('structue', 'symmetries'))
+        spec.inherit_inputs(FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries'))
 
         spec.outline(
             cls.run_strain,
@@ -27,16 +27,21 @@ class StrainedFpTbExtraction(WorkChain):
     def run_strain(self):
         return ToContext(apply_strains=submit(
             ApplyStrainsWithSymmetry,
-            **self.inherited_inputs(ApplyStrains)
+            **self.inherited_inputs(ApplyStrainsWithSymmetry)
         ))
 
     @check_workchain_step
     def run_fp_tb_extraction(self):
         apply_strains_outputs = self.ctx.apply_strains.get_outputs_dict()
-        strain_suffixes = [
-            key.split('_', 1)[1] for key in apply_strains_outputs
-            if key.startswith('structure_')
-        ]
+        strain_suffixes = []
+        for key in apply_strains_outputs:
+            if key.startswith('structure_'):
+                split_key = key.split('_')
+                if len(split_key) > 2:
+                    continue
+                _, suffix = split_key
+                strain_suffixes.append(suffix)
+
         tocontext_kwargs = {}
         for suffix in strain_suffixes:
             key = 'tbextraction_' + suffix

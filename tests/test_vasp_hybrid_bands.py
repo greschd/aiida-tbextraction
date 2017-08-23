@@ -20,7 +20,7 @@ def test_vasp_hybrid_bands(configure_with_daemon, assert_finished, get_insb_inpu
         _return_pid=True,
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
-        **get_insb_input()
+        **get_insb_input
     )
     assert_finished(pid)
     assert 'bands' in result

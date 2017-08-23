@@ -25,7 +25,7 @@ def test_vasp_hf_to_wannier90(configure_with_daemon, assert_finished, get_insb_i
             spinors=True
         )),
         wannier_projections=wannier_projections,
-        **get_insb_input()
+        **get_insb_input
     )
     assert_finished(pid)
     assert all(key in result for key in ['wannier_input_folder', 'wannier_parameters', 'wannier_bands'])

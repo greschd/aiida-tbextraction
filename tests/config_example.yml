@@ -28,6 +28,12 @@ codes:
     remote_computer: localhost
     remote_abspath: /home/greschd/.virtualenvs/bands_inspect/bin/bands-inspect
 
+  symmetry_repr:
+    description: symmetry-repr
+    default_plugin: symmetry_representation.filter_symmetries
+    remote_computer: localhost
+    remote_abspath: /home/greschd/.virtualenvs/symmetry_representation_test/bin/symmetry-repr
+
   wannier90:
     description: Wannier90
     default_plugin: wannier90.wannier90
@@ -44,5 +50,5 @@ codes:
 pseudo_families:
   pbe:
     command_name: aiida_vasp.commands.paw._Paw
-    folder: /home/greschd/software/VASP-5.4.1/potpaw_PBE.54
+    folder: /home/greschd/programming/aiida/vasp_potentials_minimal
     group_description: VASP 5.4 potpaw_PBE
