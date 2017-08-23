@@ -35,4 +35,6 @@ def test_strained_fp_tb(
         **inputs
     )
     print(result)
-    assert all(key in result for key in ['difference', 'tb_model', 'window'])
+    for value in strain_list:
+        suffix = '_{}'.format(value)
+        assert all(key + suffix in result for key in ['difference', 'tb_model', 'window'])
