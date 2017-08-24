@@ -118,7 +118,7 @@ def get_fp_tb_input(configure, get_insb_input, sample):
     )
 
     slice_reference_bands = List()
-    slice_reference_bands.extend(list(range(14)))
+    slice_reference_bands.extend(list(range(12, 26)))
     inputs['slice_reference_bands'] = slice_reference_bands
 
     slice_tb_model = List()
