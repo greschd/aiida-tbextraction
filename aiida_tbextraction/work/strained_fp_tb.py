@@ -14,8 +14,8 @@ class StrainedFpTbExtraction(WorkChain):
     def define(cls, spec):
         super(StrainedFpTbExtraction, cls).define(spec)
 
-        spec.inherit_inputs(ApplyStrainsWithSymmetry)
-        spec.inherit_inputs(FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries'))
+        spec.expose_inputs(ApplyStrainsWithSymmetry)
+        spec.expose_inputs(FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries'))
 
         spec.outline(
             cls.run_strain,
@@ -27,7 +27,7 @@ class StrainedFpTbExtraction(WorkChain):
     def run_strain(self):
         return ToContext(apply_strains=submit(
             ApplyStrainsWithSymmetry,
-            **self.inherited_inputs(ApplyStrainsWithSymmetry)
+            **self.exposed_inputs(ApplyStrainsWithSymmetry)
         ))
 
     @check_workchain_step
@@ -42,15 +42,15 @@ class StrainedFpTbExtraction(WorkChain):
                 FirstPrinciplesTbExtraction,
                 structure=apply_strains_outputs[structure_key],
                 symmetries=apply_strains_outputs[symmetries_key],
-                **self.inherited_inputs(FirstPrinciplesTbExtraction)
+                **self.exposed_inputs(FirstPrinciplesTbExtraction)
             )
         return ToContext(**tocontext_kwargs)
 
     @check_workchain_step
     def finalize(self):
-        for key, calc in self.ctx._get_dict().items():
-            if key.startswith('tbextraction_'):
-                suffix = key.split('_', 1)[1]
-                self.out('tb_model_' + suffix, calc.out.tb_model)
-                self.out('difference_'  + suffix, calc.out.difference)
-                self.out('window_' + suffix, calc.out.window)
+        for strain in self.inputs.strain_strengths:
+            suffix = '_{}'.format(strain)
+            calc = self.ctx['tbextraction' + suffix]
+            self.out('tb_model_' + suffix, calc.out.tb_model)
+            self.out('cost_value_'  + suffix, calc.out.cost_value)
+            self.out('window_' + suffix, calc.out.window)

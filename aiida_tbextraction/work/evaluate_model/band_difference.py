@@ -1,6 +1,6 @@
 from aiida.orm import CalculationFactory
 from aiida.orm.code import Code
-from aiida.orm.data.base import Float 
+from aiida.orm.data.base import Float
 from aiida.work import submit
 from aiida.work.workchain import ToContext
 
@@ -11,7 +11,6 @@ class BandDifferenceModelEvaluation(ModelEvaluation):
     @classmethod
     def define(cls, spec):
         super(BandDifferenceModelEvaluation, cls).define(spec)
-        spec.input('tbmodels_code', valid_type=Code)
         spec.input('bands_inspect_code', valid_type=Code)
 
         spec.outline(
@@ -40,10 +39,10 @@ class BandDifferenceModelEvaluation(ModelEvaluation):
         process, inputs = self.setup_calc('bands_inspect.difference', 'bands_inspect_code')
         inputs.bands1 = self.inputs.reference_bands
         inputs.bands2 = self.ctx.calculated_bands.out.bands
-        self.report("Running difference calculation.")
+        self.report('Running difference calculation.')
         pid = submit(process, **inputs)
         return ToContext(difference=pid)
 
     @check_workchain_step
     def finalize(self):
-        self.out("result", Float(self.ctx.difference.out.difference))
+        self.out('cost_value', Float(self.ctx.difference.out.difference))

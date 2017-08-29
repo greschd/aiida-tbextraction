@@ -5,9 +5,8 @@ except ImportError:
     from singledispatch import singledispatch
     from chainmap import ChainMap
 
-import plum.util
 from aiida.work.run import submit
-from aiida.orm.data.base import Str, List
+from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
@@ -16,27 +15,7 @@ from .windowsearch import WindowSearch
 from .reference_bands.base import ReferenceBandsBase
 from .wannier_input.base import ToWannier90Base
 from ._utils import check_workchain_step
-
-@singledispatch
-def _get_fullname(cls_obj):
-    return Str(plum.util.fullname(cls_obj))
-
-@_get_fullname.register(str)
-def _(cls_name):
-    return Str(cls_name)
-
-@_get_fullname.register(Str)
-def _(cls_name):
-    return cls_name
-
-def _load_class(cls_name):
-    return plum.util.load_class(cls_name.value)
-
-WORKCHAIN_INPUT_KWARGS = {
-    'valid_type': Str,
-    'serialize_fct': _get_fullname,
-    'deserialize_fct': _load_class
-}
+from ._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 class FirstPrinciplesTbExtraction(WorkChain):
     """
@@ -47,7 +26,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         super(FirstPrinciplesTbExtraction, cls).define(spec)
 
         # inputs which are inherited at the top level
-        spec.inherit_inputs(
+        spec.expose_inputs(
             ReferenceBandsBase,
             exclude=(
                 'code',
@@ -56,7 +35,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             )
         )
         # inputs which are inherited at the namespace level
-        spec.inherit_inputs(
+        spec.expose_inputs(
             ReferenceBandsBase,
             namespace='reference_bands',
             exclude=(
@@ -68,7 +47,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
 
         # Inputs which are inherited at the top level
-        spec.inherit_inputs(
+        spec.expose_inputs(
             ToWannier90Base,
             exclude=(
                 'code',
@@ -77,7 +56,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             )
         )
         # inputs which are inherited at the namespace level
-        spec.inherit_inputs(
+        spec.expose_inputs(
             ToWannier90Base,
             namespace='to_wannier90',
             exclude=(
@@ -90,7 +69,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
 
         # top-level scope
-        spec.inherit_inputs(
+        spec.expose_inputs(
             WindowSearch,
             exclude=(
                 'wannier_bands',
@@ -118,11 +97,11 @@ class FirstPrinciplesTbExtraction(WorkChain):
         self.report("Starting DFT workflows.")
         reference_bands_pid = submit(
             self.get_deserialized_input('reference_bands_workflow'),
-            **self.inherited_inputs(ReferenceBandsBase)
+            **self.exposed_inputs(ReferenceBandsBase)
         )
         to_wannier90_pid = submit(
             self.get_deserialized_input('to_wannier90_workflow'),
-            **self.inherited_inputs(ToWannier90Base)
+            **self.exposed_inputs(ToWannier90Base)
         )
         return ToContext(
             reference_bands=reference_bands_pid,
@@ -132,7 +111,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
     @check_workchain_step
     def run_windowsearch(self):
         # check for wannier_settings from to_wannier90 workflow
-        inputs = self.inherited_inputs(WindowSearch)
+        inputs = self.exposed_inputs(WindowSearch)
         self.report("Merging 'wannier_settings' from input and to_wannier90 workflow.")
         wannier_settings_explicit = inputs.pop(
             'wannier_settings', ParameterData()
@@ -182,7 +161,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         self.report("Adding outputs from WindowSearch workflow.")
         windowsearch = self.ctx.windowsearch
         self.out('tb_model', windowsearch.out.tb_model)
-        self.out('difference', windowsearch.out.difference)
+        self.out('cost_value', windowsearch.out.cost_value)
         self.out('window', windowsearch.out.window)
 
 @make_inline

@@ -28,7 +28,7 @@ def test_bandevaluation(configure_with_daemon, band_difference_process_inputs):
         process,
         **inputs
     )
-    assert np.isclose(output['result'].value, 0.)
+    assert np.isclose(output['cost_value'].value, 0.)
 
 def test_bandevaluation_launchmany(configure_with_daemon, band_difference_process_inputs, wait_for):
     from aiida.work import submit

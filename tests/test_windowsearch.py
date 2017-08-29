@@ -28,7 +28,6 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
 
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
-    inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
 
     window_values = DataFactory('parameter')(dict=dict(
         dis_win_min=[-4.5, -3.9],
@@ -72,12 +71,16 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
         inputs['slice_idx'] = slice_idx
 
     bands = read_bands(sample('bands.hdf5'))
-    inputs['reference_bands'] = bands
-    inputs['wannier_bands'] = bands
+    inputs['evaluate_model_workflow'] =
+    inputs['evaluate_model'] = {
+        'bands_inspect_code': Code.get_from_string('bands_inspect'),
+        'reference_bands': bands
+    }
 
+    inputs['wannier_bands'] = bands
     result = run(
         WindowSearch,
         **inputs
     )
     print(result)
-    assert all(key in result for key in ['difference', 'tb_model', 'window'])
+    assert all(key in result for key in ['cost_value', 'tb_model', 'window'])

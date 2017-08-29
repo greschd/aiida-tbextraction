@@ -20,7 +20,7 @@ class WindowSearch(WorkChain):
     def define(cls, spec):
         super(WindowSearch, cls).define(spec)
 
-        spec.inherit_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
+        spec.expose_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
         spec.input('window_values', valid_type=DataFactory('parameter'))
         spec.input('wannier_bands', valid_type=DataFactory('array.bands'))
 
@@ -37,7 +37,7 @@ class WindowSearch(WorkChain):
             raise AssertionError
         else:
             self.report('Found {} valid window configurations.'.format(len(valid_windows)))
-        runwindow_inputs = self.inherited_inputs(RunWindow)
+        runwindow_inputs = self.exposed_inputs(RunWindow)
         window_runs = []
         for window in valid_windows:
             inputs = copy.copy(runwindow_inputs)
@@ -98,9 +98,9 @@ class WindowSearch(WorkChain):
     def check_windows(self):
         self.report('Evaluating calculated windows.')
         window_calcs = [self.ctx[key] for key in self.ctx if key.startswith('window_')]
-        window_calcs = sorted(window_calcs, key=lambda calc: calc.out.difference.value)
+        window_calcs = sorted(window_calcs, key=lambda calc: calc.out.cost_value.value)
         optimal_calc = window_calcs[0]
         self.out('tb_model', optimal_calc.out.tb_model)
-        self.out('difference', optimal_calc.out.difference)
+        self.out('cost_value', optimal_calc.out.cost_value)
         self.out('window', optimal_calc.inp.window)
         self.report('Finished!')

@@ -17,6 +17,7 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     from aiida.work import run
     from aiida_bands_inspect.io import read_bands
     from aiida_tbextraction.work.runwindow import RunWindow
+    from aiida_tbextraction.work.evaluate_model.band_difference import BandDifferenceModelEvaluation
 
     inputs = dict()
 
@@ -28,7 +29,11 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
 
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
-    inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
+    inputs['evaluate_model_workflow'] = BandDifferenceModelEvaluation
+    inputs['evaluate_model'] = {
+        'bands_inspect_code': Code.get_from_string('bands_inspect'),
+        'reference_bands': read_bands(sample('bands.hdf5'))
+    }
 
     window = DataFactory('parameter')(dict=dict(
         dis_win_min=-4.5,
@@ -71,10 +76,8 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         inputs['slice_idx'] = slice_idx
 
-    inputs['reference_bands'] = read_bands(sample('bands.hdf5'))
-
     result = run(
         RunWindow,
         **inputs
     )
-    assert all(key in result for key in ['difference', 'tb_model'])
+    assert all(key in result for key in ['cost_value', 'tb_model'])
