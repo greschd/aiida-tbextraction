@@ -30,6 +30,12 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
 
+    inputs['evaluate_model_workflow'] = BandDifferenceModelEvaluation
+    inputs['evaluate_model'] = {
+        'bands_inspect_code': Code.get_from_string('bands_inspect'),
+        'reference_bands': read_bands(sample('bands.hdf5'))
+    }
+
     window_values = DataFactory('parameter')(dict=dict(
         dis_win_min=[-4.5, -3.9],
         dis_win_max=[16.],
@@ -37,12 +43,6 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
         dis_froz_max=[6.5]
     ))
     inputs['window_values'] = window_values
-
-    k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
-    k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
-    wannier_kpoints = DataFactory('array.kpoints')()
-    wannier_kpoints.set_kpoints(k_points)
-    inputs['wannier_kpoints'] = wannier_kpoints
 
     a = 3.2395
     structure = DataFactory('structure')()
@@ -71,14 +71,14 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         inputs['slice_idx'] = slice_idx
 
-    bands = read_bands(sample('bands.hdf5'))
-    inputs['evaluate_model_workflow'] = BandDifferenceModelEvaluation
-    inputs['evaluate_model'] = {
-        'bands_inspect_code': Code.get_from_string('bands_inspect'),
-        'reference_bands': bands
-    }
+    k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
+    k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
+    wannier_bands = DataFactory('array.bands')()
+    wannier_bands.set_kpoints(k_points)
+    # Just let every energy window be valid.
+    wannier_bands.set_bands(np.array([[0] * 14] * len(k_points)))
+    inputs['wannier_bands'] = wannier_bands
 
-    inputs['wannier_bands'] = bands
     result = run(
         WindowSearch,
         **inputs
