@@ -38,11 +38,10 @@ class FirstPrinciplesTbExtraction(WorkChain):
         spec.expose_inputs(
             ReferenceBandsBase,
             namespace='reference_bands',
-            exclude=(
-                'structure',
-                'potentials',
-                'kpoints',
-                'kpoints_mesh',
+            include=(
+                'code',
+                'parameters',
+                'calculation_kwargs',
             )
         )
 
@@ -59,12 +58,10 @@ class FirstPrinciplesTbExtraction(WorkChain):
         spec.expose_inputs(
             ToWannier90Base,
             namespace='to_wannier90',
-            exclude=(
-                'structure',
-                'potentials',
-                'kpoints_mesh',
-                'wannier_projections',
-                'wannier_parameters',
+            include=(
+                'code',
+                'parameters',
+                'calculation_kwargs',
             )
         )
 
@@ -74,7 +71,6 @@ class FirstPrinciplesTbExtraction(WorkChain):
             exclude=(
                 'wannier_bands',
                 'reference_bands',
-                'wannier_kpoints',
                 'wannier_parameters',
                 'wannier_input_folder',
                 'slice_idx',

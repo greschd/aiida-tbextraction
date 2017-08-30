@@ -23,8 +23,8 @@ class RunWindow(WorkChain):
     def define(cls, spec):
         super(RunWindow, cls).define(spec)
         spec.expose_inputs(TbExtraction)
-        spec.expose_inputs(ModelEvaluation, exclude=['tb_model', 'reference_bands'])
-        spec.expose_inputs(ModelEvaluation, include=['reference_bands'], namespace='evaluate_model')
+        spec.expose_inputs(ModelEvaluation, exclude=['tb_model'])
+        spec.expose_inputs(ModelEvaluation, include=[], namespace='evaluate_model')
         spec.input('window', valid_type=DataFactory('parameter'))
         spec.input('evaluate_model_workflow', **WORKCHAIN_INPUT_KWARGS)
 

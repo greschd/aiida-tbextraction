@@ -33,8 +33,8 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     inputs['evaluate_model_workflow'] = BandDifferenceModelEvaluation
     inputs['evaluate_model'] = {
         'bands_inspect_code': Code.get_from_string('bands_inspect'),
-        'reference_bands': read_bands(sample('bands.hdf5'))
     }
+    inputs['reference_bands'] = read_bands(sample('bands.hdf5'))
 
     window_values = DataFactory('parameter')(dict=dict(
         dis_win_min=[-4.5, -3.9],

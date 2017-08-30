@@ -60,23 +60,23 @@ def get_fp_tb_input(configure, get_insb_input, sample):
     from aiida.orm.code import Code
     from aiida_tbextraction.work.reference_bands.vasp_hybrids import VaspHybridsBands
     from aiida_tbextraction.work.wannier_input.vasp import VaspToWannier90
-    from aiida_tbextraction.work.evaluate_model.band_difference import BandDifferenceModelEvaluation 
+    from aiida_tbextraction.work.evaluate_model.band_difference import BandDifferenceModelEvaluation
 
     inputs = dict()
 
-    inputs['reference_bands_workflow'] = VaspHybridsBands
-    inputs['to_wannier90_workflow'] = VaspToWannier90
-
     vasp_inputs = get_insb_input
-    vasp_code = vasp_inputs.pop('code')
-    inputs['reference_bands_code'] = vasp_code
-    inputs['to_wannier90_code'] = vasp_code
-    vasp_parameters = vasp_inputs.pop('parameters')
-    inputs['reference_bands_parameters'] = vasp_parameters
-    inputs['to_wannier90_parameters'] = vasp_parameters
-    vasp_calculation_kwargs = vasp_inputs.pop('calculation_kwargs')
-    inputs['reference_bands_calculation_kwargs'] = vasp_calculation_kwargs
-    inputs['to_wannier90_calculation_kwargs'] = vasp_calculation_kwargs
+
+    vasp_subwf_inputs = {
+        'code': vasp_inputs.pop('code'),
+        'parameters': vasp_inputs.pop('parameters'),
+        'calculation_kwargs': vasp_inputs.pop('calculation_kwargs')
+    }
+    inputs['reference_bands_workflow'] = VaspHybridsBands
+    import copy
+    inputs['reference_bands'] = copy.deepcopy(vasp_subwf_inputs)
+    inputs['to_wannier90_workflow'] = VaspToWannier90
+    inputs['to_wannier90'] = copy.deepcopy(vasp_subwf_inputs)
+
     # structure, potentials
     inputs.update(vasp_inputs)
     kpoints = DataFactory('array.kpoints')()
