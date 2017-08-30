@@ -60,6 +60,7 @@ def get_fp_tb_input(configure, get_insb_input, sample):
     from aiida.orm.code import Code
     from aiida_tbextraction.work.reference_bands.vasp_hybrids import VaspHybridsBands
     from aiida_tbextraction.work.wannier_input.vasp import VaspToWannier90
+    from aiida_tbextraction.work.evaluate_model.band_difference import BandDifferenceModelEvaluation 
 
     inputs = dict()
 
@@ -87,7 +88,11 @@ def get_fp_tb_input(configure, get_insb_input, sample):
 
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
-    inputs['bands_inspect_code'] = Code.get_from_string('bands_inspect')
+
+    inputs['evaluate_model_workflow'] = BandDifferenceModelEvaluation
+    inputs['evaluate_model'] = {
+        'bands_inspect_code': Code.get_from_string('bands_inspect')
+    }
 
     window_values = DataFactory('parameter')(dict=dict(
         dis_win_min=[-10, -4.5, -3.9],
