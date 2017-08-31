@@ -51,6 +51,6 @@ class StrainedFpTbExtraction(WorkChain):
         for strain in self.inputs.strain_strengths:
             suffix = '_{}'.format(strain)
             calc = self.ctx['tbextraction' + suffix]
-            self.out('tb_model_' + suffix, calc.out.tb_model)
-            self.out('cost_value_'  + suffix, calc.out.cost_value)
-            self.out('window_' + suffix, calc.out.window)
+            self.out('tb_model' + suffix, calc.out.tb_model)
+            self.out('cost_value'  + suffix, calc.out.cost_value)
+            self.out('window' + suffix, calc.out.window)

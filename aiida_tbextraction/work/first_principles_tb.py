@@ -140,7 +140,6 @@ class FirstPrinciplesTbExtraction(WorkChain):
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
 
-        self.report(str(inputs.keys()))
         self.report("Starting WindowSearch workflow.")
         return ToContext(windowsearch=submit(
             WindowSearch,
