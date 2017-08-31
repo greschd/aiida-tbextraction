@@ -93,11 +93,11 @@ class FirstPrinciplesTbExtraction(WorkChain):
         self.report("Starting DFT workflows.")
         reference_bands_pid = submit(
             self.get_deserialized_input('reference_bands_workflow'),
-            **self.exposed_inputs(ReferenceBandsBase)
+            **self.exposed_inputs(ReferenceBandsBase, namespace='reference_bands')
         )
         to_wannier90_pid = submit(
             self.get_deserialized_input('to_wannier90_workflow'),
-            **self.exposed_inputs(ToWannier90Base)
+            **self.exposed_inputs(ToWannier90Base, namespace='to_wannier90')
         )
         return ToContext(
             reference_bands=reference_bands_pid,
@@ -140,6 +140,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
 
+        self.report(str(inputs.keys()))
         self.report("Starting WindowSearch workflow.")
         return ToContext(windowsearch=submit(
             WindowSearch,

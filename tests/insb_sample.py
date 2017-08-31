@@ -72,10 +72,9 @@ def get_fp_tb_input(configure, get_insb_input, sample):
         'calculation_kwargs': vasp_inputs.pop('calculation_kwargs')
     }
     inputs['reference_bands_workflow'] = VaspHybridsBands
-    import copy
-    inputs['reference_bands'] = copy.deepcopy(vasp_subwf_inputs)
+    inputs['reference_bands'] = vasp_subwf_inputs
     inputs['to_wannier90_workflow'] = VaspToWannier90
-    inputs['to_wannier90'] = copy.deepcopy(vasp_subwf_inputs)
+    inputs['to_wannier90'] = vasp_subwf_inputs
 
     # structure, potentials
     inputs.update(vasp_inputs)
