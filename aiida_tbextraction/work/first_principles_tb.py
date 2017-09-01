@@ -12,8 +12,9 @@ from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
 from .windowsearch import WindowSearch
-from .reference_bands.base import ReferenceBandsBase
-from .wannier_input.base import ToWannier90Base
+from .run_dft.base import RunDFTBase
+# from .reference_bands.base import ReferenceBandsBase
+# from .wannier_input.base import ToWannier90Base
 from ._utils import check_workchain_step
 from ._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
@@ -27,7 +28,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
 
         # inputs which are inherited at the top level
         spec.expose_inputs(
-            ReferenceBandsBase,
+            RunDFTBase,
             exclude=(
                 'code',
                 'parameters',
@@ -36,28 +37,8 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
         # inputs which are inherited at the namespace level
         spec.expose_inputs(
-            ReferenceBandsBase,
-            namespace='reference_bands',
-            include=(
-                'code',
-                'parameters',
-                'calculation_kwargs',
-            )
-        )
-
-        # Inputs which are inherited at the top level
-        spec.expose_inputs(
-            ToWannier90Base,
-            exclude=(
-                'code',
-                'parameters',
-                'calculation_kwargs',
-            )
-        )
-        # inputs which are inherited at the namespace level
-        spec.expose_inputs(
-            ToWannier90Base,
-            namespace='to_wannier90',
+            RunDFTBase,
+            namespace='run_dft',
             include=(
                 'code',
                 'parameters',

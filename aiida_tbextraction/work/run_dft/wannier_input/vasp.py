@@ -14,6 +14,11 @@ class VaspToWannier90(ToWannier90Base):
     @classmethod
     def define(cls, spec):
         super(VaspToWannier90, cls).define(spec)
+
+        spec.input('code', valid_type=Code)
+        spec.input('parameters', valid_type=ParameterData)
+        spec.input('calculation_kwargs', valid_type=ParameterData)
+
         spec.outline(
             cls.submit_calculation, cls.get_result
         )

@@ -19,6 +19,10 @@ class VaspHybridsBands(ReferenceBandsBase):
         # For this workflow, the kpoints_mesh input is actually required
         spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'))
 
+        spec.input('code', valid_type=Code)
+        spec.input('parameters', valid_type=ParameterData)
+        spec.input('calculation_kwargs', valid_type=ParameterData)
+
         spec.outline(
             cls.run_calc, cls.get_bands
         )

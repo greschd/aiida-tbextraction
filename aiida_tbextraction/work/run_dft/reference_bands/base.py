@@ -16,8 +16,5 @@ class ReferenceBandsBase(WorkChain):
         spec.input('kpoints', valid_type=DataFactory('array.kpoints'))
         spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'), required=False)
         spec.input_group('potentials')
-        spec.input('code', valid_type=Code)
-        spec.input('parameters', valid_type=ParameterData)
-        spec.input('calculation_kwargs', valid_type=ParameterData)
 
         spec.output('bands', valid_type=DataFactory('array.bands'))

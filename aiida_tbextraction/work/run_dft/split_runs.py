@@ -38,5 +38,5 @@ class SplitDFTRuns(RunDFTBase):
 
     @check_workchain_step
     def finalize(self):
-        self.out_many(**self.exposed_outputs(self.ctx.reference_bands))
-        self.out_many(**self.exposed_outputs(self.ctx.to_wannier90))
+        self.out_many(**self.exposed_outputs(self.ctx.reference_bands, ReferenceBandsBase))
+        self.out_many(**self.exposed_outputs(self.ctx.to_wannier90, ToWannier90Base))
