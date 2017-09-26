@@ -7,6 +7,7 @@ from aiida.work.workchain import ToContext
 from .base import ModelEvaluation
 from .._utils import check_workchain_step
 
+
 class BandDifferenceModelEvaluation(ModelEvaluation):
     @classmethod
     def define(cls, spec):
@@ -27,7 +28,9 @@ class BandDifferenceModelEvaluation(ModelEvaluation):
 
     @check_workchain_step
     def calculate_bands(self):
-        process, inputs = self.setup_calc('tbmodels.eigenvals', 'tbmodels_code')
+        process, inputs = self.setup_calc(
+            'tbmodels.eigenvals', 'tbmodels_code'
+        )
         inputs.tb_model = self.inputs.tb_model
         inputs.kpoints = self.inputs.reference_bands
         self.report("Running TBmodels eigenvals calculation.")
@@ -36,7 +39,9 @@ class BandDifferenceModelEvaluation(ModelEvaluation):
 
     @check_workchain_step
     def calculate_difference(self):
-        process, inputs = self.setup_calc('bands_inspect.difference', 'bands_inspect_code')
+        process, inputs = self.setup_calc(
+            'bands_inspect.difference', 'bands_inspect_code'
+        )
         inputs.bands1 = self.inputs.reference_bands
         inputs.bands2 = self.ctx.calculated_bands.out.bands
         self.report('Running difference calculation.')

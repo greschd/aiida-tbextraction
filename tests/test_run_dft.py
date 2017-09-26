@@ -4,9 +4,7 @@
 from insb_sample import get_insb_input
 
 
-def test_vasp_hf_to_wannier90(
-    configure_with_daemon, assert_finished, get_insb_input
-):
+def test_run_dft(configure_with_daemon, assert_finished, get_insb_input):
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run

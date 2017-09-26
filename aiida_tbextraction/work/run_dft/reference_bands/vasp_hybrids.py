@@ -9,10 +9,12 @@ from aiida.orm.calculation.inline import make_inline
 
 from .base import ReferenceBandsBase
 
+
 class VaspHybridsBands(ReferenceBandsBase):
     """
     The WorkChain to calculate reference bands with VASP, using hybrids.
     """
+
     @classmethod
     def define(cls, spec):
         super(VaspHybridsBands, cls).define(spec)
@@ -23,17 +25,14 @@ class VaspHybridsBands(ReferenceBandsBase):
         spec.input('parameters', valid_type=ParameterData)
         spec.input('calculation_kwargs', valid_type=ParameterData)
 
-        spec.outline(
-            cls.run_calc, cls.get_bands
-        )
+        spec.outline(cls.run_calc, cls.get_bands)
 
     def run_calc(self):
         self.report("Merging kpoints and kpoints_mesh.")
         mesh_kpoints = self.inputs.kpoints_mesh
         band_kpoints = self.inputs.kpoints
         kpoints = merge_kpoints_inline(
-            mesh_kpoints=mesh_kpoints,
-            band_kpoints=band_kpoints
+            mesh_kpoints=mesh_kpoints, band_kpoints=band_kpoints
         )[1]['kpoints']
 
         self.report("Submitting VASP calculation.")
@@ -52,10 +51,10 @@ class VaspHybridsBands(ReferenceBandsBase):
     def get_bands(self):
         bands = self.ctx.vasp_calc.out.bands
         cropped_bands = crop_bands_inline(
-            bands=bands,
-            kpoints=self.inputs.kpoints
+            bands=bands, kpoints=self.inputs.kpoints
         )[1]['bands']
         self.out('bands', cropped_bands)
+
 
 @make_inline
 def merge_kpoints_inline(mesh_kpoints, band_kpoints):
@@ -67,10 +66,10 @@ def merge_kpoints_inline(mesh_kpoints, band_kpoints):
     weights = [1.] * len(mesh_kpoints_array) + [0.] * len(band_kpoints_array)
     kpoints = DataFactory('array.kpoints')()
     kpoints.set_kpoints(
-        np.vstack([mesh_kpoints_array, band_kpoints_array]),
-        weights=weights
+        np.vstack([mesh_kpoints_array, band_kpoints_array]), weights=weights
     )
     return {'kpoints': kpoints}
+
 
 @make_inline
 def crop_bands_inline(bands, kpoints):

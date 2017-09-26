@@ -9,6 +9,7 @@ import numpy as np
 
 from insb_sample import *
 
+
 def test_fp_tb(
     configure_with_daemon,
     sample,
@@ -23,11 +24,8 @@ def test_fp_tb(
     qb.append(DifferenceCalculation)
     initial_count = qb.count()
 
-    result = run(
-        FirstPrinciplesTbExtraction,
-        **get_fp_tb_input
-    )
+    result = run(FirstPrinciplesTbExtraction, **get_fp_tb_input)
     print(result)
     assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
     # check for the AiiDA locking bug (execute same step multiple times)
-    assert qb.count() - initial_count <= 5 # there should be 5 valid windows
+    assert qb.count() - initial_count <= 5  # there should be 5 valid windows

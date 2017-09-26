@@ -4,6 +4,7 @@
 import pytest
 from ase.io.vasp import read_vasp
 
+
 @pytest.fixture
 def get_insb_input(configure, sample, get_queue_name_from_code):
     from aiida.orm import DataFactory
@@ -21,37 +22,43 @@ def get_insb_input(configure, sample, get_queue_name_from_code):
         'Sb': Paw.load_paw(family='pbe', symbol='Sb')[0]
     }
 
-    res['parameters'] = DataFactory('parameter')(dict=dict(
-        ediff=1e-3,
-        lsorbit=True,
-        isym=0,
-        ismear=0,
-        sigma=0.05,
-        gga='PE',
-        encut=380,
-        magmom='600*0.0',
-        nbands=36,
-        kpar=4,
-        nelmin=0,
-        lwave=False,
-        aexx=0.25,
-        lhfcalc=True,
-        hfscreen=0.23,
-        algo='N',
-        time=0.4,
-        precfock='normal',
-    ))
+    res['parameters'] = DataFactory('parameter')(
+        dict=dict(
+            ediff=1e-3,
+            lsorbit=True,
+            isym=0,
+            ismear=0,
+            sigma=0.05,
+            gga='PE',
+            encut=380,
+            magmom='600*0.0',
+            nbands=36,
+            kpar=4,
+            nelmin=0,
+            lwave=False,
+            aexx=0.25,
+            lhfcalc=True,
+            hfscreen=0.23,
+            algo='N',
+            time=0.4,
+            precfock='normal',
+        )
+    )
 
     res['code'] = Code.get_from_string('vasp')
-    res['calculation_kwargs'] = DataFactory('parameter')(dict=dict(
-        _options=dict(
-            resources={'num_machines': 2, 'num_mpiprocs_per_machine': 18},
-            queue_name=get_queue_name_from_code('vasp'),
-            withmpi=True,
-            max_wallclock_seconds=600
+    res['calculation_kwargs'] = DataFactory('parameter')(
+        dict=dict(
+            _options=dict(
+                resources={'num_machines': 2,
+                           'num_mpiprocs_per_machine': 18},
+                queue_name=get_queue_name_from_code('vasp'),
+                withmpi=True,
+                max_wallclock_seconds=600
+            )
         )
-    ))
+    )
     return res
+
 
 @pytest.fixture
 def get_fp_tb_input(configure, get_insb_input, sample):
@@ -93,12 +100,14 @@ def get_fp_tb_input(configure, get_insb_input, sample):
         'bands_inspect_code': Code.get_from_string('bands_inspect')
     }
 
-    window_values = DataFactory('parameter')(dict=dict(
-        dis_win_min=[-10, -4.5, -3.9],
-        dis_win_max=[16.],
-        dis_froz_min=[-4, -3.8],
-        dis_froz_max=[6.5]
-    ))
+    window_values = DataFactory('parameter')(
+        dict=dict(
+            dis_win_min=[-10, -4.5, -3.9],
+            dis_win_max=[16.],
+            dis_froz_min=[-4, -3.8],
+            dis_froz_max=[6.5]
+        )
+    )
     inputs['window_values'] = window_values
 
     wannier_parameters = DataFactory('parameter')(
@@ -114,9 +123,17 @@ def get_fp_tb_input(configure, get_insb_input, sample):
     wannier_projections = List()
     wannier_projections.extend(['In : s; px; py; pz', 'Sb : px; py; pz'])
     inputs['wannier_projections'] = wannier_projections
-    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(dict=dict(
-        _options={'resources': {'num_machines': 1, 'tot_num_mpiprocs': 1}, 'withmpi': False}
-    ))
+    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(
+        dict=dict(
+            _options={
+                'resources': {
+                    'num_machines': 1,
+                    'tot_num_mpiprocs': 1
+                },
+                'withmpi': False
+            }
+        )
+    )
     inputs['symmetries'] = DataFactory('singlefile')(
         file=sample('symmetries.hdf5')
     )

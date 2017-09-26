@@ -8,6 +8,7 @@ import pytest
 import pymatgen
 import numpy as np
 
+
 @pytest.mark.parametrize('slice', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
 def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
@@ -22,25 +23,34 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
     input_folder = DataFactory('folder')()
     input_folder_path = sample('wannier_input_folder')
     for fn in os.listdir(input_folder_path):
-        input_folder.add_path(os.path.abspath(os.path.join(input_folder_path, fn)), fn)
+        input_folder.add_path(
+            os.path.abspath(os.path.join(input_folder_path, fn)), fn
+        )
     inputs['wannier_input_folder'] = input_folder
 
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
 
-    k_values = [x if x <= 0.5 else -1 + x for x in np.linspace(0, 1, 6, endpoint=False)]
-    k_points = [list(reversed(k)) for k in itertools.product(k_values, repeat=3)]
+    k_values = [
+        x if x <= 0.5 else -1 + x
+        for x in np.linspace(0, 1, 6, endpoint=False)
+    ]
+    k_points = [
+        list(reversed(k)) for k in itertools.product(k_values, repeat=3)
+    ]
     wannier_kpoints = DataFactory('array.kpoints')()
     wannier_kpoints.set_kpoints(k_points)
     inputs['wannier_kpoints'] = wannier_kpoints
 
     a = 3.2395
     structure = DataFactory('structure')()
-    structure.set_pymatgen_structure(pymatgen.Structure(
-        lattice=[[0, a, a], [a, 0, a], [a, a, 0]],
-        species=['In', 'Sb'],
-        coords=[[0] * 3, [0.25] * 3]
-    ))
+    structure.set_pymatgen_structure(
+        pymatgen.Structure(
+            lattice=[[0, a, a], [a, 0, a], [a, a, 0]],
+            species=['In', 'Sb'],
+            coords=[[0] * 3, [0.25] * 3]
+        )
+    )
     inputs['structure'] = structure
 
     wannier_parameters = DataFactory('parameter')(
@@ -58,16 +68,25 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
         )
     )
     inputs['wannier_parameters'] = wannier_parameters
-    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(dict=dict(_options={'resources': {'num_machines': 1, 'tot_num_mpiprocs': 1}, 'withmpi': False}))
+    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(
+        dict=dict(
+            _options={
+                'resources': {
+                    'num_machines': 1,
+                    'tot_num_mpiprocs': 1
+                },
+                'withmpi': False
+            }
+        )
+    )
     if symmetries:
-        inputs['symmetries'] = DataFactory('singlefile')(file=sample('symmetries.hdf5'))
+        inputs['symmetries'] = DataFactory('singlefile')(
+            file=sample('symmetries.hdf5')
+        )
     if slice:
         slice_idx = List()
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         inputs['slice_idx'] = slice_idx
 
-    result = run(
-        TbExtraction,
-        **inputs
-    )
+    result = run(TbExtraction, **inputs)
     assert 'tb_model' in result

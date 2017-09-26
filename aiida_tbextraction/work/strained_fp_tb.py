@@ -10,25 +10,26 @@ from ._utils import check_workchain_step
 class StrainedFpTbExtraction(WorkChain):
     """
     """
+
     @classmethod
     def define(cls, spec):
         super(StrainedFpTbExtraction, cls).define(spec)
 
         spec.expose_inputs(ApplyStrainsWithSymmetry)
-        spec.expose_inputs(FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries'))
-
-        spec.outline(
-            cls.run_strain,
-            cls.run_fp_tb_extraction,
-            cls.finalize
+        spec.expose_inputs(
+            FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries')
         )
+
+        spec.outline(cls.run_strain, cls.run_fp_tb_extraction, cls.finalize)
 
     @check_workchain_step
     def run_strain(self):
-        return ToContext(apply_strains=submit(
-            ApplyStrainsWithSymmetry,
-            **self.exposed_inputs(ApplyStrainsWithSymmetry)
-        ))
+        return ToContext(
+            apply_strains=submit(
+                ApplyStrainsWithSymmetry,
+                **self.exposed_inputs(ApplyStrainsWithSymmetry)
+            )
+        )
 
     @check_workchain_step
     def run_fp_tb_extraction(self):
@@ -52,5 +53,5 @@ class StrainedFpTbExtraction(WorkChain):
             suffix = '_{}'.format(strain)
             calc = self.ctx['tbextraction' + suffix]
             self.out('tb_model' + suffix, calc.out.tb_model)
-            self.out('cost_value'  + suffix, calc.out.cost_value)
+            self.out('cost_value' + suffix, calc.out.cost_value)
             self.out('window' + suffix, calc.out.window)

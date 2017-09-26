@@ -3,7 +3,10 @@
 
 from insb_sample import get_insb_input
 
-def test_vasp_hybrid_bands(configure_with_daemon, assert_finished, get_insb_input):
+
+def test_vasp_hybrid_bands(
+    configure_with_daemon, assert_finished, get_insb_input
+):
     from aiida.orm import DataFactory
     from aiida.work.run import run
     from aiida_tbextraction.work.reference_bands.vasp_hybrids import VaspHybridsBands

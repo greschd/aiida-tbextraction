@@ -9,40 +9,52 @@ except ImportError:
 from aiida.orm.data.base import Str, List
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
-from aiida.orm import (
-    Code, Computer, DataFactory, CalculationFactory
-)
+from aiida.orm import (Code, Computer, DataFactory, CalculationFactory)
 
 from ._utils import check_workchain_step
+
 
 class TbExtraction(WorkChain):
     """
     This workchain takes a Wannier90 input and a symmetry file as input and returns the symmetrized TBmodels model.
     """
+
     @classmethod
     def define(cls, spec):
         super(TbExtraction, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
-        spec.input('structure', valid_type=DataFactory('structure'), required=False)
+        spec.input(
+            'structure', valid_type=DataFactory('structure'), required=False
+        )
         spec.input('wannier_code', valid_type=Code)
         spec.input('wannier_input_folder', valid_type=DataFactory('folder'))
-        spec.input('wannier_calculation_kwargs', valid_type=ParameterData, default=ParameterData(dict={'_options': {}}))
+        spec.input(
+            'wannier_calculation_kwargs',
+            valid_type=ParameterData,
+            default=ParameterData(dict={'_options': {}})
+        )
         spec.input('wannier_parameters', valid_type=ParameterData)
-        spec.input('wannier_settings', valid_type=ParameterData, required=False)
-        spec.input('wannier_projections', valid_type=(DataFactory('orbital'), List), required=False)
+        spec.input(
+            'wannier_settings', valid_type=ParameterData, required=False
+        )
+        spec.input(
+            'wannier_projections',
+            valid_type=(DataFactory('orbital'), List),
+            required=False
+        )
         spec.input('wannier_kpoints', valid_type=DataFactory('array.kpoints'))
 
         spec.input('tbmodels_code', valid_type=Code)
         spec.input('slice_idx', valid_type=List, required=False)
-        spec.input('symmetries', valid_type=DataFactory('singlefile'), required=False)
+        spec.input(
+            'symmetries', valid_type=DataFactory('singlefile'), required=False
+        )
 
         spec.outline(
-            cls.run_wswannier,
-            cls.parse,
+            cls.run_wswannier, cls.parse,
             if_(cls.has_slice)(cls.slice),
-            if_(cls.has_symmetries)(cls.symmetrize),
-            cls.finalize
+            if_(cls.has_symmetries)(cls.symmetrize), cls.finalize
         )
 
     def has_slice(self):
@@ -69,8 +81,7 @@ class TbExtraction(WorkChain):
                 dict=ChainMap(
                     self.inputs.get(
                         'wannier_settings', DataFactory('parameter')()
-                    ).get_dict(),
-                    {'retrieve_hoppings': True}
+                    ).get_dict(), {'retrieve_hoppings': True}
                 )
             ),
             **self.inputs.wannier_calculation_kwargs.get_dict()
@@ -94,10 +105,7 @@ class TbExtraction(WorkChain):
         process, inputs = self.setup_tbmodels('tbmodels.parse')
         inputs.wannier_folder = self.ctx.wannier_calc.out.retrieved
         self.report("Parsing Wannier90 output to tbmodels format.")
-        pid = submit(
-            process,
-            **inputs
-        )
+        pid = submit(process, **inputs)
         return ToContext(tbmodels_calc=pid)
 
     @check_workchain_step
@@ -106,10 +114,7 @@ class TbExtraction(WorkChain):
         inputs.tb_model = self.tb_model
         inputs.slice_idx = self.inputs.slice_idx
         self.report("Slicing tight-binding model.")
-        pid = submit(
-            process,
-            **inputs
-        )
+        pid = submit(process, **inputs)
         return ToContext(tbmodels_calc=pid)
 
     @check_workchain_step
@@ -118,10 +123,7 @@ class TbExtraction(WorkChain):
         inputs.tb_model = self.tb_model
         inputs.symmetries = self.inputs.symmetries
         self.report("Symmetrizing tight-binding model.")
-        pid = submit(
-            process,
-            **inputs
-        )
+        pid = submit(process, **inputs)
         return ToContext(tbmodels_calc=pid)
 
     @check_workchain_step

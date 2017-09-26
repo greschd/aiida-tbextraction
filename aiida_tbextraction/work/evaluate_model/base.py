@@ -3,6 +3,7 @@ from aiida.orm import DataFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import Float
 
+
 class ModelEvaluation(WorkChain):
     @classmethod
     def define(cls, spec):

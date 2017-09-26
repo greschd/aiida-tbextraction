@@ -9,6 +9,7 @@ import numpy as np
 
 from insb_sample import *
 
+
 def test_strained_fp_tb(
     configure_with_daemon,
     sample,
@@ -30,11 +31,11 @@ def test_strained_fp_tb(
 
     inputs['symmetry_repr_code'] = Code.get_from_string('symmetry_repr')
 
-    result = run(
-        StrainedFpTbExtraction,
-        **inputs
-    )
+    result = run(StrainedFpTbExtraction, **inputs)
     print(result)
     for value in strain_list:
         suffix = '_{}'.format(value)
-        assert all(key + suffix in result for key in ['cost_value', 'tb_model', 'window'])
+        assert all(
+            key + suffix in result
+            for key in ['cost_value', 'tb_model', 'window']
+        )

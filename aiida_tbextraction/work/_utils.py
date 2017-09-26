@@ -4,15 +4,20 @@
 import sys
 import functools
 
+
 def check_workchain_step(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
         except Exception as e:
-            self.report('{} in {}: {}'.format(type(e).__name__, func.__name__, e))
+            self.report(
+                '{} in {}: {}'.format(type(e).__name__, func.__name__, e)
+            )
             raise e
+
     return inner
+
 
 def create_workchain(typename, template, **kwargs):
     """
@@ -28,7 +33,7 @@ def create_workchain(typename, template, **kwargs):
     """
     workchain_definition = template.format(typename=typename, **kwargs)
     namespace = dict(__name__='workchain_%s' % typename)
-    exec(workchain_definition, namespace)
+    exec (workchain_definition, namespace)
     result = namespace[typename]
     result._source = workchain_definition
 

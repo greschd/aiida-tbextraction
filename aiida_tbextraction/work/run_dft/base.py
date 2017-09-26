@@ -6,9 +6,11 @@ from aiida.work.workchain import WorkChain
 from .reference_bands.base import ReferenceBandsBase
 from .wannier_input.base import ToWannier90Base
 
+
 class RunDFTBase(WorkChain):
     """
     """
+
     @classmethod
     def define(cls, spec):
         super(RunDFTBase, cls).define(spec)
