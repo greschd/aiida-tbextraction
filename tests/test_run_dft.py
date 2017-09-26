@@ -8,17 +8,27 @@ def test_run_dft(configure_with_daemon, assert_finished, get_insb_input):
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run
-    from aiida_tbextraction.work.wannier_input.vasp import VaspToWannier90
+    from aiida_tbextraction.work.run_dft.split_runs import SplitDFTRuns
+    from aiida_tbextraction.work.run_dft.wannier_input.vasp import VaspToWannier90
+    from aiida_tbextraction.work.run_dft.reference_bands.vasp_hybrids import VaspHybridsBands
 
-    kpoints_mesh = DataFactory('array.kpoints')()
+    KpointsData = DataFactory('array.kpoints')
+
+    kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
+
+    kpoints = KpointsData()
+    kpoints.set_kpoints_path([('G', (0, 0, 0), 'M', (0.5, 0.5, 0.5))])
 
     wannier_projections = List()
     wannier_projections.extend(['In : s; px; py; pz', 'Sb : px; py; pz'])
 
     result, pid = run(
-        VaspToWannier90,
+        SplitDFTRuns,
         _return_pid=True,
+        reference_bands_workflow=VaspHybridsBands,
+        to_wannier90_workflow=VaspToWannier90,
+        kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
         wannier_parameters=DataFactory('parameter')(
             dict=dict(num_wann=14, num_bands=36, spinors=True)
@@ -29,8 +39,10 @@ def test_run_dft(configure_with_daemon, assert_finished, get_insb_input):
     assert_finished(pid)
     assert all(
         key in result
-        for key in
-        ['wannier_input_folder', 'wannier_parameters', 'wannier_bands']
+        for key in [
+            'wannier_input_folder', 'wannier_parameters', 'wannier_bands',
+            'bands'
+        ]
     )
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(

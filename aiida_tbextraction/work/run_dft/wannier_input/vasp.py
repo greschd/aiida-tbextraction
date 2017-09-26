@@ -8,7 +8,7 @@ from aiida.orm import DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
 
 from .base import ToWannier90Base
-from .._utils import check_workchain_step
+from ..._utils import check_workchain_step
 
 
 class VaspToWannier90(ToWannier90Base):
