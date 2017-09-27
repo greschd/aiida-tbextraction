@@ -1,13 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import numpy as np
-from aiida.orm import DataFactory, CalculationFactory
+from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 from aiida.orm.calculation.inline import make_inline
 
 from .base import ReferenceBandsBase
+from ..._utils import check_workchain_step
 
 
 class VaspHybridsBands(ReferenceBandsBase):
@@ -21,12 +19,14 @@ class VaspHybridsBands(ReferenceBandsBase):
         # For this workflow, the kpoints_mesh input is actually required
         spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'))
 
+        ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
         spec.input('calculation_kwargs', valid_type=ParameterData)
 
         spec.outline(cls.run_calc, cls.get_bands)
 
+    @check_workchain_step
     def run_calc(self):
         self.report("Merging kpoints and kpoints_mesh.")
         mesh_kpoints = self.inputs.kpoints_mesh
@@ -48,6 +48,7 @@ class VaspHybridsBands(ReferenceBandsBase):
             )
         )
 
+    @check_workchain_step
     def get_bands(self):
         bands = self.ctx.vasp_calc.out.bands
         cropped_bands = crop_bands_inline(

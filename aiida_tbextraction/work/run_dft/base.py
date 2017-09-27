@@ -1,6 +1,3 @@
-from aiida.orm import DataFactory
-from aiida.orm.code import Code
-from aiida.orm.data.base import List
 from aiida.work.workchain import WorkChain
 
 from .reference_bands.base import ReferenceBandsBase

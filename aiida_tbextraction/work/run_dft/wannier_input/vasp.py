@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import numpy as np
 
 from aiida.work.run import submit
-from aiida.orm import DataFactory, CalculationFactory
+from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
 
 from .base import ToWannier90Base
@@ -16,6 +13,7 @@ class VaspToWannier90(ToWannier90Base):
     def define(cls, spec):
         super(VaspToWannier90, cls).define(spec)
 
+        ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
         spec.input('calculation_kwargs', valid_type=ParameterData)

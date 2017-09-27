@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from aiida.orm import DataFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import List

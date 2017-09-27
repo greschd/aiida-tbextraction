@@ -13,7 +13,6 @@ class ReferenceBandsBase(WorkChain):
     def define(cls, spec):
         super(ReferenceBandsBase, cls).define(spec)
 
-        ParameterData = DataFactory('parameter')
         spec.input('structure', valid_type=DataFactory('structure'))
         spec.input('kpoints', valid_type=DataFactory('array.kpoints'))
         spec.input(

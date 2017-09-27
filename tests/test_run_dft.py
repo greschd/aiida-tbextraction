@@ -23,18 +23,28 @@ def test_run_dft(configure_with_daemon, assert_finished, get_insb_input):
     wannier_projections = List()
     wannier_projections.extend(['In : s; px; py; pz', 'Sb : px; py; pz'])
 
+    vasp_inputs = get_insb_input
+
+    vasp_subwf_inputs = {
+        'code': vasp_inputs.pop('code'),
+        'parameters': vasp_inputs.pop('parameters'),
+        'calculation_kwargs': vasp_inputs.pop('calculation_kwargs')
+    }
+
     result, pid = run(
         SplitDFTRuns,
         _return_pid=True,
         reference_bands_workflow=VaspHybridsBands,
+        reference_bands=vasp_subwf_inputs,
         to_wannier90_workflow=VaspToWannier90,
+        to_wannier90=vasp_subwf_inputs,
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
         wannier_parameters=DataFactory('parameter')(
             dict=dict(num_wann=14, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
-        **get_insb_input
+        **vasp_inputs
     )
     assert_finished(pid)
     assert all(
