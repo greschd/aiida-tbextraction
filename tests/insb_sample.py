@@ -65,9 +65,9 @@ def get_fp_tb_input(configure, get_insb_input, sample):
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.orm.code import Code
-    from aiida_tbextraction.work.reference_bands.vasp_hybrids import VaspHybridsBands
-    from aiida_tbextraction.work.wannier_input.vasp import VaspToWannier90
-    from aiida_tbextraction.work.evaluate_model.band_difference import BandDifferenceModelEvaluation
+    from aiida_tbextraction.reference_bands.vasp_hybrids import VaspHybridsBands
+    from aiida_tbextraction.wannier_input.vasp import VaspToWannier90
+    from aiida_tbextraction.evaluate_model.band_difference import BandDifferenceModelEvaluation
 
     inputs = dict()
 

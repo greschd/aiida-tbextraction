@@ -17,8 +17,8 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm.code import Code
     from aiida.work import run
     from aiida_bands_inspect.io import read_bands
-    from aiida_tbextraction.work.runwindow import RunWindow
-    from aiida_tbextraction.work.evaluate_model.band_difference import BandDifferenceModelEvaluation
+    from aiida_tbextraction.runwindow import RunWindow
+    from aiida_tbextraction.evaluate_model.band_difference import BandDifferenceModelEvaluation
 
     inputs = dict()
 

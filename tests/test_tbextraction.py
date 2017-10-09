@@ -16,7 +16,7 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm.code import Code
     from aiida.orm.data.base import List
     from aiida.work import run
-    from aiida_tbextraction.work.tbextraction import TbExtraction
+    from aiida_tbextraction.tbextraction import TbExtraction
 
     inputs = dict()
 

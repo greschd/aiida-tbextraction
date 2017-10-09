@@ -8,9 +8,9 @@ def test_run_dft(configure_with_daemon, assert_finished, get_insb_input):
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run
-    from aiida_tbextraction.work.run_dft.split_runs import SplitDFTRuns
-    from aiida_tbextraction.work.run_dft.wannier_input.vasp import VaspToWannier90
-    from aiida_tbextraction.work.run_dft.reference_bands.vasp_hybrids import VaspHybridsBands
+    from aiida_tbextraction.run_dft.split_runs import SplitDFTRuns
+    from aiida_tbextraction.run_dft.wannier_input.vasp import VaspToWannier90
+    from aiida_tbextraction.run_dft.reference_bands.vasp_hybrids import VaspHybridsBands
 
     KpointsData = DataFactory('array.kpoints')
 

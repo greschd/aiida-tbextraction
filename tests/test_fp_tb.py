@@ -18,7 +18,7 @@ def test_fp_tb(
     from aiida.work import run
     from aiida.orm.querybuilder import QueryBuilder
     from aiida_bands_inspect.calculations.difference import DifferenceCalculation
-    from aiida_tbextraction.work.first_principles_tb import FirstPrinciplesTbExtraction
+    from aiida_tbextraction.first_principles_tb import FirstPrinciplesTbExtraction
 
     qb = QueryBuilder()
     qb.append(DifferenceCalculation)

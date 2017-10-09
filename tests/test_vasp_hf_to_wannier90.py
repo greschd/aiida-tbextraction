@@ -10,7 +10,7 @@ def test_vasp_hf_to_wannier90(
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run
-    from aiida_tbextraction.work.wannier_input.vasp import VaspToWannier90
+    from aiida_tbextraction.wannier_input.vasp import VaspToWannier90
 
     kpoints_mesh = DataFactory('array.kpoints')()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])

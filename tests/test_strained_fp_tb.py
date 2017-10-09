@@ -18,7 +18,7 @@ def test_strained_fp_tb(
     from aiida.work import run
     from aiida.orm.code import Code
     from aiida.orm.data.base import Str, List
-    from aiida_tbextraction.work.strained_fp_tb import StrainedFpTbExtraction
+    from aiida_tbextraction.strained_fp_tb import StrainedFpTbExtraction
     inputs = get_fp_tb_input
 
     inputs['strain_kind'] = Str('three_five.Biaxial001')
