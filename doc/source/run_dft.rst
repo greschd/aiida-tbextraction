@@ -1,6 +1,13 @@
 Workflows to run DFT calculations
 =================================
 
+Workflows to run all necessary DFT calculations
+-----------------------------------------------
+
+.. aiida-workchain:: aiida_tbextraction.run_dft.base.RunDFTBase
+
+.. aiida-workchain:: aiida_tbextraction.run_dft.split_runs.SplitDFTRuns
+
 Reference Bands Workflows
 -------------------------
 
