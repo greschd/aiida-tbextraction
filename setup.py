@@ -29,12 +29,9 @@ if __name__ == '__main__':
         setup_requires=['reentry'],
         reentry_register=True,
         install_requires=[
-            'aiida-core',
-            'aiida-vasp',
-            'aiida-wannier90',
-            'aiida-bands-inspect',
-            'aiida-tbmodels',
-            'aiida-strain',
+            'aiida-core', 'aiida-vasp', 'aiida-wannier90',
+            'aiida-bands-inspect', 'aiida-tbmodels', 'aiida-strain',
+            'fsc.export'
         ],
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],

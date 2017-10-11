@@ -16,7 +16,7 @@ from ._utils import check_workchain_step
 
 class TbExtraction(WorkChain):
     """
-    This workchain takes a Wannier90 input and a symmetry file as input and returns the symmetrized TBmodels model.
+    This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.
     """
 
     @classmethod
@@ -25,30 +25,73 @@ class TbExtraction(WorkChain):
 
         ParameterData = DataFactory('parameter')
         spec.input(
-            'structure', valid_type=DataFactory('structure'), required=False
+            'structure',
+            valid_type=DataFactory('structure'),
+            required=False,
+            help=
+            'Structure of the material for which the tight-binding model should be calculated.'
         )
-        spec.input('wannier_code', valid_type=Code)
-        spec.input('wannier_input_folder', valid_type=DataFactory('folder'))
+        spec.input(
+            'wannier_code',
+            valid_type=Code,
+            help='Code that executes Wannier90.'
+        )
+        spec.input(
+            'wannier_input_folder',
+            valid_type=DataFactory('folder'),
+            help=
+            'A folder containing the Wannier90 ``.mmn`` and ``.amn`` input files.'
+        )
         spec.input(
             'wannier_calculation_kwargs',
             valid_type=ParameterData,
-            default=ParameterData(dict={'_options': {}})
+            default=ParameterData(dict={'_options': {}}),
+            help=
+            'Additional keyword arguments passed to the ``wannier90.wannier90`` calculation.'
         )
-        spec.input('wannier_parameters', valid_type=ParameterData)
         spec.input(
-            'wannier_settings', valid_type=ParameterData, required=False
+            'wannier_parameters',
+            valid_type=ParameterData,
+            help="Wannier90 paramaters written to the ``.win`` file."
+        )
+        spec.input(
+            'wannier_settings',
+            valid_type=ParameterData,
+            required=False,
+            help="Settings for the ``wannier90.wannier90`` calculation."
         )
         spec.input(
             'wannier_projections',
             valid_type=(DataFactory('orbital'), List),
-            required=False
+            required=False,
+            help=
+            'Projections used, either as OrbitalData or as a list of strings in Wannier90\'s projections format.'
         )
-        spec.input('wannier_kpoints', valid_type=DataFactory('array.kpoints'))
-
-        spec.input('tbmodels_code', valid_type=Code)
-        spec.input('slice_idx', valid_type=List, required=False)
         spec.input(
-            'symmetries', valid_type=DataFactory('singlefile'), required=False
+            'wannier_kpoints',
+            valid_type=DataFactory('array.kpoints'),
+            help=
+            'The k-points used in the Wannier90 run. These must match the k-points used in the ``.amn`` and ``.mmn`` input files.'
+        )
+
+        spec.input(
+            'tbmodels_code',
+            valid_type=Code,
+            help='Code that runs the TBmodels CLI.'
+        )
+        spec.input(
+            'slice_idx',
+            valid_type=List,
+            required=False,
+            help=
+            'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'
+        )
+        spec.input(
+            'symmetries',
+            valid_type=DataFactory('singlefile'),
+            required=False,
+            help=
+            'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'
         )
 
         spec.outline(

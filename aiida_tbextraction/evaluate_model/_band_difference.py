@@ -1,18 +1,28 @@
+from fsc.export import export
 from aiida.orm import CalculationFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import Float
 from aiida.work import submit
 from aiida.work.workchain import ToContext
 
-from .base import ModelEvaluation
+from . import ModelEvaluation
 from .._utils import check_workchain_step
 
 
-class BandDifferenceModelEvaluation(ModelEvaluation):
+@export
+class BandDifference(ModelEvaluation):
+    """
+    Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.
+    """
+
     @classmethod
     def define(cls, spec):
-        super(BandDifferenceModelEvaluation, cls).define(spec)
-        spec.input('bands_inspect_code', valid_type=Code)
+        super(BandDifference, cls).define(spec)
+        spec.input(
+            'bands_inspect_code',
+            valid_type=Code,
+            help='Code that runs the bands_inspect CLI.'
+        )
 
         spec.outline(
             cls.calculate_bands, cls.calculate_difference, cls.finalize
