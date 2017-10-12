@@ -6,22 +6,22 @@ except ImportError:
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 
-from .base import RunDFTBase
-from .reference_bands.base import ReferenceBandsBase
-from .wannier_input.base import ToWannier90Base
+from ._base import RunDFTBase
+from .reference_bands import ReferenceBandsBase
+from .wannier_input import WannierInputBase
 
 from .._utils import check_workchain_step
 from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
-class SplitDFTRuns(RunDFTBase):
+class SplitRunDFT(RunDFTBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.
     """
 
     @classmethod
     def define(cls, spec):
-        super(SplitDFTRuns, cls).define(spec)
+        super(SplitRunDFT, cls).define(spec)
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('to_wannier90_workflow', **WORKCHAIN_INPUT_KWARGS)
@@ -31,7 +31,7 @@ class SplitDFTRuns(RunDFTBase):
             ReferenceBandsBase, namespace='reference_bands', include=[]
         )
         spec.expose_inputs(
-            ToWannier90Base, namespace='to_wannier90', include=[]
+            WannierInputBase, namespace='to_wannier90', include=[]
         )
 
         spec.outline(cls.run_dft, cls.finalize)
@@ -53,7 +53,9 @@ class SplitDFTRuns(RunDFTBase):
             self.get_deserialized_input('to_wannier90_workflow'),
             **ChainMap(
                 self.inputs['to_wannier90'],
-                self.exposed_inputs(ToWannier90Base, namespace='to_wannier90')
+                self.exposed_inputs(
+                    WannierInputBase, namespace='to_wannier90'
+                )
             )
         )
         return ToContext(
@@ -68,5 +70,5 @@ class SplitDFTRuns(RunDFTBase):
             )
         )
         self.out_many(
-            **self.exposed_outputs(self.ctx.to_wannier90, ToWannier90Base)
+            **self.exposed_outputs(self.ctx.to_wannier90, WannierInputBase)
         )

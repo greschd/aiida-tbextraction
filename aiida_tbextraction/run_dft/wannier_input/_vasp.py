@@ -4,14 +4,14 @@ from aiida.work.run import submit
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
 
-from .base import ToWannier90Base
+from ._base import WannierInputBase
 from ..._utils import check_workchain_step
 
 
-class VaspToWannier90(ToWannier90Base):
+class VaspWannierInputBase(WannierInputBase):
     @classmethod
     def define(cls, spec):
-        super(VaspToWannier90, cls).define(spec)
+        super(VaspWannierInputBase, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code)

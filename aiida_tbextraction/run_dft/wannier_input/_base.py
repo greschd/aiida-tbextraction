@@ -4,14 +4,14 @@ from aiida.orm.data.base import List
 from aiida.work.workchain import WorkChain
 
 
-class ToWannier90Base(WorkChain):
+class WannierInputBase(WorkChain):
     """
     The base class for WorkChains which can be used to calculate the Wannier90 input files. It defines the inputs required by these WorkChains.
     """
 
     @classmethod
     def define(cls, spec):
-        super(ToWannier90Base, cls).define(spec)
+        super(WannierInputBase, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
         spec.input('structure', valid_type=DataFactory('structure'))

@@ -12,9 +12,9 @@ from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
 from .windowsearch import WindowSearch
-from .run_dft.base import RunDFTBase
-# from .reference_bands.base import ReferenceBandsBase
-# from .wannier_input.base import ToWannier90Base
+from .run_dft import RunDFTBase
+# from .reference_bands import ReferenceBandsBase
+# from .wannier_input import WannierInputBase
 from ._utils import check_workchain_step
 from ._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 

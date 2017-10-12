@@ -100,6 +100,12 @@ class TbExtraction(WorkChain):
             if_(cls.has_symmetries)(cls.symmetrize), cls.finalize
         )
 
+        spec.output(
+            'tb_model',
+            valid_type=DataFactory('singlefile'),
+            help='The calculated tight-binding model, in TBmodels HDF5 format.'
+        )
+
     def has_slice(self):
         return 'slice_idx' in self.inputs
 

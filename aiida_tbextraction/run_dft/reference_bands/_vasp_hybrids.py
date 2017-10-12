@@ -4,7 +4,7 @@ from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 from aiida.orm.calculation.inline import make_inline
 
-from .base import ReferenceBandsBase
+from ._base import ReferenceBandsBase
 from ..._utils import check_workchain_step
 
 
