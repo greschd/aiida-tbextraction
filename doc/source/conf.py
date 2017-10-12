@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # aiida-tbextraction documentation build configuration file, created by
 # sphinx-quickstart on Mon Oct  9 17:32:37 2017.
