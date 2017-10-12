@@ -6,7 +6,7 @@ except ImportError:
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 
-from ._base import RunDFTBase
+from ._base import DFTRunBase
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
@@ -14,14 +14,14 @@ from .._utils import check_workchain_step
 from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
-class SplitRunDFT(RunDFTBase):
+class SplitDFTRun(DFTRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.
     """
 
     @classmethod
     def define(cls, spec):
-        super(SplitRunDFT, cls).define(spec)
+        super(SplitDFTRun, cls).define(spec)
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('to_wannier90_workflow', **WORKCHAIN_INPUT_KWARGS)
@@ -34,10 +34,10 @@ class SplitRunDFT(RunDFTBase):
             WannierInputBase, namespace='to_wannier90', include=[]
         )
 
-        spec.outline(cls.run_dft, cls.finalize)
+        spec.outline(cls.dft_run, cls.finalize)
 
     @check_workchain_step
-    def run_dft(self):
+    def dft_run(self):
         self.report('Submitting reference_bands workflow.')
         reference_bands = submit(
             self.get_deserialized_input('reference_bands_workflow'),

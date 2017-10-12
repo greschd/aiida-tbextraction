@@ -10,7 +10,7 @@ from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, while_, ToContext
 
 from .runwindow import RunWindow
-from ._utils import check_workchain_step
+from .._utils import check_workchain_step
 
 
 class WindowSearch(WorkChain):

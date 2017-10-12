@@ -17,8 +17,8 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm.data.base import List
     from aiida.work import run
     from aiida_bands_inspect.io import read_bands
-    from aiida_tbextraction.windowsearch import WindowSearch
-    from aiida_tbextraction.evaluate_model import BandDifference
+    from aiida_tbextraction.helpers.windowsearch import WindowSearch
+    from aiida_tbextraction.model_evaluation import BandDifference
 
     inputs = dict()
 
@@ -33,8 +33,8 @@ def test_runwindow(configure_with_daemon, sample, slice, symmetries):
     inputs['wannier_code'] = Code.get_from_string('wannier90')
     inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
 
-    inputs['evaluate_model_workflow'] = BandDifference
-    inputs['evaluate_model'] = {
+    inputs['model_evaluation_workflow'] = BandDifference
+    inputs['model_evaluation'] = {
         'bands_inspect_code': Code.get_from_string('bands_inspect'),
     }
     inputs['reference_bands'] = read_bands(sample('bands.hdf5'))

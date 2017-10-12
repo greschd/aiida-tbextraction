@@ -12,7 +12,7 @@ from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
 from .windowsearch import WindowSearch
-from .run_dft import RunDFTBase
+from .dft_run import DFTRunBase
 # from .reference_bands import ReferenceBandsBase
 # from .wannier_input import WannierInputBase
 from ._utils import check_workchain_step
@@ -30,7 +30,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
 
         # inputs which are inherited at the top level
         spec.expose_inputs(
-            RunDFTBase, exclude=(
+            DFTRunBase, exclude=(
                 'code',
                 'parameters',
                 'calculation_kwargs',
@@ -38,8 +38,8 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
         # inputs which are inherited at the namespace level
         spec.expose_inputs(
-            RunDFTBase,
-            namespace='run_dft',
+            DFTRunBase,
+            namespace='dft_run',
             include=(
                 'code',
                 'parameters',
@@ -59,19 +59,19 @@ class FirstPrinciplesTbExtraction(WorkChain):
             )
         )
 
-        spec.input('run_dft_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input('dft_run_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('slice_reference_bands', valid_type=List, required=False)
         spec.input('slice_tb_model', valid_type=List, required=False)
 
-        spec.outline(cls.run_dft, cls.run_windowsearch, cls.finalize)
+        spec.outline(cls.dft_run, cls.run_windowsearch, cls.finalize)
 
     @check_workchain_step
-    def run_dft(self):
+    def dft_run(self):
         self.report("Starting DFT workflows.")
         return ToContext(
-            run_dft=submit(
-                self.get_deserialized_input('run_dft_workflow'),
-                **self.exposed_inputs(ReferenceBandsBase, namespace='run_dft')
+            dft_run=submit(
+                self.get_deserialized_input('dft_run_workflow'),
+                **self.exposed_inputs(ReferenceBandsBase, namespace='dft_run')
             )
         )
 
@@ -85,7 +85,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         wannier_settings_explicit = inputs.pop(
             'wannier_settings', ParameterData()
         )
-        wannier_settings_from_wf = self.ctx.run_dft.get_outputs_dict().get(
+        wannier_settings_from_wf = self.ctx.dft_run.get_outputs_dict().get(
             'wannier_settings', ParameterData()
         )
         wannier_settings = merge_parameterdata_inline(
@@ -94,12 +94,12 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )[1]['result']
 
         # prefer wannier_projections from to_wannier90 workflow if it exists
-        wannier_projections = self.ctx.run_dft.get_outputs_dict().get(
+        wannier_projections = self.ctx.dft_run.get_outputs_dict().get(
             'wannier_projections', inputs.pop('wannier_projections', None)
         )
 
         # slice reference bands if necessary
-        reference_bands = self.ctx.run_dft.out.bands
+        reference_bands = self.ctx.dft_run.out.bands
         slice_reference_bands = self.inputs.get('slice_reference_bands', None)
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(

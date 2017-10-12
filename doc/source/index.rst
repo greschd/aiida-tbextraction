@@ -5,8 +5,8 @@ AiiDA tight-binding extraction
    :maxdepth: 2
 
    tb_extraction.rst
-   run_dft.rst
-   evaluate_model.rst
+   dft_run.rst
+   model_evaluation.rst
    helpers.rst
 
 

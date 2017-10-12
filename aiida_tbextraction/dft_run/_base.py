@@ -4,13 +4,13 @@ from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 
-class RunDFTBase(WorkChain):
+class DFTRunBase(WorkChain):
     """
     """
 
     @classmethod
     def define(cls, spec):
-        super(RunDFTBase, cls).define(spec)
+        super(DFTRunBase, cls).define(spec)
 
         spec.expose_inputs(ReferenceBandsBase)
         spec.expose_inputs(WannierInputBase)

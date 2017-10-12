@@ -11,7 +11,7 @@ import numpy as np
 def band_difference_process_inputs(configure, sample):
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
-    from aiida_tbextraction.evaluate_model import BandDifference
+    from aiida_tbextraction.model_evaluation import BandDifference
     from aiida_bands_inspect.io import read_bands
 
     inputs = BandDifference.get_inputs_template()

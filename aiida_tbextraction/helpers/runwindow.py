@@ -10,10 +10,10 @@ from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 
-from .evaluate_model import ModelEvaluation
-from .tbextraction import TbExtraction
-from ._utils import check_workchain_step
-from ._workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from ..model_evaluation import ModelEvaluation
+from ..tbextraction import TbExtraction
+from .._utils import check_workchain_step
+from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
 class RunWindow(WorkChain):
@@ -27,10 +27,10 @@ class RunWindow(WorkChain):
         spec.expose_inputs(TbExtraction)
         spec.expose_inputs(ModelEvaluation, exclude=['tb_model'])
         spec.expose_inputs(
-            ModelEvaluation, include=[], namespace='evaluate_model'
+            ModelEvaluation, include=[], namespace='model_evaluation'
         )
         spec.input('window', valid_type=DataFactory('parameter'))
-        spec.input('evaluate_model_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input('model_evaluation_workflow', **WORKCHAIN_INPUT_KWARGS)
 
         spec.outline(cls.extract_model, cls.evaluate_bands, cls.finalize)
 
@@ -53,11 +53,11 @@ class RunWindow(WorkChain):
         self.out('tb_model', tb_model)
         self.report("Running model evaluation.")
         return ToContext(
-            evaluate_model_wf=submit(
-                self.get_deserialized_input('evaluate_model_workflow'),
+            model_evaluation_wf=submit(
+                self.get_deserialized_input('model_evaluation_workflow'),
                 tb_model=tb_model,
                 **ChainMap(
-                    self.inputs.evaluate_model,
+                    self.inputs.model_evaluation,
                     self.exposed_inputs(ModelEvaluation),
                 )
             )
@@ -66,4 +66,4 @@ class RunWindow(WorkChain):
     @check_workchain_step
     def finalize(self):
         self.report("Adding band difference to output.")
-        self.out('cost_value', self.ctx.evaluate_model_wf.out.cost_value)
+        self.out('cost_value', self.ctx.model_evaluation_wf.out.cost_value)
