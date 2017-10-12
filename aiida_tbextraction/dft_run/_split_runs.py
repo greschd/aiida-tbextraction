@@ -3,6 +3,7 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+from fsc.export import export
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 
@@ -14,6 +15,7 @@ from .._utils import check_workchain_step
 from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
+@export
 class SplitDFTRun(DFTRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.

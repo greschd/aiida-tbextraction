@@ -1,3 +1,5 @@
+from fsc.export import export
+
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 
@@ -7,6 +9,7 @@ from .first_principles_tb import FirstPrinciplesTbExtraction
 from ._utils import check_workchain_step
 
 
+@export
 class StrainedFpTbExtraction(WorkChain):
     """
     """

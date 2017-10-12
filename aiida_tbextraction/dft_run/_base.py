@@ -1,9 +1,11 @@
+from fsc.export import export
 from aiida.work.workchain import WorkChain
 
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 
+@export
 class DFTRunBase(WorkChain):
     """
     """

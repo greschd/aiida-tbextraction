@@ -6,6 +6,7 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+from fsc.export import export
 from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
@@ -16,6 +17,7 @@ from .._utils import check_workchain_step
 from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
+@export
 class RunWindow(WorkChain):
     """
     This workchain runs the tight-binding extraction and analysis for a given energy window.

@@ -1,4 +1,5 @@
 import numpy as np
+from fsc.export import export
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
@@ -8,6 +9,7 @@ from ._base import ReferenceBandsBase
 from ..._utils import check_workchain_step
 
 
+@export
 class VaspHybridsReferenceBands(ReferenceBandsBase):
     """
     The WorkChain to calculate reference bands with VASP, using hybrids.

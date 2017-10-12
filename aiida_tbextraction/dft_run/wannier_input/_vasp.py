@@ -1,3 +1,4 @@
+from fsc.export import export
 import numpy as np
 
 from aiida.work.run import submit
@@ -8,6 +9,7 @@ from ._base import WannierInputBase
 from ..._utils import check_workchain_step
 
 
+@export
 class VaspWannierInput(WannierInputBase):
     @classmethod
     def define(cls, spec):

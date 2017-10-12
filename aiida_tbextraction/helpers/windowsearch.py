@@ -5,6 +5,7 @@ import copy
 import itertools
 
 import numpy as np
+from fsc.export import export
 from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, while_, ToContext
@@ -13,6 +14,7 @@ from .runwindow import RunWindow
 from .._utils import check_workchain_step
 
 
+@export
 class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.

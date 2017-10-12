@@ -6,6 +6,7 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+from fsc.export import export
 from aiida.orm.data.base import Str, List
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
@@ -14,6 +15,7 @@ from aiida.orm import (Code, Computer, DataFactory, CalculationFactory)
 from ._utils import check_workchain_step
 
 
+@export
 class TbExtraction(WorkChain):
     """
     This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.

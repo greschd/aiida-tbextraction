@@ -5,6 +5,7 @@ except ImportError:
     from singledispatch import singledispatch
     from chainmap import ChainMap
 
+from fsc.export import export
 from aiida.work.run import submit
 from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData
@@ -19,6 +20,7 @@ from ._utils import check_workchain_step
 from ._workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
+@export
 class FirstPrinciplesTbExtraction(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.
