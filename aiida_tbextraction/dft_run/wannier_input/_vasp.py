@@ -8,10 +8,10 @@ from ._base import WannierInputBase
 from ..._utils import check_workchain_step
 
 
-class VaspWannierInputBase(WannierInputBase):
+class VaspWannierInput(WannierInputBase):
     @classmethod
     def define(cls, spec):
-        super(VaspWannierInputBase, cls).define(spec)
+        super(VaspWannierInput, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code)

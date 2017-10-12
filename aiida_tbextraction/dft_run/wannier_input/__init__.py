@@ -1,2 +1,2 @@
 from ._base import WannierInputBase
-from ._vasp import VaspWannierInputBase
+from ._vasp import VaspWannierInput

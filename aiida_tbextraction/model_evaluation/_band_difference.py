@@ -10,14 +10,14 @@ from .._utils import check_workchain_step
 
 
 @export
-class BandDifference(ModelEvaluation):
+class BandDifferenceModelEvaluation(ModelEvaluation):
     """
     Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.
     """
 
     @classmethod
     def define(cls, spec):
-        super(BandDifference, cls).define(spec)
+        super(BandDifferenceModelEvaluation, cls).define(spec)
         spec.input(
             'bands_inspect_code',
             valid_type=Code,

@@ -11,10 +11,10 @@ import numpy as np
 def band_difference_process_inputs(configure, sample):
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
-    from aiida_tbextraction.model_evaluation import BandDifference
+    from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
     from aiida_bands_inspect.io import read_bands
 
-    inputs = BandDifference.get_inputs_template()
+    inputs = BandDifferenceModelEvaluation.get_inputs_template()
     inputs.tbmodels_code = Code.get_from_string('tbmodels')
     inputs.bands_inspect_code = Code.get_from_string('bands_inspect')
     inputs.tb_model = DataFactory('singlefile')(
@@ -22,7 +22,7 @@ def band_difference_process_inputs(configure, sample):
     )
     inputs.reference_bands = read_bands(sample('silicon/bands.hdf5'))
 
-    return BandDifference, inputs
+    return BandDifferenceModelEvaluation, inputs
 
 
 def test_bandevaluation(configure_with_daemon, band_difference_process_inputs):

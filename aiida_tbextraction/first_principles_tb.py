@@ -11,7 +11,7 @@ from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
-from .windowsearch import WindowSearch
+from .helpers.windowsearch import WindowSearch
 from .dft_run import DFTRunBase
 # from .reference_bands import ReferenceBandsBase
 # from .wannier_input import WannierInputBase

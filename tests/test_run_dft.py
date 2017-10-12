@@ -9,8 +9,8 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
     from aiida.orm.data.base import List
     from aiida.work.run import run
     from aiida_tbextraction.dft_run.split_runs import SplitDFTRun
-    from aiida_tbextraction.dft_run.wannier_input.vasp import VaspWannierInputBase
-    from aiida_tbextraction.dft_run.reference_bands.vasp_hybrids import VaspHybridsBands
+    from aiida_tbextraction.dft_run.wannier_input.vasp import VaspWannierInput
+    from aiida_tbextraction.dft_run.reference_bands.vasp_hybrids import VaspHybridsReferenceBands
 
     KpointsData = DataFactory('array.kpoints')
 
@@ -34,9 +34,9 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
     result, pid = run(
         SplitDFTRun,
         _return_pid=True,
-        reference_bands_workflow=VaspHybridsBands,
+        reference_bands_workflow=VaspHybridsReferenceBands,
         reference_bands=vasp_subwf_inputs,
-        to_wannier90_workflow=VaspWannierInputBase,
+        to_wannier90_workflow=VaspWannierInput,
         to_wannier90=vasp_subwf_inputs,
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,

@@ -8,14 +8,14 @@ from ._base import ReferenceBandsBase
 from ..._utils import check_workchain_step
 
 
-class VaspHybridsBands(ReferenceBandsBase):
+class VaspHybridsReferenceBands(ReferenceBandsBase):
     """
     The WorkChain to calculate reference bands with VASP, using hybrids.
     """
 
     @classmethod
     def define(cls, spec):
-        super(VaspHybridsBands, cls).define(spec)
+        super(VaspHybridsReferenceBands, cls).define(spec)
         # For this workflow, the kpoints_mesh input is actually required
         spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'))
 
