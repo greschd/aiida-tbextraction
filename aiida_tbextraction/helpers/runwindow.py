@@ -11,7 +11,7 @@ from aiida.work.workchain import WorkChain, ToContext
 from ..model_evaluation import ModelEvaluation
 from ..tbextraction import TbExtraction
 from .._utils import check_workchain_step
-from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from ..workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
 @export

@@ -12,7 +12,7 @@ from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 from .._utils import check_workchain_step
-from .._workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from ..workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
 @export
@@ -26,14 +26,14 @@ class SplitDFTRun(DFTRunBase):
         super(SplitDFTRun, cls).define(spec)
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
-        spec.input('to_wannier90_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input('wannier_input_workflow', **WORKCHAIN_INPUT_KWARGS)
 
         # Add dynamic namespaces
         spec.expose_inputs(
             ReferenceBandsBase, namespace='reference_bands', include=[]
         )
         spec.expose_inputs(
-            WannierInputBase, namespace='to_wannier90', include=[]
+            WannierInputBase, namespace='wannier_input', include=[]
         )
 
         spec.outline(cls.dft_run, cls.finalize)
@@ -50,18 +50,18 @@ class SplitDFTRun(DFTRunBase):
                 )
             )
         )
-        self.report('Submitting to_wannier90 workflow.')
-        to_wannier90 = submit(
-            self.get_deserialized_input('to_wannier90_workflow'),
+        self.report('Submitting wannier_input workflow.')
+        wannier_input = submit(
+            self.get_deserialized_input('wannier_input_workflow'),
             **ChainMap(
-                self.inputs['to_wannier90'],
+                self.inputs['wannier_input'],
                 self.exposed_inputs(
-                    WannierInputBase, namespace='to_wannier90'
+                    WannierInputBase, namespace='wannier_input'
                 )
             )
         )
         return ToContext(
-            reference_bands=reference_bands, to_wannier90=to_wannier90
+            reference_bands=reference_bands, wannier_input=wannier_input
         )
 
     @check_workchain_step
@@ -71,6 +71,12 @@ class SplitDFTRun(DFTRunBase):
                 self.ctx.reference_bands, ReferenceBandsBase
             )
         )
+        self.report(
+            str(
+                self.
+                exposed_outputs(self.ctx.reference_bands, ReferenceBandsBase)
+            )
+        )
         self.out_many(
-            **self.exposed_outputs(self.ctx.to_wannier90, WannierInputBase)
+            **self.exposed_outputs(self.ctx.wannier_input, WannierInputBase)
         )

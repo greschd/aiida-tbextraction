@@ -1,13 +1,13 @@
 from insb_sample import get_insb_input
 
 
-def test_vasp_hf_to_wannier90(
+def test_vasp_hf_wannier_input(
     configure_with_daemon, assert_finished, get_insb_input
 ):
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run
-    from aiida_tbextraction.wannier_input.vasp import VaspWannierInput
+    from aiida_tbextraction.dft_run.wannier_input import VaspWannierInput
 
     kpoints_mesh = DataFactory('array.kpoints')()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])

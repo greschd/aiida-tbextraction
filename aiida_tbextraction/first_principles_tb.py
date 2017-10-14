@@ -14,10 +14,8 @@ from aiida.work.workchain import WorkChain, ToContext
 
 from .helpers.windowsearch import WindowSearch
 from .dft_run import DFTRunBase
-# from .reference_bands import ReferenceBandsBase
-# from .wannier_input import WannierInputBase
 from ._utils import check_workchain_step
-from ._workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from .workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
 @export
@@ -73,16 +71,19 @@ class FirstPrinciplesTbExtraction(WorkChain):
         return ToContext(
             dft_run=submit(
                 self.get_deserialized_input('dft_run_workflow'),
-                **self.exposed_inputs(ReferenceBandsBase, namespace='dft_run')
+                **ChainMap(
+                    self.inputs.dft_run,
+                    self.exposed_inputs(DFTRunBase, namespace='dft_run'),
+                )
             )
         )
 
     @check_workchain_step
     def run_windowsearch(self):
-        # check for wannier_settings from to_wannier90 workflow
+        # check for wannier_settings from wannier_input workflow
         inputs = self.exposed_inputs(WindowSearch)
         self.report(
-            "Merging 'wannier_settings' from input and to_wannier90 workflow."
+            "Merging 'wannier_settings' from input and wannier_input workflow."
         )
         wannier_settings_explicit = inputs.pop(
             'wannier_settings', ParameterData()
@@ -95,7 +96,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
             param_secondary=wannier_settings_from_wf
         )[1]['result']
 
-        # prefer wannier_projections from to_wannier90 workflow if it exists
+        # prefer wannier_projections from wannier_input workflow if it exists
         wannier_projections = self.ctx.dft_run.get_outputs_dict().get(
             'wannier_projections', inputs.pop('wannier_projections', None)
         )
@@ -118,11 +119,9 @@ class FirstPrinciplesTbExtraction(WorkChain):
             windowsearch=submit(
                 WindowSearch,
                 reference_bands=reference_bands,
-                wannier_bands=self.ctx.to_wannier90.out.wannier_bands,
-                wannier_parameters=self.ctx.to_wannier90.out.
-                wannier_parameters,
-                wannier_input_folder=self.ctx.to_wannier90.out.
-                wannier_input_folder,
+                wannier_bands=self.ctx.dft_run.out.wannier_bands,
+                wannier_parameters=self.ctx.dft_run.out.wannier_parameters,
+                wannier_input_folder=self.ctx.dft_run.out.wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
                 **inputs
