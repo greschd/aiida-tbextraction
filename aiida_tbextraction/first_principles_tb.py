@@ -6,6 +6,9 @@ except ImportError:
     from chainmap import ChainMap
 
 from fsc.export import export
+
+import aiida
+aiida.try_load_dbenv()
 from aiida.work.run import submit
 from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData

@@ -4,6 +4,9 @@ except ImportError:
     from singledispatch import singledispatch
 
 import plum.util
+
+import aiida
+aiida.try_load_dbenv()
 from aiida.orm.data.base import Str
 
 

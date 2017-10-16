@@ -1,4 +1,7 @@
 from fsc.export import export
+
+import aiida
+aiida.try_load_dbenv()
 from aiida.work.workchain import WorkChain
 
 from .reference_bands import ReferenceBandsBase

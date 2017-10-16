@@ -1,6 +1,8 @@
 from fsc.export import export
 import numpy as np
 
+import aiida
+aiida.try_load_dbenv()
 from aiida.work.run import submit
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext

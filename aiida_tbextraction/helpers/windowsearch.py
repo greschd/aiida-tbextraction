@@ -3,6 +3,9 @@ import itertools
 
 import numpy as np
 from fsc.export import export
+
+import aiida
+aiida.try_load_dbenv()
 from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, while_, ToContext

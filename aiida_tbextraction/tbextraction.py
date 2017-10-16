@@ -4,6 +4,9 @@ except ImportError:
     from chainmap import ChainMap
 
 from fsc.export import export
+
+import aiida
+aiida.try_load_dbenv()
 from aiida.orm.data.base import Str, List
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
