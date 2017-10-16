@@ -1,8 +1,11 @@
 Tight-binding extraction workflows
 ==================================
 
-.. aiida-workchain:: aiida_tbextraction.strained_fp_tb.StrainedFpTbExtraction
+.. aiida-workchain:: StrainedFpTbExtraction
+    :module: aiida_tbextraction.strained_fp_tb
 
-.. aiida-workchain:: aiida_tbextraction.first_principles_tb.FirstPrinciplesTbExtraction
+.. aiida-workchain:: FirstPrinciplesTbExtraction
+    :module: aiida_tbextraction.first_principles_tb
 
-.. aiida-workchain:: aiida_tbextraction.tbextraction.TbExtraction
+.. aiida-workchain:: TbExtraction
+    :module: aiida_tbextraction.tbextraction

@@ -4,21 +4,17 @@ Workflows to run DFT calculations
 Workflows to run all necessary DFT calculations
 -----------------------------------------------
 
-.. aiida-workchain:: aiida_tbextraction.dft_run.DFTRunBase
-
-.. aiida-workchain:: aiida_tbextraction.dft_run.SplitDFTRun
+.. automodule:: aiida_tbextraction.dft_run
+    :members:
 
 Reference Bands Workflows
 -------------------------
 
-.. aiida-workchain:: aiida_tbextraction.dft_run.reference_bands.ReferenceBandsBase
-
-.. aiida-workchain:: aiida_tbextraction.dft_run.reference_bands.VaspHybridsReferenceBands
-
+.. automodule:: aiida_tbextraction.dft_run.reference_bands
+    :members:
 
 Wannier90 Input Workflows
 -------------------------
 
-.. aiida-workchain:: aiida_tbextraction.dft_run.wannier_input.WannierInputBase
-
-.. aiida-workchain:: aiida_tbextraction.dft_run.wannier_input.VaspWannierInput
+.. automodule:: aiida_tbextraction.dft_run.wannier_input
+    :members:
