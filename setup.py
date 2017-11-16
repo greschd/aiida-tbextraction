@@ -34,7 +34,7 @@ if __name__ == '__main__':
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],
             'dev': [
-                'pymatgen', 'aiida-pytest', 'ase', 'yapf', 'pre-commit',
+                'pymatgen', 'aiida-pytest', 'ase', 'yapf==0.19', 'pre-commit',
                 'sphinx-rtd-theme'
             ]
         },

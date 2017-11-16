@@ -39,8 +39,9 @@ class WindowSearch(WorkChain):
             raise AssertionError
         else:
             self.report(
-                'Found {} valid window configurations.'.
-                format(len(valid_windows))
+                'Found {} valid window configurations.'.format(
+                    len(valid_windows)
+                )
             )
         runwindow_inputs = self.exposed_inputs(RunWindow)
         window_runs = []
@@ -55,10 +56,9 @@ class WindowSearch(WorkChain):
             pid = submit(RunWindow, **inputs)
             window_runs.append(pid)
         return ToContext(
-            **{
-                'window_{}'.format(i): pid
-                for i, pid in enumerate(window_runs)
-            }
+            **
+            {'window_{}'.format(i): pid
+             for i, pid in enumerate(window_runs)}
         )
 
     def _get_valid_windows(self):

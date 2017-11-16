@@ -34,6 +34,7 @@ class RunWindow(WorkChain):
         spec.input('window', valid_type=DataFactory('parameter'))
         spec.input('model_evaluation_workflow', **WORKCHAIN_INPUT_KWARGS)
 
+        spec.output('cost_value')
         spec.outline(cls.extract_model, cls.evaluate_bands, cls.finalize)
 
     @check_workchain_step

@@ -20,7 +20,7 @@ codes:
     description: tbmodels
     default_plugin: tbmodels.parse
     remote_computer: localhost
-    remote_abspath: /home/greschd/.virtualenvs/tbmodels_test/bin/tbmodels
+    remote_abspath: /home/greschd/.virtualenvs/tbmodels_dev/bin/tbmodels
 
   bands_inspect:
     description: bands_inspect

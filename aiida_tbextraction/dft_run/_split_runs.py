@@ -70,14 +70,14 @@ class SplitDFTRun(DFTRunBase):
     @check_workchain_step
     def finalize(self):
         self.out_many(
-            **self.exposed_outputs(
-                self.ctx.reference_bands, ReferenceBandsBase
-            )
+            **
+            self.exposed_outputs(self.ctx.reference_bands, ReferenceBandsBase)
         )
         self.report(
             str(
-                self.
-                exposed_outputs(self.ctx.reference_bands, ReferenceBandsBase)
+                self.exposed_outputs(
+                    self.ctx.reference_bands, ReferenceBandsBase
+                )
             )
         )
         self.out_many(

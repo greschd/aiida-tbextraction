@@ -47,7 +47,9 @@ class TbExtraction(WorkChain):
         spec.input(
             'wannier_calculation_kwargs',
             valid_type=ParameterData,
-            default=ParameterData(dict={'_options': {}}),
+            default=ParameterData(dict={
+                '_options': {}
+            }),
             help=
             'Additional keyword arguments passed to the ``wannier90.wannier90`` calculation.'
         )
@@ -95,17 +97,16 @@ class TbExtraction(WorkChain):
             help=
             'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'
         )
+        spec.output(
+            'tb_model',
+            valid_type=DataFactory('singlefile'),
+            help='The calculated tight-binding model, in TBmodels HDF5 format.'
+        )
 
         spec.outline(
             cls.run_wswannier, cls.parse,
             if_(cls.has_slice)(cls.slice),
             if_(cls.has_symmetries)(cls.symmetrize), cls.finalize
-        )
-
-        spec.output(
-            'tb_model',
-            valid_type=DataFactory('singlefile'),
-            help='The calculated tight-binding model, in TBmodels HDF5 format.'
         )
 
     def has_slice(self):
@@ -132,7 +133,8 @@ class TbExtraction(WorkChain):
                 dict=ChainMap(
                     self.inputs.get(
                         'wannier_settings', DataFactory('parameter')()
-                    ).get_dict(), {'retrieve_hoppings': True}
+                    ).get_dict(),
+                    dict(retrieve_hoppings=True)
                 )
             ),
             **self.inputs.wannier_calculation_kwargs.get_dict()

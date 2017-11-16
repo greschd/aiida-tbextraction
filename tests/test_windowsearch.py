@@ -8,7 +8,7 @@ import numpy as np
 
 @pytest.mark.parametrize('slice', [True])
 @pytest.mark.parametrize('symmetries', [True])
-def test_runwindow(configure_with_daemon, sample, slice, symmetries):
+def test_windowsearch(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.orm.data.base import List

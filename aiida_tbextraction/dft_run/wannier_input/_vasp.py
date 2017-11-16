@@ -36,9 +36,8 @@ class VaspWannierInput(WannierInputBase):
                 parameters=self.inputs.parameters,
                 code=self.inputs.code,
                 wannier_parameters=self.inputs.get('wannier_parameters', None),
-                wannier_projections=self.inputs.get(
-                    'wannier_projections', None
-                ),
+                wannier_projections=self.inputs.
+                get('wannier_projections', None),
                 **self.inputs.calculation_kwargs.get_dict()
             )
         )
