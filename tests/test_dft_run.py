@@ -28,6 +28,7 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
         'calculation_kwargs': vasp_inputs.pop('calculation_kwargs')
     }
 
+    num_wann = 14
     result, pid = run(
         SplitDFTRun,
         _return_pid=True,
@@ -38,7 +39,7 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
         wannier_parameters=DataFactory('parameter')(
-            dict=dict(num_wann=14, num_bands=36, spinors=True)
+            dict=dict(num_wann=num_wann, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
         **vasp_inputs
@@ -51,6 +52,7 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
             'bands'
         ]
     )
+    assert int(result['wannier_parameters'].get_attr('num_wann')) == num_wann
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(
         filename in folder_list

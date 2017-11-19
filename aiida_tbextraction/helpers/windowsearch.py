@@ -78,19 +78,35 @@ class WindowSearch(WorkChain):
         froz_max = window['dis_froz_max']
         num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
 
+        window_invalid_str = 'Window [{}, ({}, {}), {}] is invalid'.format(
+            win_min, froz_min, froz_max, win_max
+        )
         # max >= min
         if win_min > win_max or froz_min > froz_max:
+            self.report('{}: max < min.'.format(window_invalid_str))
             return False
 
         # outer window contains the inner window
         if win_min > froz_min or win_max < froz_max:
+            self.report(
+                '{}: Outer window does not contain inner.'.
+                format(window_invalid_str)
+            )
             return False
 
         # check number of bands in inner window <= num_wann
         if np.max(self._count_bands(limits=(froz_min, froz_max))) > num_wann:
+            self.report(
+                '{}: Too many bands in inner window.'.
+                format(window_invalid_str)
+            )
             return False
         # check number of bands in outer window >= num_wann
         if np.min(self._count_bands(limits=(win_min, win_max))) < num_wann:
+            self.report(
+                '{}: Too few bands in outer window.'.
+                format(window_invalid_str)
+            )
             return False
         return True
 

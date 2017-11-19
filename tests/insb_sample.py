@@ -50,7 +50,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):
                            'num_mpiprocs_per_machine': 18},
                 queue_name=get_queue_name_from_code('vasp'),
                 withmpi=True,
-                max_wallclock_seconds=600
+                max_wallclock_seconds=1200
             )
         )
     )

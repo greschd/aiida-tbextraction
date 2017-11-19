@@ -14,6 +14,9 @@ computers:
     work_directory: /mnt/lnec/{username}/test_aiida_tbextraction_run/
     num_cpus: 20
     queue_name: express_compute
+    configuration:
+      username: greschd
+      proxy_command: ssh -W monch.cscs.ch:22 ela.cscs.ch
 
 codes:
   tbmodels:
@@ -52,3 +55,5 @@ pseudo_families:
     command_name: aiida_vasp.commands.paw._Paw
     folder: /home/greschd/programming/aiida/vasp_potentials_minimal
     group_description: VASP 5.4 potpaw_PBE
+
+daemon_interval_time: 15
