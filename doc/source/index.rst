@@ -4,11 +4,8 @@ AiiDA tight-binding extraction
 .. toctree::
    :maxdepth: 2
 
-   calculate_tb.rst
-   fp_run.rst
-   model_evaluation.rst
-   energy_windows.rst
-
+   reference/index.rst
+   package_structure.rst
 
 
 Indices and tables

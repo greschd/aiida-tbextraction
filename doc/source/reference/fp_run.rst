@@ -1,8 +1,8 @@
-Workflows to run DFT calculations
+Run First-Principles Calculations
 =================================
 
-Workflows to run all necessary DFT calculations
------------------------------------------------
+Complete First-Principles Calculations
+--------------------------------------
 
 .. automodule:: aiida_tbextraction.fp_run
     :members:

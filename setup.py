@@ -39,7 +39,7 @@ if __name__ == '__main__':
             ':python_version < "3"': ['chainmap', 'singledispatch'],
             'dev': [
                 'pymatgen', 'aiida-pytest', 'ase', 'yapf==0.19', 'pre-commit',
-                'sphinx-rtd-theme'
+                'sphinx-rtd-theme', 'sphinx-pyreverse'
             ]
         },
         entry_points={},

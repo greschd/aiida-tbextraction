@@ -33,7 +33,7 @@ import aiida_tbextraction
 # ones.
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode', 'aiida.sphinxext'
+    'sphinx.ext.viewcode', 'aiida.sphinxext', 'sphinx_pyreverse'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
