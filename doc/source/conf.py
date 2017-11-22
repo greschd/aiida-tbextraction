@@ -18,6 +18,8 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import aiida
+aiida.try_load_dbenv()
 import aiida_tbextraction
 
 # -- General configuration ------------------------------------------------
