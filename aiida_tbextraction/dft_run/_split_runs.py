@@ -5,20 +5,18 @@ except ImportError:
 
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
+
+from aiida_tools import check_workchain_step
+from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 from ._base import DFTRunBase
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
-from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
-
-@export
+@export  # pylint: disable=abstract-method
 class SplitDFTRun(DFTRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.

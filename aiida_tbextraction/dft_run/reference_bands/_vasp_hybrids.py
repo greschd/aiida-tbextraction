@@ -1,18 +1,17 @@
 import numpy as np
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 from aiida.orm.calculation.inline import make_inline
 
-from ._base import ReferenceBandsBase
-from ..._utils import check_workchain_step
+from aiida_tools import check_workchain_step
+
+from . import ReferenceBandsBase
 
 
-@export
+@export  # pylint: disable=abstract-method
 class VaspHybridsReferenceBands(ReferenceBandsBase):
     """
     The WorkChain to calculate reference bands with VASP, using hybrids.

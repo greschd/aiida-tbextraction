@@ -23,7 +23,7 @@ class TightBindingCalculation(WorkChain):
     def define(cls, spec):
         super(TightBindingCalculation, cls).define(spec)
 
-        ParameterData = DataFactory('parameter')  # pylint: disable=invalid-name
+        ParameterData = DataFactory('parameter')
         spec.input(
             'structure',
             valid_type=DataFactory('structure'),

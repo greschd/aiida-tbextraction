@@ -16,7 +16,7 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):  # pyl
     from aiida_tbextraction.dft_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.dft_run.reference_bands import VaspHybridsReferenceBands
 
-    KpointsData = DataFactory('array.kpoints')  # pylint: disable=invalid-name
+    KpointsData = DataFactory('array.kpoints')
 
     kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])

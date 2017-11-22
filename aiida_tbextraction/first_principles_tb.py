@@ -1,27 +1,24 @@
 try:
-    from functools import singledispatch
     from collections import ChainMap
 except ImportError:
-    from singledispatch import singledispatch
     from chainmap import ChainMap
 
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.work.run import submit
 from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
-from .energy_windows.windowsearch import WindowSearch
-from .dft_run import DFTRunBase
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
+from .energy_windows.windowsearch import WindowSearch
+from .dft_run import DFTRunBase
 
-@export
+
+@export  # pylint: disable=abstract-method
 class FirstPrinciplesTbExtraction(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.

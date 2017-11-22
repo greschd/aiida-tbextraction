@@ -4,17 +4,16 @@ import itertools
 import numpy as np
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.orm import DataFactory
 from aiida.work.run import submit
-from aiida.work.workchain import WorkChain, while_, ToContext
+from aiida.work.workchain import WorkChain, ToContext
 
-from .runwindow import RunWindow
 from aiida_tools import check_workchain_step
 
+from .runwindow import RunWindow
 
-@export
+
+@export  # pylint: disable=abstract-method
 class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.

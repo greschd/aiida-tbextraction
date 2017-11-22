@@ -1,18 +1,17 @@
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.orm import CalculationFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import Float
 from aiida.work import submit
 from aiida.work.workchain import ToContext
 
-from . import ModelEvaluation
 from aiida_tools import check_workchain_step
 
+from . import ModelEvaluation
 
-@export
+
+@export  # pylint: disable=abstract-method
 class BandDifferenceModelEvaluation(ModelEvaluation):
     """
     Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.
@@ -35,8 +34,8 @@ class BandDifferenceModelEvaluation(ModelEvaluation):
         process = CalculationFactory(calc_string).process()
         inputs = process.get_inputs_template()
         inputs.code = self.inputs[code_param]
-        inputs._options.resources = {'num_machines': 1}
-        inputs._options.withmpi = False
+        inputs._options.resources = {'num_machines': 1}  # pylint: disable=protected-access
+        inputs._options.withmpi = False  # pylint: disable=protected-access
         return process, inputs
 
     @check_workchain_step

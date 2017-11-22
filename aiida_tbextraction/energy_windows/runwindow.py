@@ -5,19 +5,18 @@ except ImportError:
 
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 
-from ..model_evaluation import ModelEvaluation
-from ..calculate_tb import TightBindingCalculation
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
+from ..model_evaluation import ModelEvaluation
+from ..calculate_tb import TightBindingCalculation
 
-@export
+
+@export  # pylint: disable=abstract-method
 class RunWindow(WorkChain):
     """
     This workchain runs the tight-binding extraction and analysis for a given energy window.

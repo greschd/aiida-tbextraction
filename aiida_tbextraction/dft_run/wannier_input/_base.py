@@ -1,14 +1,11 @@
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.orm import DataFactory
-from aiida.orm.code import Code
 from aiida.orm.data.base import List
 from aiida.work.workchain import WorkChain
 
 
-@export
+@export  # pylint: disable=abstract-method
 class WannierInputBase(WorkChain):
     """
     The base class for WorkChains which can be used to calculate the Wannier90 input files. It defines the inputs required by these WorkChains.

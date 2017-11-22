@@ -17,7 +17,7 @@ def test_vasp_hybrid_bands(
     from aiida.work.run import run
     from aiida_tbextraction.dft_run.reference_bands import VaspHybridsReferenceBands
 
-    KpointsData = DataFactory('array.kpoints')  # pylint: disable=invalid-name
+    KpointsData = DataFactory('array.kpoints')
     kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
 

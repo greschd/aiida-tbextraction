@@ -1,14 +1,12 @@
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.work.workchain import WorkChain
 from aiida.orm import DataFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import Float
 
 
-@export
+@export  # pylint: disable=abstract-method
 class ModelEvaluation(WorkChain):
     """
     Base class for evaluating a tight-binding model. The workflow returns a cost measure, which should be minimized to get an optimal model.

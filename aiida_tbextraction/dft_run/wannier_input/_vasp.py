@@ -1,17 +1,16 @@
 from fsc.export import export
 import numpy as np
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.work.run import submit
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
 
-from ._base import WannierInputBase
-from ..._utils import check_workchain_step
+from aiida_tools import check_workchain_step
+
+from . import WannierInputBase
 
 
-@export
+@export  # pylint: disable=abstract-method
 class VaspWannierInput(WannierInputBase):
     @classmethod
     def define(cls, spec):
