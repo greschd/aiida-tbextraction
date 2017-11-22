@@ -11,20 +11,20 @@ from aiida.work.workchain import ToContext
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
-from ._base import DFTRunBase
+from ._base import FirstPrinciplesRunBase
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 
 @export  # pylint: disable=abstract-method
-class SplitDFTRun(DFTRunBase):
+class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.
     """
 
     @classmethod
     def define(cls, spec):
-        super(SplitDFTRun, cls).define(spec)
+        super(SplitFirstPrinciplesRun, cls).define(spec)
 
         spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('wannier_input_workflow', **WORKCHAIN_INPUT_KWARGS)
@@ -37,10 +37,10 @@ class SplitDFTRun(DFTRunBase):
             WannierInputBase, namespace='wannier_input', include=[]
         )
 
-        spec.outline(cls.dft_run, cls.finalize)
+        spec.outline(cls.fp_run, cls.finalize)
 
     @check_workchain_step
-    def dft_run(self):
+    def fp_run(self):
         self.report('Submitting reference_bands workflow.')
         reference_bands = submit(
             self.get_deserialized_input('reference_bands_workflow'),

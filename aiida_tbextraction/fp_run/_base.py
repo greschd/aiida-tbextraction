@@ -7,13 +7,13 @@ from .wannier_input import WannierInputBase
 
 
 @export  # pylint: disable=abstract-method
-class DFTRunBase(WorkChain):
+class FirstPrinciplesRunBase(WorkChain):
     """
     """
 
     @classmethod
     def define(cls, spec):
-        super(DFTRunBase, cls).define(spec)
+        super(FirstPrinciplesRunBase, cls).define(spec)
 
         spec.expose_inputs(ReferenceBandsBase)
         spec.expose_inputs(WannierInputBase)

@@ -5,7 +5,7 @@ AiiDA tight-binding extraction
    :maxdepth: 2
 
    calculate_tb.rst
-   dft_run.rst
+   fp_run.rst
    model_evaluation.rst
    energy_windows.rst
 

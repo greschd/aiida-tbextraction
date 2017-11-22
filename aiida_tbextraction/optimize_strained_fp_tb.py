@@ -10,22 +10,23 @@ from aiida.work.workchain import WorkChain, ToContext
 from aiida_tools import check_workchain_step
 from aiida_strain.work import ApplyStrainsWithSymmetry
 
-from .first_principles_tb import FirstPrinciplesTbExtraction
+from .optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 
 
 @export  # pylint: disable=abstract-method
-class StrainedFpTbExtraction(WorkChain):
+class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
     """
     Workflow to optimize a DFT-based tight-binding model for different strain values.
     """
 
     @classmethod
     def define(cls, spec):
-        super(StrainedFpTbExtraction, cls).define(spec)
+        super(OptimizeStrainedFirstPrinciplesTightBinding, cls).define(spec)
 
         spec.expose_inputs(ApplyStrainsWithSymmetry)
         spec.expose_inputs(
-            FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries')
+            OptimizeFirstPrinciplesTightBinding,
+            exclude=('structure', 'symmetries')
         )
 
         spec.outline(cls.run_strain, cls.run_optimize_dft_tb, cls.finalize)
@@ -54,10 +55,10 @@ class StrainedFpTbExtraction(WorkChain):
             structure_key = 'structure_{}'.format(strain)
             symmetries_key = 'symmetries_{}'.format(strain)
             tocontext_kwargs[key] = submit(
-                FirstPrinciplesTbExtraction,
+                OptimizeFirstPrinciplesTightBinding,
                 structure=apply_strains_outputs[structure_key],
                 symmetries=apply_strains_outputs[symmetries_key],
-                **self.exposed_inputs(FirstPrinciplesTbExtraction)
+                **self.exposed_inputs(OptimizeFirstPrinciplesTightBinding)
             )
         return ToContext(**tocontext_kwargs)
 

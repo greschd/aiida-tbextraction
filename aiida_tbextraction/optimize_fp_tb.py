@@ -15,22 +15,22 @@ from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 from .energy_windows.windowsearch import WindowSearch
-from .dft_run import DFTRunBase
+from .fp_run import FirstPrinciplesRunBase
 
 
 @export  # pylint: disable=abstract-method
-class FirstPrinciplesTbExtraction(WorkChain):
+class OptimizeFirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.
     """
 
     @classmethod
     def define(cls, spec):
-        super(FirstPrinciplesTbExtraction, cls).define(spec)
+        super(OptimizeFirstPrinciplesTightBinding, cls).define(spec)
 
         # inputs which are inherited at the top level
         spec.expose_inputs(
-            DFTRunBase, exclude=(
+            FirstPrinciplesRunBase, exclude=(
                 'code',
                 'parameters',
                 'calculation_kwargs',
@@ -38,8 +38,8 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )
         # inputs which are inherited at the namespace level
         spec.expose_inputs(
-            DFTRunBase,
-            namespace='dft_run',
+            FirstPrinciplesRunBase,
+            namespace='fp_run',
             include=(
                 'code',
                 'parameters',
@@ -63,17 +63,17 @@ class FirstPrinciplesTbExtraction(WorkChain):
         spec.input('slice_reference_bands', valid_type=List, required=False)
         spec.input('slice_tb_model', valid_type=List, required=False)
 
-        spec.outline(cls.dft_run, cls.run_windowsearch, cls.finalize)
+        spec.outline(cls.fp_run, cls.run_windowsearch, cls.finalize)
 
     @check_workchain_step
-    def dft_run(self):
+    def fp_run(self):
         self.report("Starting DFT workflows.")
         return ToContext(
-            dft_run=submit(
+            fp_run=submit(
                 self.get_deserialized_input('dft_run_workflow'),
                 **ChainMap(
-                    self.inputs.dft_run,
-                    self.exposed_inputs(DFTRunBase, namespace='dft_run'),
+                    self.inputs.fp_run,
+                    self.exposed_inputs(FirstPrinciplesRunBase, namespace='fp_run'),
                 )
             )
         )
@@ -88,7 +88,7 @@ class FirstPrinciplesTbExtraction(WorkChain):
         wannier_settings_explicit = inputs.pop(
             'wannier_settings', ParameterData()
         )
-        wannier_settings_from_wf = self.ctx.dft_run.get_outputs_dict().get(
+        wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
             'wannier_settings', ParameterData()
         )
         wannier_settings = merge_parameterdata_inline(
@@ -97,12 +97,12 @@ class FirstPrinciplesTbExtraction(WorkChain):
         )[1]['result']
 
         # prefer wannier_projections from wannier_input workflow if it exists
-        wannier_projections = self.ctx.dft_run.get_outputs_dict().get(
+        wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
             'wannier_projections', inputs.pop('wannier_projections', None)
         )
 
         # slice reference bands if necessary
-        reference_bands = self.ctx.dft_run.out.bands
+        reference_bands = self.ctx.fp_run.out.bands
         slice_reference_bands = self.inputs.get('slice_reference_bands', None)
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(
@@ -119,9 +119,9 @@ class FirstPrinciplesTbExtraction(WorkChain):
             windowsearch=submit(
                 WindowSearch,
                 reference_bands=reference_bands,
-                wannier_bands=self.ctx.dft_run.out.wannier_bands,
-                wannier_parameters=self.ctx.dft_run.out.wannier_parameters,
-                wannier_input_folder=self.ctx.dft_run.out.wannier_input_folder,
+                wannier_bands=self.ctx.fp_run.out.wannier_bands,
+                wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
+                wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
                 **inputs

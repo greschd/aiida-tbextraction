@@ -16,7 +16,7 @@ def test_vasp_hf_wannier_input(
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run
-    from aiida_tbextraction.dft_run.wannier_input import VaspWannierInput
+    from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
 
     kpoints_mesh = DataFactory('array.kpoints')()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])

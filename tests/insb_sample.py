@@ -73,9 +73,9 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     from aiida.orm.data.base import List
     from aiida.orm.code import Code
     from aiida_tools.workchain_inputs import get_fullname
-    from aiida_tbextraction.dft_run import SplitDFTRun
-    from aiida_tbextraction.dft_run.reference_bands import VaspHybridsReferenceBands
-    from aiida_tbextraction.dft_run.wannier_input import VaspWannierInput
+    from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
+    from aiida_tbextraction.fp_run.reference_bands import VaspHybridsReferenceBands
+    from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
     inputs = dict()
@@ -87,14 +87,14 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
         'parameters': vasp_inputs.pop('parameters'),
         'calculation_kwargs': vasp_inputs.pop('calculation_kwargs')
     }
-    inputs['dft_run_workflow'] = SplitDFTRun
-    inputs['dft_run'] = dict()
-    inputs['dft_run']['reference_bands_workflow'
+    inputs['dft_run_workflow'] = SplitFirstPrinciplesRun
+    inputs['fp_run'] = dict()
+    inputs['fp_run']['reference_bands_workflow'
                       ] = get_fullname(VaspHybridsReferenceBands)
-    inputs['dft_run']['reference_bands'] = vasp_subwf_inputs
-    inputs['dft_run']['wannier_input_workflow'
+    inputs['fp_run']['reference_bands'] = vasp_subwf_inputs
+    inputs['fp_run']['wannier_input_workflow'
                       ] = get_fullname(VaspWannierInput)
-    inputs['dft_run']['wannier_input'] = vasp_subwf_inputs
+    inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
     # structure, potentials
     inputs.update(vasp_inputs)

@@ -4,7 +4,7 @@ Test for the workflow that optimizes DFT-based tight-binding models.
 
 from __future__ import print_function
 
-from insb_sample import get_fp_tb_input  # pylint: disable=unused-import
+from insb_sample import *  # pylint: disable=unused-wildcard-import
 
 
 def test_fp_tb(
@@ -17,13 +17,13 @@ def test_fp_tb(
     from aiida.work import run
     from aiida.orm.querybuilder import QueryBuilder
     from aiida_bands_inspect.calculations.difference import DifferenceCalculation
-    from aiida_tbextraction.first_principles_tb import FirstPrinciplesTbExtraction
+    from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 
     query = QueryBuilder()
     query.append(DifferenceCalculation)
     initial_count = query.count()
 
-    result = run(FirstPrinciplesTbExtraction, **get_fp_tb_input)
+    result = run(OptimizeFirstPrinciplesTightBinding, **get_fp_tb_input)
     print(result)
     assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
     # check for the AiiDA locking bug (execute same step multiple times)

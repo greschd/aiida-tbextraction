@@ -4,7 +4,7 @@ Tests the workflow that optimizes a DFT-based tight-binding model for different 
 
 from __future__ import print_function
 
-from insb_sample import get_fp_tb_input  # pylint: disable=unused-import
+from insb_sample import *  # pylint: disable=unused-wildcard-import
 
 
 def test_strained_fp_tb(
@@ -17,7 +17,7 @@ def test_strained_fp_tb(
     from aiida.work import run
     from aiida.orm.code import Code
     from aiida.orm.data.base import Str, List
-    from aiida_tbextraction.strained_fp_tb import StrainedFpTbExtraction
+    from aiida_tbextraction.optimize_strained_fp_tb import OptimizeStrainedFirstPrinciplesTightBinding
     inputs = get_fp_tb_input
 
     inputs['strain_kind'] = Str('three_five.Biaxial001')
@@ -30,7 +30,7 @@ def test_strained_fp_tb(
 
     inputs['symmetry_repr_code'] = Code.get_from_string('symmetry_repr')
 
-    result = run(StrainedFpTbExtraction, **inputs)
+    result = run(OptimizeStrainedFirstPrinciplesTightBinding, **inputs)
     print(result)
     for value in strain_list:
         suffix = '_{}'.format(value)
