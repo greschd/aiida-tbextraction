@@ -72,7 +72,7 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.orm.code import Code
-    from aiida_tbextraction.workchain_inputs import get_fullname
+    from aiida_tools.workchain_inputs import get_fullname
     from aiida_tbextraction.dft_run import SplitDFTRun
     from aiida_tbextraction.dft_run.reference_bands import VaspHybridsReferenceBands
     from aiida_tbextraction.dft_run.wannier_input import VaspWannierInput

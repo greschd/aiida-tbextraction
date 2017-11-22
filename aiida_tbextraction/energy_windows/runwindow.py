@@ -14,7 +14,7 @@ from aiida.work.workchain import WorkChain, ToContext
 from ..model_evaluation import ModelEvaluation
 from ..calculate_tb import TightBindingCalculation
 from aiida_tools import check_workchain_step
-from ..workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
 @export

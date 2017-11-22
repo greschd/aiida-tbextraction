@@ -1,19 +1,22 @@
+"""
+Defines the workflow to optimize tight-binding models from DFT inputs with different strain values.
+"""
+
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 
+from aiida_tools import check_workchain_step
 from aiida_strain.work import ApplyStrainsWithSymmetry
 
 from .first_principles_tb import FirstPrinciplesTbExtraction
-from aiida_tools import check_workchain_step
 
 
-@export
+@export  # pylint: disable=abstract-method
 class StrainedFpTbExtraction(WorkChain):
     """
+    Workflow to optimize a DFT-based tight-binding model for different strain values.
     """
 
     @classmethod
@@ -25,10 +28,13 @@ class StrainedFpTbExtraction(WorkChain):
             FirstPrinciplesTbExtraction, exclude=('structure', 'symmetries')
         )
 
-        spec.outline(cls.run_strain, cls.run_fp_tb_extraction, cls.finalize)
+        spec.outline(cls.run_strain, cls.run_optimize_dft_tb, cls.finalize)
 
     @check_workchain_step
     def run_strain(self):
+        """
+        Apply strain to the initial structure to get the strained structures.
+        """
         return ToContext(
             apply_strains=submit(
                 ApplyStrainsWithSymmetry,
@@ -37,7 +43,10 @@ class StrainedFpTbExtraction(WorkChain):
         )
 
     @check_workchain_step
-    def run_fp_tb_extraction(self):
+    def run_optimize_dft_tb(self):
+        """
+        Run the tight-binding optimization for each strained structure.
+        """
         apply_strains_outputs = self.ctx.apply_strains.get_outputs_dict()
         tocontext_kwargs = {}
         for strain in self.inputs.strain_strengths:
@@ -54,6 +63,9 @@ class StrainedFpTbExtraction(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Retrieve and output results.
+        """
         for strain in self.inputs.strain_strengths:
             suffix = '_{}'.format(strain)
             calc = self.ctx['tbextraction' + suffix]

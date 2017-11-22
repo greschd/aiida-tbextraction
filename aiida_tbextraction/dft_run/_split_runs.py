@@ -15,7 +15,7 @@ from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 from aiida_tools import check_workchain_step
-from ..workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 
 @export
