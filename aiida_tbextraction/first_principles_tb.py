@@ -15,7 +15,7 @@ from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
 
-from .helpers.windowsearch import WindowSearch
+from .energy_windows.windowsearch import WindowSearch
 from .dft_run import DFTRunBase
 from ._utils import check_workchain_step
 from .workchain_inputs import WORKCHAIN_INPUT_KWARGS

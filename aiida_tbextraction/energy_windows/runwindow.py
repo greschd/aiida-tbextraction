@@ -12,7 +12,7 @@ from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 
 from ..model_evaluation import ModelEvaluation
-from ..tbextraction import TbExtraction
+from ..calculate_tb import TightBindingCalculation
 from .._utils import check_workchain_step
 from ..workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
@@ -26,7 +26,7 @@ class RunWindow(WorkChain):
     @classmethod
     def define(cls, spec):
         super(RunWindow, cls).define(spec)
-        spec.expose_inputs(TbExtraction)
+        spec.expose_inputs(TightBindingCalculation)
         spec.expose_inputs(ModelEvaluation, exclude=['tb_model'])
         spec.expose_inputs(
             ModelEvaluation, include=[], namespace='model_evaluation'
@@ -39,7 +39,7 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def extract_model(self):
-        inputs = self.exposed_inputs(TbExtraction)
+        inputs = self.exposed_inputs(TightBindingCalculation)
         # set the energy window
         wannier_parameters = inputs.pop('wannier_parameters').get_dict()
         wannier_parameters.update(self.inputs.window.get_dict())
@@ -47,7 +47,9 @@ class RunWindow(WorkChain):
             dict=wannier_parameters
         )
         self.report("Extracting tight-binding model.")
-        return ToContext(tbextraction_calc=submit(TbExtraction, **inputs))
+        return ToContext(
+            tbextraction_calc=submit(TightBindingCalculation, **inputs)
+        )
 
     @check_workchain_step
     def evaluate_bands(self):

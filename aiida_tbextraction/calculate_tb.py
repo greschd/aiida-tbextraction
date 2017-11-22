@@ -16,14 +16,14 @@ from ._utils import check_workchain_step
 
 
 @export
-class TbExtraction(WorkChain):
+class TightBindingCalculation(WorkChain):
     """
     This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.
     """
 
     @classmethod
     def define(cls, spec):
-        super(TbExtraction, cls).define(spec)
+        super(TightBindingCalculation, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
         spec.input(
@@ -131,9 +131,9 @@ class TbExtraction(WorkChain):
             structure=self.inputs.get('structure', None),
             settings=DataFactory('parameter')(
                 dict=ChainMap(
-                    self.inputs.get(
-                        'wannier_settings', DataFactory('parameter')()
-                    ).get_dict(),
+                    self.inputs.
+                    get('wannier_settings',
+                        DataFactory('parameter')()).get_dict(),
                     dict(retrieve_hoppings=True)
                 )
             ),

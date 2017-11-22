@@ -4,10 +4,10 @@ AiiDA tight-binding extraction
 .. toctree::
    :maxdepth: 2
 
-   tb_extraction.rst
+   calculate_tb.rst
    dft_run.rst
    model_evaluation.rst
-   helpers.rst
+   energy_windows.rst
 
 
 

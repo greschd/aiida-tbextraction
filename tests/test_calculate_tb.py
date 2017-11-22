@@ -13,7 +13,7 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm.code import Code
     from aiida.orm.data.base import List
     from aiida.work import run
-    from aiida_tbextraction.tbextraction import TbExtraction
+    from aiida_tbextraction.calculate_tb import TightBindingCalculation
 
     inputs = dict()
 
@@ -85,5 +85,5 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         inputs['slice_idx'] = slice_idx
 
-    result = run(TbExtraction, **inputs)
+    result = run(TightBindingCalculation, **inputs)
     assert 'tb_model' in result

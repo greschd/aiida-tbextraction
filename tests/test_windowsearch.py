@@ -14,7 +14,7 @@ def test_windowsearch(configure_with_daemon, sample, slice, symmetries):
     from aiida.orm.data.base import List
     from aiida.work import run
     from aiida_bands_inspect.io import read_bands
-    from aiida_tbextraction.helpers.windowsearch import WindowSearch
+    from aiida_tbextraction.energy_windows.windowsearch import WindowSearch
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
     inputs = dict()
