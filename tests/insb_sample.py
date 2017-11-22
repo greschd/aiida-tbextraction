@@ -90,10 +90,9 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     inputs['dft_run_workflow'] = SplitFirstPrinciplesRun
     inputs['fp_run'] = dict()
     inputs['fp_run']['reference_bands_workflow'
-                      ] = get_fullname(VaspHybridsReferenceBands)
+                     ] = get_fullname(VaspHybridsReferenceBands)
     inputs['fp_run']['reference_bands'] = vasp_subwf_inputs
-    inputs['fp_run']['wannier_input_workflow'
-                      ] = get_fullname(VaspWannierInput)
+    inputs['fp_run']['wannier_input_workflow'] = get_fullname(VaspWannierInput)
     inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
     # structure, potentials

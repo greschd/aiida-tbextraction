@@ -30,7 +30,8 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
         # inputs which are inherited at the top level
         spec.expose_inputs(
-            FirstPrinciplesRunBase, exclude=(
+            FirstPrinciplesRunBase,
+            exclude=(
                 'code',
                 'parameters',
                 'calculation_kwargs',
@@ -73,7 +74,8 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 self.get_deserialized_input('dft_run_workflow'),
                 **ChainMap(
                     self.inputs.fp_run,
-                    self.exposed_inputs(FirstPrinciplesRunBase, namespace='fp_run'),
+                    self.
+                    exposed_inputs(FirstPrinciplesRunBase, namespace='fp_run'),
                 )
             )
         )
