@@ -1,17 +1,19 @@
-import itertools
+"""
+Tests the workflow that optimizes a DFT-based tight-binding model for different strain values.
+"""
 
-import pytest
-import pymatgen
-import numpy as np
+from __future__ import print_function
 
-from insb_sample import *
+from insb_sample import get_fp_tb_input  # pylint: disable=unused-import
 
 
 def test_strained_fp_tb(
-    configure_with_daemon,
-    sample,
-    get_fp_tb_input,
+    configure_with_daemon,  # pylint: disable=unused-argument
+    get_fp_tb_input,  # pylint: disable=redefined-outer-name
 ):
+    """
+    Run the DFT tight-binding optimization workflow with strain on an InSb sample for three strain values.
+    """
     from aiida.work import run
     from aiida.orm.code import Code
     from aiida.orm.data.base import Str, List

@@ -1,3 +1,7 @@
+"""
+Tests the workflow which calculates the tight-binding model from a complete Wannier90 input folder and symmetry + slice inputs.
+"""
+
 import os
 import itertools
 
@@ -6,9 +10,12 @@ import pymatgen
 import numpy as np
 
 
-@pytest.mark.parametrize('slice', [True, False])
+@pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
-def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
+def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pylint: disable=too-many-locals,unused-argument
+    """
+    Run the tight-binding calculation workflow, optionally including symmetrization and slicing of orbitals.
+    """
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.orm.data.base import List
@@ -19,9 +26,10 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
 
     input_folder = DataFactory('folder')()
     input_folder_path = sample('wannier_input_folder')
-    for fn in os.listdir(input_folder_path):
+    for filename in os.listdir(input_folder_path):
         input_folder.add_path(
-            os.path.abspath(os.path.join(input_folder_path, fn)), fn
+            os.path.abspath(os.path.join(input_folder_path, filename)),
+            filename
         )
     inputs['wannier_input_folder'] = input_folder
 
@@ -39,7 +47,7 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
     wannier_kpoints.set_kpoints(k_points)
     inputs['wannier_kpoints'] = wannier_kpoints
 
-    a = 3.2395
+    a = 3.2395  # pylint: disable=invalid-name
     structure = DataFactory('structure')()
     structure.set_pymatgen_structure(
         pymatgen.Structure(
@@ -80,7 +88,7 @@ def test_tbextraction(configure_with_daemon, sample, slice, symmetries):
         inputs['symmetries'] = DataFactory('singlefile')(
             file=sample('symmetries.hdf5')
         )
-    if slice:
+    if slice_:
         slice_idx = List()
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
         inputs['slice_idx'] = slice_idx

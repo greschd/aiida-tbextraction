@@ -8,7 +8,7 @@ from aiida.work.workchain import WorkChain, ToContext
 from aiida_strain.work import ApplyStrainsWithSymmetry
 
 from .first_principles_tb import FirstPrinciplesTbExtraction
-from ._utils import check_workchain_step
+from aiida_tools import check_workchain_step
 
 
 @export

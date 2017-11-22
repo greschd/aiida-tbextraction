@@ -1,9 +1,16 @@
+"""
+Defines fixtures to create the InSb input for VASP and the optimization workflows.
+"""
+
 import pytest
 from ase.io.vasp import read_vasp
 
 
 @pytest.fixture
-def get_insb_input(configure, sample, get_queue_name_from_code):
+def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disable=unused-argument
+    """
+    Create input for the VASP InSb sample.
+    """
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
 
@@ -13,7 +20,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):
     structure.set_ase(read_vasp(sample('InSb/POSCAR')))
     res['structure'] = structure
 
-    Paw = DataFactory('vasp.paw')
+    Paw = DataFactory('vasp.paw')  # pylint: disable=invalid-name
     res['potentials'] = {
         'In': Paw.load_paw(family='pbe', symbol='In_d')[0],
         'Sb': Paw.load_paw(family='pbe', symbol='Sb')[0]
@@ -58,7 +65,10 @@ def get_insb_input(configure, sample, get_queue_name_from_code):
 
 
 @pytest.fixture
-def get_fp_tb_input(configure, get_insb_input, sample):
+def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-many-locals,unused-argument,redefined-outer-name
+    """
+    Returns the input for DFT-based tight-binding optimization workflows.
+    """
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.orm.code import Code

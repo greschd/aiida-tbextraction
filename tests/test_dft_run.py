@@ -1,7 +1,14 @@
-from insb_sample import get_insb_input
+"""
+Tests for running the DFT calculations needed as input for the tight-binding calculation.
+"""
+
+from insb_sample import get_insb_input  # pylint: disable=unused-import
 
 
-def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
+def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Calculates the Wannier90 inputs from VASP with hybrid functionals.
+    """
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
     from aiida.work.run import run
@@ -9,7 +16,7 @@ def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):
     from aiida_tbextraction.dft_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.dft_run.reference_bands import VaspHybridsReferenceBands
 
-    KpointsData = DataFactory('array.kpoints')
+    KpointsData = DataFactory('array.kpoints')  # pylint: disable=invalid-name
 
     kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])

@@ -1,14 +1,23 @@
-from insb_sample import get_insb_input
+"""
+Defines tests for the workflow calculating the reference bands with VASP and hybrid functionals.
+"""
+
+from insb_sample import get_insb_input  # pylint: disable=unused-import
 
 
 def test_vasp_hybrid_bands(
-    configure_with_daemon, assert_finished, get_insb_input
+    configure_with_daemon,  # pylint: disable=unused-argument
+    assert_finished,
+    get_insb_input  # pylint: disable=redefined-outer-name
 ):
+    """
+    Runs the VASP + hybrids reference bands workflow with InSb, on a very coarse grid.
+    """
     from aiida.orm import DataFactory
     from aiida.work.run import run
     from aiida_tbextraction.dft_run.reference_bands import VaspHybridsReferenceBands
 
-    KpointsData = DataFactory('array.kpoints')
+    KpointsData = DataFactory('array.kpoints')  # pylint: disable=invalid-name
     kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
 

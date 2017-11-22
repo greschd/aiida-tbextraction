@@ -9,7 +9,7 @@ from aiida.work import submit
 from aiida.work.workchain import ToContext
 
 from . import ModelEvaluation
-from .._utils import check_workchain_step
+from aiida_tools import check_workchain_step
 
 
 @export

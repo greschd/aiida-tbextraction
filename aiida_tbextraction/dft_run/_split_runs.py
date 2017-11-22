@@ -14,7 +14,7 @@ from ._base import DFTRunBase
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
-from .._utils import check_workchain_step
+from aiida_tools import check_workchain_step
 from ..workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
 

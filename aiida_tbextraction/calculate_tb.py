@@ -5,17 +5,15 @@ except ImportError:
 
 from fsc.export import export
 
-import aiida
-aiida.try_load_dbenv()
-from aiida.orm.data.base import Str, List
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
-from aiida.orm import (Code, Computer, DataFactory, CalculationFactory)
+from aiida.orm.data.base import List
+from aiida.orm import Code, DataFactory, CalculationFactory
 
-from ._utils import check_workchain_step
+from aiida_tools import check_workchain_step
 
 
-@export
+@export  # pylint: disable=abstract-method
 class TightBindingCalculation(WorkChain):
     """
     This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.
@@ -25,7 +23,7 @@ class TightBindingCalculation(WorkChain):
     def define(cls, spec):
         super(TightBindingCalculation, cls).define(spec)
 
-        ParameterData = DataFactory('parameter')
+        ParameterData = DataFactory('parameter')  # pylint: disable=invalid-name
         spec.input(
             'structure',
             valid_type=DataFactory('structure'),
@@ -88,14 +86,14 @@ class TightBindingCalculation(WorkChain):
             valid_type=List,
             required=False,
             help=
-            'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'
+            'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'  # pylint: disable=line-too-long
         )
         spec.input(
             'symmetries',
             valid_type=DataFactory('singlefile'),
             required=False,
             help=
-            'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'
+            'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'  # pylint: disable=line-too-long
         )
         spec.output(
             'tb_model',
@@ -145,8 +143,8 @@ class TightBindingCalculation(WorkChain):
         process = CalculationFactory(calc_string).process()
         inputs = process.get_inputs_template()
         inputs.code = self.inputs.tbmodels_code
-        inputs._options.resources = {'num_machines': 1}
-        inputs._options.withmpi = False
+        inputs._options.resources = {'num_machines': 1}  # pylint: disable=protected-access
+        inputs._options.withmpi = False  # pylint: disable=protected-access
         return process, inputs
 
     @property
