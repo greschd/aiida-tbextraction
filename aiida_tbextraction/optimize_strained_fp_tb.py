@@ -6,6 +6,7 @@ from fsc.export import export
 
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
+from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
 from aiida_strain.work import ApplyStrainsWithSymmetry
@@ -70,6 +71,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         for strain in self.inputs.strain_strengths:
             suffix = '_{}'.format(strain)
             calc = self.ctx['tbextraction' + suffix]
-            self.out('tb_model' + suffix, calc.out.tb_model)
-            self.out('cost_value' + suffix, calc.out.cost_value)
-            self.out('window' + suffix, calc.out.window)
+            for label, node in calc.get_outputs(
+                also_labels=True, link_type=LinkType.RETURN
+            ):
+                self.out(label + suffix, node)

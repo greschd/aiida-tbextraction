@@ -10,6 +10,7 @@ from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
+from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
@@ -63,6 +64,8 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         spec.input('dft_run_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('slice_reference_bands', valid_type=List, required=False)
         spec.input('slice_tb_model', valid_type=List, required=False)
+
+        spec.expose_outputs(WindowSearch)
 
         spec.outline(cls.fp_run, cls.run_windowsearch, cls.finalize)
 
@@ -134,9 +137,10 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
     def finalize(self):
         self.report("Adding outputs from WindowSearch workflow.")
         windowsearch = self.ctx.windowsearch
-        self.out('tb_model', windowsearch.out.tb_model)
-        self.out('cost_value', windowsearch.out.cost_value)
-        self.out('window', windowsearch.out.window)
+        for label, node in windowsearch.get_outputs(
+            also_labels=True, link_type=LinkType.RETURN
+        ):
+            self.out(label, node)
 
 
 @make_inline

@@ -7,14 +7,14 @@ from aiida.orm.data.base import Float
 
 
 @export  # pylint: disable=abstract-method
-class ModelEvaluation(WorkChain):
+class ModelEvaluationBase(WorkChain):
     """
     Base class for evaluating a tight-binding model. The workflow returns a cost measure, which should be minimized to get an optimal model.
     """
 
     @classmethod
     def define(cls, spec):
-        super(ModelEvaluation, cls).define(spec)
+        super(ModelEvaluationBase, cls).define(spec)
         spec.input(
             'tb_model',
             valid_type=DataFactory('singlefile'),

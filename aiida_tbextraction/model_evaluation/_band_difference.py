@@ -12,11 +12,11 @@ from aiida.work.workchain import ToContext
 
 from aiida_tools import check_workchain_step
 
-from . import ModelEvaluation
+from . import ModelEvaluationBase
 
 
 @export  # pylint: disable=abstract-method
-class BandDifferenceModelEvaluation(ModelEvaluation):
+class BandDifferenceModelEvaluation(ModelEvaluationBase):
     """
     Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.
     """

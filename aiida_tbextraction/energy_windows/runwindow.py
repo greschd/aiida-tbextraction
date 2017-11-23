@@ -13,7 +13,7 @@ from aiida.common.links import LinkType
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
 
-from ..model_evaluation import ModelEvaluation
+from ..model_evaluation import ModelEvaluationBase
 from ..calculate_tb import TightBindingCalculation
 
 
@@ -27,14 +27,14 @@ class RunWindow(WorkChain):
     def define(cls, spec):
         super(RunWindow, cls).define(spec)
         spec.expose_inputs(TightBindingCalculation)
-        spec.expose_inputs(ModelEvaluation, exclude=['tb_model'])
+        spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model'])
         spec.expose_inputs(
-            ModelEvaluation, include=[], namespace='model_evaluation'
+            ModelEvaluationBase, include=[], namespace='model_evaluation'
         )
         spec.input('window', valid_type=DataFactory('parameter'))
         spec.input('model_evaluation_workflow', **WORKCHAIN_INPUT_KWARGS)
 
-        spec.output('cost_value')
+        spec.expose_outputs(ModelEvaluationBase)
         spec.outline(cls.extract_model, cls.evaluate_bands, cls.finalize)
 
     @check_workchain_step
@@ -63,7 +63,7 @@ class RunWindow(WorkChain):
                 tb_model=tb_model,
                 **ChainMap(
                     self.inputs.model_evaluation,
-                    self.exposed_inputs(ModelEvaluation),
+                    self.exposed_inputs(ModelEvaluationBase),
                 )
             )
         )
