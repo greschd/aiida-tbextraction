@@ -112,4 +112,6 @@ def test_windowsearch(configure_with_daemon, sample, slice_, symmetries):  # pyl
 
     result = run(WindowSearch, **inputs)
     print(result)
-    assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
+    assert all(
+        key in result for key in ['cost_value', 'tb_model', 'window', 'plot']
+    )

@@ -7,6 +7,7 @@ from fsc.export import export
 from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
+from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
 
@@ -127,7 +128,11 @@ class WindowSearch(WorkChain):
             window_calcs, key=lambda calc: calc.out.cost_value.value
         )
         optimal_calc = window_calcs[0]
-        self.out('tb_model', optimal_calc.out.tb_model)
-        self.out('cost_value', optimal_calc.out.cost_value)
+        self.report('Adding optimal window to outputs.')
         self.out('window', optimal_calc.inp.window)
+        for label, node in optimal_calc.get_outputs(
+            also_labels=True, link_type=LinkType.RETURN
+        ):
+            self.report("Adding {} to outputs.".format(label))
+            self.out(label, node)
         self.report('Finished!')

@@ -70,8 +70,8 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def finalize(self):
-        self.report("Adding band difference to output.")
         for label, node in self.ctx.model_evaluation_wf.get_outputs(
             also_labels=True, link_type=LinkType.RETURN
         ):
+            self.report("Adding {} to outputs.".format(label))
             self.out(label, node)
