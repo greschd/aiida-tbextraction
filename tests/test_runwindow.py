@@ -106,4 +106,4 @@ def test_runwindow(configure_with_daemon, sample, slice_, symmetries):  # pylint
         inputs['slice_idx'] = slice_idx
 
     result = run(RunWindow, **inputs)
-    assert all(key in result for key in ['cost_value', 'tb_model'])
+    assert all(key in result for key in ['cost_value', 'tb_model', 'plot'])

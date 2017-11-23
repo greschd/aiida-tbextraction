@@ -4,7 +4,7 @@ Defines a workflow which evaluates a tight-binding model by comparing its bandst
 
 from fsc.export import export
 
-from aiida.orm import CalculationFactory
+from aiida.orm import DataFactory, CalculationFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import Float
 from aiida.work import submit
@@ -28,6 +28,11 @@ class BandDifferenceModelEvaluation(ModelEvaluation):
             'bands_inspect_code',
             valid_type=Code,
             help='Code that runs the bands_inspect CLI.'
+        )
+        spec.output(
+            'plot',
+            valid_type=DataFactory('singlefile'),
+            help='Plot comparing the reference and evaluated bandstructure.'
         )
 
         spec.outline(

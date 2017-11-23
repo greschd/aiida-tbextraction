@@ -8,6 +8,7 @@ from fsc.export import export
 from aiida.orm import DataFactory
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
+from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
@@ -70,4 +71,7 @@ class RunWindow(WorkChain):
     @check_workchain_step
     def finalize(self):
         self.report("Adding band difference to output.")
-        self.out('cost_value', self.ctx.model_evaluation_wf.out.cost_value)
+        for label, node in self.ctx.model_evaluation_wf.get_outputs(
+            also_labels=True, link_type=LinkType.RETURN
+        ):
+            self.out(label, node)
