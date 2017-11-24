@@ -1,15 +1,17 @@
-import copy
 import itertools
 
 import numpy as np
 from fsc.export import export
 
-from aiida.orm import DataFactory
+from aiida.orm import DataFactory, load_node
+from aiida.orm.data.parameter import ParameterData
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
+from aiida_optimize.engines import ParameterSweep
+from aiida_optimize.workchain import OptimizationWorkChain
 
 from .runwindow import RunWindow
 
@@ -25,14 +27,14 @@ class WindowSearch(WorkChain):
         super(WindowSearch, cls).define(spec)
 
         spec.expose_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
-        spec.input('window_values', valid_type=DataFactory('parameter'))
+        spec.input('window_values', valid_type=ParameterData)
         spec.input('wannier_bands', valid_type=DataFactory('array.bands'))
 
         # TODO: Generalize to allow iterative window search
-        spec.outline(cls.run_windows, cls.check_windows)
+        spec.outline(cls.create_optimization, cls.finalize)
 
     @check_workchain_step
-    def run_windows(self):
+    def create_optimization(self):
         valid_windows = self._get_valid_windows()
         if not valid_windows:
             self.report('No valid energy windows found, aborting.')
@@ -43,22 +45,21 @@ class WindowSearch(WorkChain):
                     len(valid_windows)
                 )
             )
-        runwindow_inputs = self.exposed_inputs(RunWindow)
-        window_runs = []
-        for window in valid_windows:
-            inputs = copy.copy(runwindow_inputs)
-            inputs['window'] = DataFactory('parameter')(dict=window)
-            inputs['wannier_kpoints'] = self.inputs.wannier_bands
-            self.report(
-                'Submitting calculation with outer window=({0[dis_win_min]}, {0[dis_win_max]}), inner window=({0[dis_froz_min]}, {0[dis_froz_max]}).'.
-                format(window)
-            )
-            pid = submit(RunWindow, **inputs)
-            window_runs.append(pid)
         return ToContext(
-            **
-            {'window_{}'.format(i): pid
-             for i, pid in enumerate(window_runs)}
+            optimization=submit(
+                OptimizationWorkChain,
+                engine=ParameterSweep,
+                engine_kwargs=ParameterData(
+                    dict=dict(
+                        result_key='cost_value', parameters=valid_windows
+                    )
+                ),
+                calculation_workchain=RunWindow,
+                calculation_inputs=dict(
+                    wannier_kpoints=self.inputs.wannier_bands,
+                    **self.exposed_inputs(RunWindow)
+                )
+            )
         )
 
     def _get_valid_windows(self):
@@ -67,9 +68,9 @@ class WindowSearch(WorkChain):
             key: val
             for key, val in zip(window_values.keys(), window_choice)
         } for window_choice in itertools.product(*window_values.values())]
-        return [
-            window for window in all_windows if self._window_is_valid(window)
-        ]
+        return [{
+            'window': window
+        } for window in all_windows if self._window_is_valid(window)]
 
     def _window_is_valid(self, window):
         win_min = window['dis_win_min']
@@ -119,15 +120,11 @@ class WindowSearch(WorkChain):
         return band_count
 
     @check_workchain_step
-    def check_windows(self):
-        self.report('Evaluating calculated windows.')
-        window_calcs = [
-            self.ctx[key] for key in self.ctx if key.startswith('window_')
-        ]
-        window_calcs = sorted(
-            window_calcs, key=lambda calc: calc.out.cost_value.value
+    def finalize(self):
+        self.report('Add optimization results to outputs.')
+        optimal_calc = load_node(
+            self.ctx.optimization.out.calculation_uuid.value
         )
-        optimal_calc = window_calcs[0]
         self.report('Adding optimal window to outputs.')
         self.out('window', optimal_calc.inp.window)
         for label, node in optimal_calc.get_outputs(
