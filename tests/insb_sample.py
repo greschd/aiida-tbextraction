@@ -86,7 +86,6 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
         'code': vasp_inputs.pop('code'),
         'parameters': vasp_inputs.pop('parameters'),
         'calculation_kwargs': vasp_inputs.pop('calculation_kwargs'),
-        'potentials': vasp_inputs.pop('potentials')
     }
     inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
     inputs['fp_run'] = dict()
@@ -96,8 +95,9 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     inputs['fp_run']['wannier_input_workflow'] = get_fullname(VaspWannierInput)
     inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
-    # structure
+    # structure, potentials
     inputs.update(vasp_inputs)
+
     kpoints = DataFactory('array.kpoints')()
     kpoints.set_kpoints_path([('G', (0, 0, 0), 'M', (0.5, 0.5, 0.5))])
     inputs['kpoints'] = kpoints

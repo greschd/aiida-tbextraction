@@ -8,6 +8,10 @@ from .wannier_input import WannierInputBase
 
 @export  # pylint: disable=abstract-method
 class FirstPrinciplesRunBase(WorkChain):
+    """
+    Base class for first-principles runs, calculation the reference bandstructure and Wannier90 inputs.
+    """
+
     @classmethod
     def define(cls, spec):
         super(FirstPrinciplesRunBase, cls).define(spec)

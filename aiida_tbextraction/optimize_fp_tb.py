@@ -30,25 +30,10 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         super(OptimizeFirstPrinciplesTightBinding, cls).define(spec)
 
         # inputs which are inherited at the top level
+        spec.expose_inputs(FirstPrinciplesRunBase, exclude=())
+        # create namespace for additional inputs
         spec.expose_inputs(
-            FirstPrinciplesRunBase,
-            exclude=(
-                'code',
-                'parameters',
-                'calculation_kwargs',
-                'potentials',
-            )
-        )
-        # inputs which are inherited at the namespace level
-        spec.expose_inputs(
-            FirstPrinciplesRunBase,
-            namespace='fp_run',
-            include=(
-                'code',
-                'parameters',
-                'calculation_kwargs',
-                'potentials',
-            )
+            FirstPrinciplesRunBase, namespace='fp_run', include=()
         )
 
         # top-level scope
