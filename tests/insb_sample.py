@@ -85,9 +85,10 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     vasp_subwf_inputs = {
         'code': vasp_inputs.pop('code'),
         'parameters': vasp_inputs.pop('parameters'),
-        'calculation_kwargs': vasp_inputs.pop('calculation_kwargs')
+        'calculation_kwargs': vasp_inputs.pop('calculation_kwargs'),
+        'potentials': vasp_inputs.pop('potentials')
     }
-    inputs['dft_run_workflow'] = SplitFirstPrinciplesRun
+    inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
     inputs['fp_run'] = dict()
     inputs['fp_run']['reference_bands_workflow'
                      ] = get_fullname(VaspHybridsReferenceBands)
@@ -95,7 +96,7 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     inputs['fp_run']['wannier_input_workflow'] = get_fullname(VaspWannierInput)
     inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
-    # structure, potentials
+    # structure
     inputs.update(vasp_inputs)
     kpoints = DataFactory('array.kpoints')()
     kpoints.set_kpoints_path([('G', (0, 0, 0), 'M', (0.5, 0.5, 0.5))])

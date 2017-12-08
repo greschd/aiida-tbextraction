@@ -5,7 +5,7 @@ Tests for running the DFT calculations needed as input for the tight-binding cal
 from insb_sample import get_insb_input  # pylint: disable=unused-import
 
 
-def test_dft_run(configure_with_daemon, assert_finished, get_insb_input):  # pylint: disable=unused-argument,redefined-outer-name
+def test_fp_run(configure_with_daemon, assert_finished, get_insb_input):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Calculates the Wannier90 inputs from VASP with hybrid functionals.
     """

@@ -36,6 +36,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 'code',
                 'parameters',
                 'calculation_kwargs',
+                'potentials',
             )
         )
         # inputs which are inherited at the namespace level
@@ -46,6 +47,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 'code',
                 'parameters',
                 'calculation_kwargs',
+                'potentials',
             )
         )
 
@@ -61,7 +63,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             )
         )
 
-        spec.input('dft_run_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input('fp_run_workflow', **WORKCHAIN_INPUT_KWARGS)
         spec.input('slice_reference_bands', valid_type=List, required=False)
         spec.input('slice_tb_model', valid_type=List, required=False)
 
@@ -74,7 +76,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         self.report("Starting DFT workflows.")
         return ToContext(
             fp_run=submit(
-                self.get_deserialized_input('dft_run_workflow'),
+                self.get_deserialized_input('fp_run_workflow'),
                 **ChainMap(
                     self.inputs.fp_run,
                     self.
