@@ -7,7 +7,8 @@ from fsc.export import export
 
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
-from aiida.orm.data.base import List
+from aiida.orm.data.base import List, Str
+from aiida.orm.data.parameter import ParameterData
 from aiida.orm import Code, DataFactory, CalculationFactory
 
 from aiida_tools import check_workchain_step
@@ -23,7 +24,6 @@ class TightBindingCalculation(WorkChain):
     def define(cls, spec):
         super(TightBindingCalculation, cls).define(spec)
 
-        ParameterData = DataFactory('parameter')
         spec.input(
             'structure',
             valid_type=DataFactory('structure'),
@@ -117,22 +117,24 @@ class TightBindingCalculation(WorkChain):
     def run_wswannier(self):
         wannier_parameters = self.inputs.wannier_parameters.get_dict()
         wannier_parameters.setdefault('write_hr', True)
+        wannier_parameters.setdefault('write_xyz', True)
         wannier_parameters.setdefault('use_ws_distance', True)
         self.report("Running Wannier90 calculation.")
         pid = submit(
             CalculationFactory('wannier90.wannier90').process(),
             code=self.inputs.wannier_code,
             local_input_folder=self.inputs.wannier_input_folder,
-            parameters=DataFactory('parameter')(dict=wannier_parameters),
+            parameters=ParameterData(dict=wannier_parameters),
             kpoints=self.inputs.wannier_kpoints,
             projections=self.inputs.get('wannier_projections', None),
             structure=self.inputs.get('structure', None),
-            settings=DataFactory('parameter')(
-                dict=ChainMap(
-                    self.inputs.
-                    get('wannier_settings',
-                        DataFactory('parameter')()).get_dict(),
-                    dict(retrieve_hoppings=True)
+            settings=ParameterData(
+                dict=ChainMap( # yapf: disable
+                    self.inputs.get('wannier_settings', ParameterData()).get_dict(),
+                    dict(
+                        retrieve_hoppings=True,
+                        additional_retrieve_list=['wannier90_centres.xyz']
+                    )
                 )
             ),
             **self.inputs.wannier_calculation_kwargs.get_dict()
@@ -155,6 +157,7 @@ class TightBindingCalculation(WorkChain):
     def parse(self):
         process, inputs = self.setup_tbmodels('tbmodels.parse')
         inputs.wannier_folder = self.ctx.wannier_calc.out.retrieved
+        inputs.pos_kind = Str('nearest_atom')
         self.report("Parsing Wannier90 output to tbmodels format.")
         pid = submit(process, **inputs)
         return ToContext(tbmodels_calc=pid)
