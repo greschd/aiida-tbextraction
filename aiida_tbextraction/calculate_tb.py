@@ -133,7 +133,7 @@ class TightBindingCalculation(WorkChain):
                     self.inputs.get('wannier_settings', ParameterData()).get_dict(),
                     dict(
                         retrieve_hoppings=True,
-                        additional_retrieve_list=['wannier90_centres.xyz']
+                        additional_retrieve_list=['wannier90_centres.xyz', 'wannier90.win']
                     )
                 )
             ),
