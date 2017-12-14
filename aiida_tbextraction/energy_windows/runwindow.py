@@ -3,11 +3,14 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+import numpy as np
 from fsc.export import export
 
 from aiida.orm import DataFactory
+from aiida.orm.data.base import List, Float
+from aiida.orm.calculation.inline import make_inline
 from aiida.work.run import submit
-from aiida.work.workchain import WorkChain, ToContext
+from aiida.work.workchain import WorkChain, ToContext, if_
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
@@ -31,20 +34,70 @@ class RunWindow(WorkChain):
         spec.expose_inputs(
             ModelEvaluationBase, include=[], namespace='model_evaluation'
         )
-        spec.input('window', valid_type=DataFactory('parameter'))
+        spec.input('window', valid_type=List)
+        spec.input('wannier_bands', valid_type=DataFactory('array.bands'))
         spec.input('model_evaluation_workflow', **WORKCHAIN_INPUT_KWARGS)
 
         spec.expose_outputs(ModelEvaluationBase)
-        spec.outline(cls.extract_model, cls.evaluate_bands, cls.finalize)
+        spec.outline(
+            if_(cls.window_valid)(
+                cls.extract_model, cls.evaluate_bands, cls.finalize
+            ),
+            if_(cls.window_invalid)(cls.abort_invalid)
+        )
+
+    def window_invalid(self):
+        return not self.window_valid()
+
+    def window_valid(self):
+        window_list = self.inputs.window.get_attr('list')
+        win_min, froz_min, froz_max, win_max = window_list
+        num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
+
+        window_invalid_str = 'Window [{}, ({}, {}), {}] is invalid'.format(
+            *window_list
+        )
+
+        # window values must be sorted
+        if sorted(window_list) != window_list:
+            self.report(
+                '{}: windows values not sorted.'.format(window_invalid_str)
+            )
+            return False
+
+        # check number of bands in inner window <= num_wann
+        if np.max(self._count_bands(limits=(froz_min, froz_max))) > num_wann:
+            self.report(
+                '{}: Too many bands in inner window.'.
+                format(window_invalid_str)
+            )
+            return False
+        # check number of bands in outer window >= num_wann
+        if np.min(self._count_bands(limits=(win_min, win_max))) < num_wann:
+            self.report(
+                '{}: Too few bands in outer window.'.
+                format(window_invalid_str)
+            )
+            return False
+        return True
+
+    def _count_bands(self, limits):
+        lower, upper = sorted(limits)
+        bands = self.inputs.wannier_bands.get_bands()
+        band_count = np.sum(
+            np.logical_and(lower <= bands, bands <= upper), axis=-1
+        )
+        return band_count
 
     @check_workchain_step
     def extract_model(self):
         inputs = self.exposed_inputs(TightBindingCalculation)
         # set the energy window
-        wannier_parameters = inputs.pop('wannier_parameters').get_dict()
-        wannier_parameters.update(self.inputs.window.get_dict())
-        inputs['wannier_parameters'] = DataFactory('parameter')(
-            dict=wannier_parameters
+        inputs.update(
+            add_window_parameters_inline(
+                wannier_parameters=inputs.pop('wannier_parameters'),
+                window=self.inputs.window
+            )[1]
         )
         self.report("Extracting tight-binding model.")
         return ToContext(
@@ -75,3 +128,23 @@ class RunWindow(WorkChain):
         ):
             self.report("Adding {} to outputs.".format(label))
             self.out(label, node)
+
+    @check_workchain_step
+    def abort_invalid(self):
+        self.report('Window is invalid, assigning infinite cost_value.')
+        self.out('cost_value', Float('inf'))
+
+
+@make_inline
+def add_window_parameters_inline(wannier_parameters, window):
+    param_dict = wannier_parameters.get_dict()
+    win_min, froz_min, froz_max, win_max = window.get_attr('list')
+    param_dict.update(
+        dict(
+            dis_win_min=win_min,
+            dis_win_max=win_max,
+            dis_froz_min=froz_min,
+            dis_froz_max=froz_max,
+        )
+    )
+    return {'wannier_parameters': DataFactory('parameter')(dict=param_dict)}

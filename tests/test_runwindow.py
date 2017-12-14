@@ -43,14 +43,8 @@ def test_runwindow(configure_with_daemon, sample, slice_, symmetries):  # pylint
         'bands_inspect_code': Code.get_from_string('bands_inspect'),
     }
 
-    window = DataFactory('parameter')(
-        dict=dict(
-            dis_win_min=-4.5,
-            dis_win_max=16.,
-            dis_froz_min=-4,
-            dis_froz_max=6.5,
-        )
-    )
+    window = List()
+    window.extend([-4.5, -4, 6.5, 16])
     inputs['window'] = window
 
     k_values = [
@@ -63,6 +57,12 @@ def test_runwindow(configure_with_daemon, sample, slice_, symmetries):  # pylint
     wannier_kpoints = DataFactory('array.kpoints')()
     wannier_kpoints.set_kpoints(k_points)
     inputs['wannier_kpoints'] = wannier_kpoints
+
+    wannier_bands = DataFactory('array.bands')()
+    wannier_bands.set_kpoints(k_points)
+    # Just let every energy window be valid.
+    wannier_bands.set_bands(np.array([[0] * 14] * len(k_points)))
+    inputs['wannier_bands'] = wannier_bands
 
     a = 3.2395  # pylint: disable=invalid-name
     structure = DataFactory('structure')()
