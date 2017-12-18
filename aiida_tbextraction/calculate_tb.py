@@ -183,4 +183,4 @@ class TightBindingCalculation(WorkChain):
     @check_workchain_step
     def finalize(self):
         self.out("tb_model", self.tb_model)
-        self.report('Added final tb_model to results.')
+        self.report('Adding tight-binding model to results.')

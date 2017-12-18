@@ -1,9 +1,10 @@
-import itertools
+import copy
 
 import numpy as np
 from fsc.export import export
 
-from aiida.orm import DataFactory, load_node
+from aiida.orm import load_node
+from aiida.orm.data.base import List, Float
 from aiida.orm.data.parameter import ParameterData
 from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
@@ -27,23 +28,23 @@ class WindowSearch(WorkChain):
         super(WindowSearch, cls).define(spec)
 
         spec.expose_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
-        spec.input('window_values', valid_type=ParameterData)
+        spec.input('initial_window', valid_type=List)
+        spec.input('window_tol', valid_type=Float, default=Float(0.5))
 
         # TODO: Generalize to allow iterative window search
         spec.outline(cls.create_optimization, cls.finalize)
 
     @check_workchain_step
     def create_optimization(self):
-        valid_windows = self._get_valid_windows()
-        if not valid_windows:
-            self.report('No valid energy windows found, aborting.')
-            raise AssertionError
-        else:
-            self.report(
-                'Found {} valid window configurations.'.format(
-                    len(valid_windows)
-                )
-            )
+        self.report('Launching Window optimization.')
+        initial_window_list = self.inputs.initial_window.get_attr('list')
+        window_simplex = [initial_window_list]
+        simplex_dist = 0.5
+        for i in range(len(initial_window_list)):
+            window = copy.deepcopy(initial_window_list)
+            window[i] += simplex_dist
+            window_simplex.append(window)
+
         return ToContext(
             optimization=submit(
                 OptimizationWorkChain,
@@ -51,8 +52,10 @@ class WindowSearch(WorkChain):
                 engine_kwargs=ParameterData(
                     dict=dict(
                         result_key='cost_value',
-                        xtol=1e-1,
-                        ftol=1e-1,
+                        xtol=self.inputs.window_tol.value,
+                        ftol=np.inf,
+                        input_key='window',
+                        simplex=window_simplex
                     )
                 ),
                 calculation_workchain=RunWindow,
@@ -62,16 +65,6 @@ class WindowSearch(WorkChain):
                 )
             )
         )
-
-    # def _get_valid_windows(self):
-    #     window_values = self.inputs.window_values.get_dict()
-    #     all_windows = [{
-    #         key: val
-    #         for key, val in zip(window_values.keys(), window_choice)
-    #     } for window_choice in itertools.product(*window_values.values())]
-    #     return [{
-    #         'window': window
-    #     } for window in all_windows if self._window_is_valid(window)]
 
     @check_workchain_step
     def finalize(self):

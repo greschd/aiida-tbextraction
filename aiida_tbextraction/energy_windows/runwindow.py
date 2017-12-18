@@ -41,7 +41,7 @@ class RunWindow(WorkChain):
         spec.expose_outputs(ModelEvaluationBase)
         spec.outline(
             if_(cls.window_valid)(
-                cls.extract_model, cls.evaluate_bands, cls.finalize
+                cls.calculate_model, cls.evaluate_bands, cls.finalize
             ),
             if_(cls.window_invalid)(cls.abort_invalid)
         )
@@ -90,7 +90,7 @@ class RunWindow(WorkChain):
         return band_count
 
     @check_workchain_step
-    def extract_model(self):
+    def calculate_model(self):
         inputs = self.exposed_inputs(TightBindingCalculation)
         # set the energy window
         inputs.update(
@@ -99,7 +99,7 @@ class RunWindow(WorkChain):
                 window=self.inputs.window
             )[1]
         )
-        self.report("Extracting tight-binding model.")
+        self.report("Calculating tight-binding model.")
         return ToContext(
             tbextraction_calc=submit(TightBindingCalculation, **inputs)
         )

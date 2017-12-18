@@ -20,7 +20,7 @@ def test_windowsearch(configure_with_daemon, sample, slice_, symmetries):  # pyl
     """
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
-    from aiida.orm.data.base import List
+    from aiida.orm.data.base import List, Float
     from aiida.work import run
     from aiida_bands_inspect.io import read_bands
     from aiida_tbextraction.energy_windows.windowsearch import WindowSearch
@@ -46,15 +46,10 @@ def test_windowsearch(configure_with_daemon, sample, slice_, symmetries):  # pyl
     }
     inputs['reference_bands'] = read_bands(sample('bands.hdf5'))
 
-    window_values = DataFactory('parameter')(
-        dict=dict(
-            dis_win_min=[-4.5, -3.9],
-            dis_win_max=[16.],
-            dis_froz_min=[-4, -3.8],
-            dis_froz_max=[6.5]
-        )
-    )
-    inputs['window_values'] = window_values
+    initial_window = List()
+    initial_window.extend([-4.5, -4, 6.5, 16])
+    inputs['initial_window'] = initial_window
+    inputs['window_tol'] = Float(0.5)
 
     a = 3.2395  # pylint: disable=invalid-name
     structure = DataFactory('structure')()
