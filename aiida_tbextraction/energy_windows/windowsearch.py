@@ -31,7 +31,6 @@ class WindowSearch(WorkChain):
         spec.input('initial_window', valid_type=List)
         spec.input('window_tol', valid_type=Float, default=Float(0.5))
 
-        # TODO: Generalize to allow iterative window search
         spec.outline(cls.create_optimization, cls.finalize)
 
     @check_workchain_step

@@ -113,15 +113,9 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
         'bands_inspect_code': Code.get_from_string('bands_inspect')
     }
 
-    window_values = DataFactory('parameter')(
-        dict=dict(
-            dis_win_min=[-10, -4.5, -3.9],
-            dis_win_max=[16.],
-            dis_froz_min=[-4, -3.8],
-            dis_froz_max=[6.5]
-        )
-    )
-    inputs['window_values'] = window_values
+    initial_window = List()
+    initial_window.extend([-4.5, -4, 6.5, 16])
+    inputs['initial_window'] = initial_window
 
     wannier_parameters = DataFactory('parameter')(
         dict=dict(
