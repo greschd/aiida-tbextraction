@@ -26,5 +26,3 @@ def test_fp_tb(
     result = run(OptimizeFirstPrinciplesTightBinding, **get_fp_tb_input)
     print(result)
     assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
-    # check for the AiiDA locking bug (execute same step multiple times)
-    assert query.count() - initial_count <= 5  # there should be 5 valid windows

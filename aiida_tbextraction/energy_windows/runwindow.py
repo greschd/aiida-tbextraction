@@ -47,9 +47,9 @@ class RunWindow(WorkChain):
         )
 
     def window_invalid(self):
-        return not self.window_valid()
+        return not self.window_valid(show_msg=False)
 
-    def window_valid(self):
+    def window_valid(self, show_msg=True):
         window_list = self.inputs.window.get_attr('list')
         win_min, froz_min, froz_max, win_max = window_list
         num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
@@ -60,25 +60,29 @@ class RunWindow(WorkChain):
 
         # window values must be sorted
         if sorted(window_list) != window_list:
-            self.report(
-                '{}: windows values not sorted.'.format(window_invalid_str)
-            )
+            if show_msg:
+                self.report(
+                    '{}: windows values not sorted.'.
+                    format(window_invalid_str)
+                )
             return False
 
         # check number of bands in inner window <= num_wann
         if np.max(self._count_bands(limits=(froz_min, froz_max))) > num_wann:
-            self.report(
-                '{}: Too many bands in inner window.'.
-                format(window_invalid_str)
-            )
+            if show_msg:
+                self.report(
+                    '{}: Too many bands in inner window.'.
+                    format(window_invalid_str)
+                )
             return False
         # check number of bands in outer window >= num_wann
         if np.min(self._count_bands(limits=(win_min, win_max))) < num_wann:
-            self.report(
-                '{}: Too few bands in outer window.'.
-                format(window_invalid_str)
-            )
-            return False
+            if show_msg:
+                self.report(
+                    '{}: Too few bands in outer window.'.
+                    format(window_invalid_str)
+                )
+                return False
         return True
 
     def _count_bands(self, limits):
