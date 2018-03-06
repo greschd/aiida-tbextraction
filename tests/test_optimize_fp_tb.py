@@ -21,7 +21,6 @@ def test_fp_tb(
 
     query = QueryBuilder()
     query.append(DifferenceCalculation)
-    initial_count = query.count()
 
     result = run(OptimizeFirstPrinciplesTightBinding, **get_fp_tb_input)
     print(result)

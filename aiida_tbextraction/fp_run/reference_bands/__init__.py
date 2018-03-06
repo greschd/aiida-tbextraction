@@ -1,4 +1,4 @@
 from ._base import ReferenceBandsBase
-from ._vasp_hybrids import VaspHybridsReferenceBands
+from ._vasp import VaspReferenceBands
 
-__all__ = _base.__all__ + _vasp_hybrids.__all__  # pylint: disable=undefined-variable
+__all__ = _base.__all__ + _vasp.__all__  # pylint: disable=undefined-variable

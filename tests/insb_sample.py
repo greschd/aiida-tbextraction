@@ -70,11 +70,11 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     Returns the input for DFT-based tight-binding optimization workflows.
     """
     from aiida.orm import DataFactory
-    from aiida.orm.data.base import List
+    from aiida.orm.data.base import List, Bool
     from aiida.orm.code import Code
     from aiida_tools.workchain_inputs import get_fullname
     from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
-    from aiida_tbextraction.fp_run.reference_bands import VaspHybridsReferenceBands
+    from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
@@ -90,8 +90,10 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
     inputs['fp_run'] = dict()
     inputs['fp_run']['reference_bands_workflow'
-                     ] = get_fullname(VaspHybridsReferenceBands)
-    inputs['fp_run']['reference_bands'] = vasp_subwf_inputs
+                     ] = get_fullname(VaspReferenceBands)
+    inputs['fp_run']['reference_bands'] = dict(
+        merge_kpoints=Bool(True), **vasp_subwf_inputs
+    )
     inputs['fp_run']['wannier_input_workflow'] = get_fullname(VaspWannierInput)
     inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 

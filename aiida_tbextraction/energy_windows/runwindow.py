@@ -42,8 +42,7 @@ class RunWindow(WorkChain):
         spec.outline(
             if_(cls.window_valid)(
                 cls.calculate_model, cls.evaluate_bands, cls.finalize
-            ),
-            if_(cls.window_invalid)(cls.abort_invalid)
+            ), if_(cls.window_invalid)(cls.abort_invalid)
         )
 
     def window_invalid(self):
