@@ -13,6 +13,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     """
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
+    from aiida.orm.data.parameter import ParameterData
 
     res = dict()
 
@@ -26,7 +27,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
         'Sb': Paw.load_paw(family='pbe', symbol='Sb')[0]
     }
 
-    res['parameters'] = DataFactory('parameter')(
+    res['parameters'] = ParameterData(
         dict=dict(
             ediff=1e-3,
             lsorbit=True,
@@ -50,15 +51,13 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     )
 
     res['code'] = Code.get_from_string('vasp')
-    res['calculation_kwargs'] = DataFactory('parameter')(
-        dict=dict(
-            _options=dict(
-                resources={'num_machines': 2,
-                           'num_mpiprocs_per_machine': 18},
-                queue_name=get_queue_name_from_code('vasp'),
-                withmpi=True,
-                max_wallclock_seconds=1200
-            )
+    res['calculation_kwargs'] = dict(
+        _options=dict(
+            resources={'num_machines': 2,
+                       'num_mpiprocs_per_machine': 18},
+            queue_name=get_queue_name_from_code('vasp'),
+            withmpi=True,
+            max_wallclock_seconds=1200
         )
     )
     return res

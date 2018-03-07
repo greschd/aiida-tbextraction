@@ -5,6 +5,7 @@ from aiida.orm.data.base import Bool
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.run import submit
 from aiida.work.workchain import ToContext
+from aiida.work.process import PortNamespace
 
 from aiida_tools import check_workchain_step
 
@@ -24,7 +25,9 @@ class VaspReferenceBands(ReferenceBandsBase):
         ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
-        spec.input('calculation_kwargs', valid_type=ParameterData)
+        spec._inputs['calculation_kwargs'] = PortNamespace(
+            'calculation_kwargs', required=False
+        )
         spec.input('merge_kpoints', valid_type=Bool, default=Bool(False))
 
         spec.outline(cls.run_calc, cls.get_bands)
@@ -50,7 +53,7 @@ class VaspReferenceBands(ReferenceBandsBase):
                 kpoints=kpoints,
                 parameters=self.inputs.parameters,
                 code=self.inputs.code,
-                **self.inputs.calculation_kwargs.get_dict()
+                **self.inputs.get('calculation_kwargs', {})
             )
         )
 

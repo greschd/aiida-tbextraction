@@ -4,6 +4,7 @@ import numpy as np
 from aiida.work.run import submit
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
+from aiida.work.process import PortNamespace
 
 from aiida_tools import check_workchain_step
 
@@ -19,7 +20,9 @@ class VaspWannierInput(WannierInputBase):
         ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
-        spec.input('calculation_kwargs', valid_type=ParameterData)
+        spec._inputs['calculation_kwargs'] = PortNamespace(
+            'calculation_kwargs', required=False
+        )
 
         spec.outline(cls.submit_calculation, cls.get_result)
 
@@ -37,7 +40,7 @@ class VaspWannierInput(WannierInputBase):
                 wannier_parameters=self.inputs.get('wannier_parameters', None),
                 wannier_projections=self.inputs.
                 get('wannier_projections', None),
-                **self.inputs.calculation_kwargs.get_dict()
+                **self.inputs.get('calculation_kwargs', {})
             )
         )
 

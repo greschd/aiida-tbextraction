@@ -74,7 +74,8 @@ def test_combined_fp_run(
     Calculates the Wannier90 inputs from VASP with hybrid functionals.
     """
     from aiida.orm import DataFactory
-    from aiida.orm.data.base import List
+    from aiida.orm.data.base import List, Bool
+    from aiida.orm.data.parameter import ParameterData
     from aiida.work.run import run
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
 
@@ -101,6 +102,8 @@ def test_combined_fp_run(
             dict=dict(num_wann=num_wann, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
+        scf={'parameters': ParameterData(dict=dict(isym=2))},
+        bands={'merge_kpoints': Bool(True)},
         **vasp_inputs
     )
     assert_finished(pid)
