@@ -19,6 +19,7 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.orm.data.base import List
+    from aiida.orm.data.parameter import ParameterData
     from aiida.work import run
     from aiida_tbextraction.calculate_tb import TightBindingCalculation
 
@@ -58,7 +59,7 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
     )
     inputs['structure'] = structure
 
-    wannier_parameters = DataFactory('parameter')(
+    wannier_parameters = ParameterData(
         dict=dict(
             num_wann=14,
             num_bands=36,
@@ -73,16 +74,14 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
         )
     )
     inputs['wannier_parameters'] = wannier_parameters
-    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(
-        dict=dict(
-            _options={
-                'resources': {
-                    'num_machines': 1,
-                    'tot_num_mpiprocs': 1
-                },
-                'withmpi': False
-            }
-        )
+    inputs['wannier_calculation_kwargs'] = dict(
+        options={
+            'resources': {
+                'num_machines': 1,
+                'tot_num_mpiprocs': 1
+            },
+            'withmpi': False
+        }
     )
     if symmetries:
         inputs['symmetries'] = DataFactory('singlefile')(

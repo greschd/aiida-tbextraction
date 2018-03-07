@@ -9,7 +9,6 @@ from fsc.export import export
 from aiida.orm import DataFactory
 from aiida.orm.data.base import List, Float
 from aiida.orm.calculation.inline import make_inline
-from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext, if_
 from aiida.common.links import LinkType
 
@@ -104,7 +103,7 @@ class RunWindow(WorkChain):
         )
         self.report("Calculating tight-binding model.")
         return ToContext(
-            tbextraction_calc=submit(TightBindingCalculation, **inputs)
+            tbextraction_calc=self.submit(TightBindingCalculation, **inputs)
         )
 
     @check_workchain_step
@@ -114,7 +113,7 @@ class RunWindow(WorkChain):
         self.out('tb_model', tb_model)
         self.report("Running model evaluation.")
         return ToContext(
-            model_evaluation_wf=submit(
+            model_evaluation_wf=self.submit(
                 self.get_deserialized_input('model_evaluation_workflow'),
                 tb_model=tb_model,
                 **ChainMap(

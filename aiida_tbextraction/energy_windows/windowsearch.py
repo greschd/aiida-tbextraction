@@ -6,7 +6,6 @@ from fsc.export import export
 from aiida.orm import load_node
 from aiida.orm.data.base import List, Float
 from aiida.orm.data.parameter import ParameterData
-from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 from aiida.common.links import LinkType
 
@@ -45,7 +44,7 @@ class WindowSearch(WorkChain):
             window_simplex.append(window)
 
         return ToContext(
-            optimization=submit(
+            optimization=self.submit(
                 OptimizationWorkChain,
                 engine=NelderMead,
                 engine_kwargs=ParameterData(

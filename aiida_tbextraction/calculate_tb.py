@@ -5,7 +5,6 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, if_, ToContext
 from aiida.orm.data.base import List, Str
 from aiida.orm.data.parameter import ParameterData
@@ -42,15 +41,18 @@ class TightBindingCalculation(WorkChain):
             help=
             'A folder containing the Wannier90 ``.mmn`` and ``.amn`` input files.'
         )
-        spec.input(
+        spec.input_namespace(
             'wannier_calculation_kwargs',
-            valid_type=ParameterData,
-            default=ParameterData(dict={
-                '_options': {}
-            }),
+            dynamic=True,
             help=
             'Additional keyword arguments passed to the ``wannier90.wannier90`` calculation.'
         )
+        spec.input(
+            'wannier_calculation_kwargs.options',
+            non_db=True,
+            help='Resource options for the Wannier90 calculation.'
+        )
+
         spec.input(
             'wannier_parameters',
             valid_type=ParameterData,
@@ -120,14 +122,22 @@ class TightBindingCalculation(WorkChain):
         wannier_parameters.setdefault('write_xyz', True)
         wannier_parameters.setdefault('use_ws_distance', True)
         self.report("Running Wannier90 calculation.")
-        pid = submit(
+
+        # optional inputs
+        inputs = dict(
+            projections=self.inputs.get('wannier_projections', None),
+            structure=self.inputs.get('structure', None),
+        )
+        inputs = {k: v for k, v in inputs.items() if v is not None}
+
+        inputs.update(self.inputs.wannier_calculation_kwargs)
+
+        return ToContext(wannier_calc=self.submit(
             CalculationFactory('wannier90.wannier90').process(),
             code=self.inputs.wannier_code,
             local_input_folder=self.inputs.wannier_input_folder,
             parameters=ParameterData(dict=wannier_parameters),
             kpoints=self.inputs.wannier_kpoints,
-            projections=self.inputs.get('wannier_projections', None),
-            structure=self.inputs.get('structure', None),
             settings=ParameterData(
                 dict=ChainMap( # yapf: disable
                     self.inputs.get('wannier_settings', ParameterData()).get_dict(),
@@ -137,17 +147,14 @@ class TightBindingCalculation(WorkChain):
                     )
                 )
             ),
-            **self.inputs.wannier_calculation_kwargs.get_dict()
-        )
-        return ToContext(wannier_calc=pid)
+            **inputs
+        ))
 
     def setup_tbmodels(self, calc_string):
-        process = CalculationFactory(calc_string).process()
-        inputs = process.get_inputs_template()
-        inputs.code = self.inputs.tbmodels_code
-        inputs._options.resources = {'num_machines': 1}  # pylint: disable=protected-access
-        inputs._options.withmpi = False  # pylint: disable=protected-access
-        return process, inputs
+        builder = CalculationFactory(calc_string).get_builder()
+        builder.code = self.inputs.tbmodels_code
+        builder.options = dict(resources={'num_machines': 1}, withmpi=False)
+        return builder
 
     @property
     def tb_model(self):
@@ -155,30 +162,27 @@ class TightBindingCalculation(WorkChain):
 
     @check_workchain_step
     def parse(self):
-        process, inputs = self.setup_tbmodels('tbmodels.parse')
-        inputs.wannier_folder = self.ctx.wannier_calc.out.retrieved
-        inputs.pos_kind = Str('nearest_atom')
+        builder = self.setup_tbmodels('tbmodels.parse')
+        builder.wannier_folder = self.ctx.wannier_calc.out.retrieved
+        builder.pos_kind = Str('nearest_atom')
         self.report("Parsing Wannier90 output to tbmodels format.")
-        pid = submit(process, **inputs)
-        return ToContext(tbmodels_calc=pid)
+        return ToContext(tbmodels_calc=self.submit(builder))
 
     @check_workchain_step
     def slice(self):
-        process, inputs = self.setup_tbmodels('tbmodels.slice')
-        inputs.tb_model = self.tb_model
-        inputs.slice_idx = self.inputs.slice_idx
+        builder = self.setup_tbmodels('tbmodels.slice')
+        builder.tb_model = self.tb_model
+        builder.slice_idx = self.inputs.slice_idx
         self.report("Slicing tight-binding model.")
-        pid = submit(process, **inputs)
-        return ToContext(tbmodels_calc=pid)
+        return ToContext(tbmodels_calc=self.submit(builder))
 
     @check_workchain_step
     def symmetrize(self):
-        process, inputs = self.setup_tbmodels('tbmodels.symmetrize')
-        inputs.tb_model = self.tb_model
-        inputs.symmetries = self.inputs.symmetries
+        builder = self.setup_tbmodels('tbmodels.symmetrize')
+        builder.tb_model = self.tb_model
+        builder.symmetries = self.inputs.symmetries
         self.report("Symmetrizing tight-binding model.")
-        pid = submit(process, **inputs)
-        return ToContext(tbmodels_calc=pid)
+        return ToContext(tbmodels_calc=self.submit(builder))
 
     @check_workchain_step
     def finalize(self):

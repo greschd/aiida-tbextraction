@@ -5,7 +5,6 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.run import submit
 from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
@@ -60,7 +59,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
     def fp_run(self):
         self.report("Starting DFT workflows.")
         return ToContext(
-            fp_run=submit(
+            fp_run=self.submit(
                 self.get_deserialized_input('fp_run_workflow'),
                 **ChainMap(
                     self.inputs.fp_run,
@@ -108,7 +107,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
         self.report("Starting WindowSearch workflow.")
         return ToContext(
-            windowsearch=submit(
+            windowsearch=self.submit(
                 WindowSearch,
                 reference_bands=reference_bands,
                 wannier_bands=self.ctx.fp_run.out.wannier_bands,

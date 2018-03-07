@@ -3,7 +3,6 @@ from fsc.export import export
 
 from aiida.orm.data.base import Bool
 from aiida.orm import Code, DataFactory, CalculationFactory
-from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 from aiida.work.process import PortNamespace
 
@@ -46,7 +45,7 @@ class VaspReferenceBands(ReferenceBandsBase):
 
         self.report("Submitting VASP calculation.")
         return ToContext(
-            vasp_calc=submit(
+            vasp_calc=self.submit(
                 CalculationFactory('vasp.vasp').process(),
                 structure=self.inputs.structure,
                 paw=self.inputs.potentials,

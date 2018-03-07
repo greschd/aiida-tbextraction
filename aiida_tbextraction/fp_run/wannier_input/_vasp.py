@@ -1,7 +1,6 @@
 from fsc.export import export
 import numpy as np
 
-from aiida.work.run import submit
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
 from aiida.work.process import PortNamespace
@@ -30,7 +29,7 @@ class VaspWannierInput(WannierInputBase):
     def submit_calculation(self):
         self.report("Submitting VASP2W90 calculation.")
         return ToContext(
-            vasp_calc=submit(
+            vasp_calc=self.submit(
                 CalculationFactory('vasp.vasp2w90').process(),
                 structure=self.inputs.structure,
                 paw=self.inputs.potentials,

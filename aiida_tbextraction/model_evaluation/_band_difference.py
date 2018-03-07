@@ -7,7 +7,6 @@ from fsc.export import export
 from aiida.orm import DataFactory, CalculationFactory
 from aiida.orm.code import Code
 from aiida.orm.data.base import Float
-from aiida.work import submit
 from aiida.work.workchain import ToContext
 
 from aiida_tools import check_workchain_step
@@ -62,7 +61,7 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         inputs.tb_model = self.inputs.tb_model
         inputs.kpoints = self.inputs.reference_bands
         self.report("Running TBmodels eigenvals calculation.")
-        pid = submit(process, **inputs)
+        pid = self.submit(process, **inputs)
         return ToContext(calculated_bands=pid)
 
     @check_workchain_step
@@ -80,9 +79,9 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         inputs.bands1 = self.inputs.reference_bands
         inputs.bands2 = self.ctx.calculated_bands.out.bands
         self.report('Running difference calculation.')
-        pid_diff = submit(process_diff, **inputs)
+        pid_diff = self.submit(process_diff, **inputs)
         self.report('Running plot calculation.')
-        pid_plot = submit(process_plot, **inputs)
+        pid_plot = self.submit(process_plot, **inputs)
         return ToContext(difference=pid_diff, plot=pid_plot)
 
     @check_workchain_step

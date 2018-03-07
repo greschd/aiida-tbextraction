@@ -4,7 +4,6 @@ Defines the workflow to optimize tight-binding models from DFT inputs with diffe
 
 from fsc.export import export
 
-from aiida.work.run import submit
 from aiida.work.workchain import WorkChain, ToContext
 from aiida.common.links import LinkType
 
@@ -38,7 +37,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         Apply strain to the initial structure to get the strained structures.
         """
         return ToContext(
-            apply_strains=submit(
+            apply_strains=self.submit(
                 ApplyStrainsWithSymmetry,
                 **self.exposed_inputs(ApplyStrainsWithSymmetry)
             )
@@ -55,7 +54,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
             key = 'tbextraction_{}'.format(strain)
             structure_key = 'structure_{}'.format(strain)
             symmetries_key = 'symmetries_{}'.format(strain)
-            tocontext_kwargs[key] = submit(
+            tocontext_kwargs[key] = self.submit(
                 OptimizeFirstPrinciplesTightBinding,
                 structure=apply_strains_outputs[structure_key],
                 symmetries=apply_strains_outputs[symmetries_key],

@@ -6,7 +6,6 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 from aiida.work.process import PortNamespace
 from aiida.orm.code import Code
@@ -84,7 +83,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
     def run_scf(self):
         self.report('Launching SCF calculation.')
         return ToContext(
-            scf=submit(
+            scf=self.submit(
                 VaspCalculation.process(),
                 paw=self.inputs.potentials,
                 kpoints=self.inputs.kpoints_mesh,
@@ -109,14 +108,14 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
     def run_bands_and_wannier(self):
         self.report('Launching bands and to_wannier workchains.')
         return ToContext(
-            bands=submit(
+            bands=self.submit(
                 VaspReferenceBands,
                 kpoints=self.inputs.kpoints,
                 kpoints_mesh=self.inputs.kpoints_mesh,
                 merge_kpoints=self.inputs.bands['merge_kpoints'],
                 **self._collect_workchain_inputs('bands')
             ),
-            to_wannier=submit(
+            to_wannier=self.submit(
                 VaspWannierInput,
                 kpoints_mesh=self.inputs.kpoints_mesh,
                 wannier_parameters=self.inputs.get('wannier_parameters', None),

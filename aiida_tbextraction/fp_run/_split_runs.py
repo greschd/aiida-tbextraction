@@ -5,7 +5,6 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.run import submit
 from aiida.work.workchain import ToContext
 
 from aiida_tools import check_workchain_step
@@ -42,7 +41,7 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     @check_workchain_step
     def fp_run(self):
         self.report('Submitting reference_bands workflow.')
-        reference_bands = submit(
+        reference_bands = self.submit(
             self.get_deserialized_input('reference_bands_workflow'),
             **ChainMap(
                 self.inputs['reference_bands'],
@@ -52,7 +51,7 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
             )
         )
         self.report('Submitting wannier_input workflow.')
-        wannier_input = submit(
+        wannier_input = self.submit(
             self.get_deserialized_input('wannier_input_workflow'),
             **ChainMap(
                 self.inputs['wannier_input'],
