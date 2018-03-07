@@ -72,16 +72,14 @@ def test_windowsearch(configure_with_daemon, sample, slice_, symmetries):  # pyl
         )
     )
     inputs['wannier_parameters'] = wannier_parameters
-    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(
-        dict=dict(
-            _options={
-                'resources': {
-                    'num_machines': 1,
-                    'tot_num_mpiprocs': 1
-                },
-                'withmpi': False
-            }
-        )
+    inputs['wannier_calculation_kwargs'] = dict(
+        options={
+            'resources': {
+                'num_machines': 1,
+                'tot_num_mpiprocs': 1
+            },
+            'withmpi': False
+        }
     )
     if symmetries:
         inputs['symmetries'] = DataFactory('singlefile')(
