@@ -7,7 +7,6 @@ except ImportError:
 from fsc.export import export
 
 from aiida.work.workchain import ToContext
-from aiida.work.process import PortNamespace
 from aiida.orm.code import Code
 from aiida.orm.data.base import Bool
 from aiida.orm.data.parameter import ParameterData
@@ -31,13 +30,14 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         # Top-level parameters
         spec.input('code', valid_type=Code)
         spec.input('parameters', valid_type=ParameterData)
-        spec._inputs['calculation_kwargs'
-                     ] = PortNamespace('calculation_kwargs')
+        spec.input_namespace(
+            'calculation_kwargs', required=False, dynamic=True
+        )
 
         # Optional parameters to override for specific calculations.
         # TODO: Use expose for the sub-workflows.
         for sub_calc in ['scf', 'bands', 'to_wannier']:
-            spec._inputs[sub_calc] = PortNamespace(sub_calc, required=False)
+            spec.input_namespace(sub_calc, required=False, dynamic=True)
 
         spec.input('bands.merge_kpoints', valid_type=Bool, default=Bool(False))
 

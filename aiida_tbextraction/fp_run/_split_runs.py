@@ -6,6 +6,7 @@ except ImportError:
 from fsc.export import export
 
 from aiida.work.workchain import ToContext
+from aiida.work.class_loader import CLASS_LOADER
 
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
@@ -42,7 +43,9 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     def fp_run(self):
         self.report('Submitting reference_bands workflow.')
         reference_bands = self.submit(
-            self.get_deserialized_input('reference_bands_workflow'),
+            CLASS_LOADER.load_class(
+                self.inputs.reference_bands_workflow.value
+            ),
             **ChainMap(
                 self.inputs['reference_bands'],
                 self.exposed_inputs(
@@ -52,7 +55,7 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
         )
         self.report('Submitting wannier_input workflow.')
         wannier_input = self.submit(
-            self.get_deserialized_input('wannier_input_workflow'),
+            CLASS_LOADER.load_class(self.inputs.wannier_input_workflow.value),
             **ChainMap(
                 self.inputs['wannier_input'],
                 self.exposed_inputs(

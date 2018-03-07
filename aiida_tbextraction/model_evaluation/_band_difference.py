@@ -43,46 +43,45 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         Helper function to set up a calculation of a specified type.
         """
-        process = CalculationFactory(calc_string).process()
-        inputs = process.get_inputs_template()
-        inputs.code = self.inputs[code_param]
-        inputs._options.resources = {'num_machines': 1}  # pylint: disable=protected-access
-        inputs._options.withmpi = False  # pylint: disable=protected-access
-        return process, inputs
+        builder = CalculationFactory(calc_string).get_builder()
+        builder.code = self.inputs[code_param]
+        builder.options = dict(resources={'num_machines': 1}, withmpi=False)
+        return builder
 
     @check_workchain_step
     def calculate_bands(self):
         """
         Calculate the bandstructure of the given tight-binding model.
         """
-        process, inputs = self.setup_calc(
-            'tbmodels.eigenvals', 'tbmodels_code'
-        )
-        inputs.tb_model = self.inputs.tb_model
-        inputs.kpoints = self.inputs.reference_bands
+        builder = self.setup_calc('tbmodels.eigenvals', 'tbmodels_code')
+        builder.tb_model = self.inputs.tb_model
+        builder.kpoints = self.inputs.reference_bands
         self.report("Running TBmodels eigenvals calculation.")
-        pid = self.submit(process, **inputs)
-        return ToContext(calculated_bands=pid)
+        return ToContext(calculated_bands=self.submit(builder))
 
     @check_workchain_step
     def calculate_difference_and_plot(self):
         """
         Calculate the difference between the tight-binding and reference bandstructures, and plot them.
         """
-        process_diff, inputs = self.setup_calc(
+        diff_builder = self.setup_calc(
             'bands_inspect.difference', 'bands_inspect_code'
         )
-        process_plot, _ = self.setup_calc(
+        plot_builder = self.setup_calc(
             'bands_inspect.plot', 'bands_inspect_code'
         )
         # Inputs for the plot and difference calculations are the same
-        inputs.bands1 = self.inputs.reference_bands
-        inputs.bands2 = self.ctx.calculated_bands.out.bands
-        self.report('Running difference calculation.')
-        pid_diff = self.submit(process_diff, **inputs)
+        diff_builder.bands1 = self.inputs.reference_bands
+        diff_builder.bands2 = self.ctx.calculated_bands.out.bands
+        plot_builder.bands1 = self.inputs.reference_bands
+        plot_builder.bands2 = self.ctx.calculated_bands.out.bands
+
+        self.report('Running difference and plot calculations.')
         self.report('Running plot calculation.')
-        pid_plot = self.submit(process_plot, **inputs)
-        return ToContext(difference=pid_diff, plot=pid_plot)
+        return ToContext(
+            difference=self.submit(diff_builder),
+            plot=self.submit(plot_builder)
+        )
 
     @check_workchain_step
     def finalize(self):

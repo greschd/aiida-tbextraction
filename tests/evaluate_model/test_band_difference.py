@@ -9,7 +9,7 @@ import numpy as np
 
 
 @pytest.fixture
-def band_difference_process_inputs(configure, sample):  # pylint: disable=unused-argument
+def band_difference_builder(configure, sample):  # pylint: disable=unused-argument
     """
     Create inputs for the band difference workflow.
     """
@@ -18,30 +18,30 @@ def band_difference_process_inputs(configure, sample):  # pylint: disable=unused
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
     from aiida_bands_inspect.io import read_bands
 
-    inputs = BandDifferenceModelEvaluation.get_inputs_template()
-    inputs.tbmodels_code = Code.get_from_string('tbmodels')
-    inputs.bands_inspect_code = Code.get_from_string('bands_inspect')
-    inputs.tb_model = DataFactory('singlefile')(
+    builder = BandDifferenceModelEvaluation.get_builder()
+    builder.tbmodels_code = Code.get_from_string('tbmodels')
+    builder.bands_inspect_code = Code.get_from_string('bands_inspect')
+    builder.tb_model = DataFactory('singlefile')(
         file=sample('silicon/model.hdf5')
     )
-    inputs.reference_bands = read_bands(sample('silicon/bands.hdf5'))
+    builder.reference_bands = read_bands(sample('silicon/bands.hdf5'))
 
-    return BandDifferenceModelEvaluation, inputs
+    return builder
 
 
-def test_bandevaluation(configure_with_daemon, band_difference_process_inputs):  # pylint: disable=unused-argument,redefined-outer-name
+def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Run the band evaluation workflow.
     """
     from aiida.work import run
-    process, inputs = band_difference_process_inputs
-    output = run(process, **inputs)
+    builder = band_difference_builder
+    output = run(builder)
     assert np.isclose(output['cost_value'].value, 0.)
 
 
 def test_bandevaluation_launchmany(
     configure_with_daemon,  # pylint: disable=unused-argument
-    band_difference_process_inputs,  # pylint: disable=redefined-outer-name
+    band_difference_builder,  # pylint: disable=redefined-outer-name
     wait_for
 ):
     """
@@ -59,12 +59,12 @@ def test_bandevaluation_launchmany(
     initial_count2 = qb2.count()
     num_workflows = 100
 
-    process, inputs = band_difference_process_inputs
-    pids = []
+    builder = band_difference_builder
+    pks = []
     for _ in range(num_workflows):
-        pids.append(submit(process, **inputs).pid)
+        pks.append(submit(builder).pk)
 
-    for process_id in pids:
+    for process_id in pks:
         wait_for(process_id)
 
     end_count1 = qb1.count()
