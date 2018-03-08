@@ -55,7 +55,10 @@ def runwindow_input(sample):
         wannier_bands = DataFactory('array.bands')()
         wannier_bands.set_kpoints(k_points)
         # Just let every energy window be valid.
-        wannier_bands.set_bands(np.array([[0] * 14] * len(k_points)))
+        wannier_bands.set_bands(
+            np.array([[-20] * 10 + [-0.5] * 7 + [0.5] * 7 + [20] * 12] *
+                     len(k_points))
+        )
         inputs['wannier_bands'] = wannier_bands
 
         a = 3.2395  # pylint: disable=invalid-name
@@ -123,7 +126,7 @@ def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries): 
     'window_values',
     [
         [-4.5, 6.5, -4, 16],  # unsorted
-        [-100, -100, 100, 100],  # inner window too big
+        [-30, -30, 30, 30],  # inner window too big
         [0, 0, 0, 0],  # outer window too small
     ]
 )
