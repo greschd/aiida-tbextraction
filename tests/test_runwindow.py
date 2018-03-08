@@ -10,19 +10,9 @@ import pymatgen
 import numpy as np
 
 
-@pytest.fixture(params=[True, False])
-def slice_(request):
-    return request.param
-
-
-@pytest.fixture(params=[True, False])
-def symmetries(request):
-    return request.param
-
-
 @pytest.fixture
-def runwindow_input(slice_, symmetries, sample):
-    def inner(window_values):
+def runwindow_input(sample):
+    def inner(window_values, slice_, symmetries):
         from aiida.orm import DataFactory
         from aiida.orm.data.base import List
         from aiida.orm.code import Code
@@ -111,23 +101,43 @@ def runwindow_input(slice_, symmetries, sample):
     return inner
 
 
-def test_runwindow(configure_with_daemon, runwindow_input):  # pylint:disable=too-many-locals,unused-argument
+@pytest.mark.parametrize('slice_', [True, False])
+@pytest.mark.parametrize('symmetries', [True, False])
+def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries):  # pylint:disable=too-many-locals,unused-argument
     """
     Runs the workflow which evaluates an energy window.
     """
     from aiida.work import run
     from aiida_tbextraction.energy_windows.runwindow import RunWindow
 
-    result = run(RunWindow, **runwindow_input([-4.5, -4, 6.5, 16]))
+    result = run(
+        RunWindow,
+        **runwindow_input([-4.5, -4, 6.5, 16],
+                          slice_=slice_,
+                          symmetries=symmetries)
+    )
     assert all(key in result for key in ['cost_value', 'tb_model', 'plot'])
 
 
-def test_runwindow_invalid(configure_with_daemon, runwindow_input):
+@pytest.mark.parametrize(
+    'window_values',
+    [
+        [-4.5, 6.5, -4, 16],  # unsorted
+        [-100, -100, 100, 100],  # inner window too big
+        [0, 0, 0, 0],  # outer window too small
+    ]
+)
+def test_runwindow_invalid(
+    configure_with_daemon, runwindow_input, window_values
+):
     """
     Runs an the runwindow workflow with invalid window values.
     """
     from aiida.work import run
     from aiida_tbextraction.energy_windows.runwindow import RunWindow
 
-    result = run(RunWindow, **runwindow_input([-4.5, 6.5, -4, 16]))
+    result = run(
+        RunWindow,
+        **runwindow_input(window_values, slice_=True, symmetries=True)
+    )
     assert result['cost_value'] == float('inf')

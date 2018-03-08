@@ -82,7 +82,7 @@ class RunWindow(WorkChain):
                     '{}: Too few bands in outer window.'.
                     format(window_invalid_str)
                 )
-                return False
+            return False
         return True
 
     def _count_bands(self, limits):
