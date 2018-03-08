@@ -44,9 +44,11 @@ class RunWindow(WorkChain):
             ), if_(cls.window_invalid)(cls.abort_invalid)
         )
 
+    @check_workchain_step
     def window_invalid(self):
         return not self.window_valid(show_msg=False)
 
+    @check_workchain_step
     def window_valid(self, show_msg=True):
         window_list = self.inputs.window.get_attr('list')
         win_min, froz_min, froz_max, win_max = window_list

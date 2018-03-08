@@ -32,9 +32,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         # inputs which are inherited at the top level
         spec.expose_inputs(FirstPrinciplesRunBase, exclude=())
         # create namespace for additional inputs
-        spec.expose_inputs(
-            FirstPrinciplesRunBase, namespace='fp_run', include=()
-        )
+        spec.input_namespace('fp_run', dynamic=True)
 
         # top-level scope
         spec.expose_inputs(
@@ -61,7 +59,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         self.report("Starting DFT workflows.")
         return ToContext(
             fp_run=self.submit(
-                CLASS_LOADER.load_class(self.inputs.fp_run_workflow),
+                CLASS_LOADER.load_class(self.inputs.fp_run_workflow.value),
                 **ChainMap(
                     self.inputs.fp_run,
                     self.
