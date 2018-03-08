@@ -21,6 +21,6 @@ class ReferenceBandsBase(WorkChain):
             valid_type=DataFactory('array.kpoints'),
             required=False
         )
-        spec.input_group('potentials')
+        spec.input_namespace('potentials', dynamic=True)
 
         spec.output('bands', valid_type=DataFactory('array.bands'))

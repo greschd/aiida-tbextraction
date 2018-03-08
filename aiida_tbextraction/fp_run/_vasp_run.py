@@ -129,9 +129,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
     @check_workchain_step
     def finalize(self):
         self.report('Retrieving outputs.')
+        self.out_many(self.exposed_outputs(self.ctx.bands, VaspReferenceBands))
         self.out_many(
-            **self.exposed_outputs(self.ctx.bands, VaspReferenceBands)
-        )
-        self.out_many(
-            **self.exposed_outputs(self.ctx.to_wannier, VaspWannierInput)
+            self.exposed_outputs(self.ctx.to_wannier, VaspWannierInput)
         )

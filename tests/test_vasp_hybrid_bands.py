@@ -15,7 +15,7 @@ def test_vasp_hybrid_bands(
     Runs the VASP + hybrids reference bands workflow with InSb, on a very coarse grid.
     """
     from aiida.orm.data.base import Bool
-    from aiida.orm import DataFactory
+    from aiida.orm import DataFactory, load_node
     from aiida.work.run import submit
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
 
@@ -26,16 +26,15 @@ def test_vasp_hybrid_bands(
     kpoints = KpointsData()
     kpoints.set_kpoints_path([('G', (0, 0, 0), 'M', (0.5, 0.5, 0.5))])
 
-    pid = submit(
+    pk = submit(
         VaspReferenceBands,
-        _return_pid=True,
         merge_kpoints=Bool(True),
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
         **get_insb_input
-    ).pid
-    wait_for(pid)
-    assert_finished(pid)
-    result = load_node(pid).get_outputs_dict()
+    ).pk
+    wait_for(pk)
+    assert_finished(pk)
+    result = load_node(pk).get_outputs_dict()
     assert 'bands' in result
     assert result['bands'].get_bands().shape == (10, 36)

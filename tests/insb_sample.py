@@ -52,7 +52,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
 
     res['code'] = Code.get_from_string('vasp')
     res['calculation_kwargs'] = dict(
-        _options=dict(
+        options=dict(
             resources={'num_machines': 2,
                        'num_mpiprocs_per_machine': 18},
             queue_name=get_queue_name_from_code('vasp'),
@@ -131,16 +131,14 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
     wannier_projections = List()
     wannier_projections.extend(['In : s; px; py; pz', 'Sb : px; py; pz'])
     inputs['wannier_projections'] = wannier_projections
-    inputs['wannier_calculation_kwargs'] = DataFactory('parameter')(
-        dict=dict(
-            _options={
-                'resources': {
-                    'num_machines': 1,
-                    'tot_num_mpiprocs': 1
-                },
-                'withmpi': False
-            }
-        )
+    inputs['wannier_calculation_kwargs'] = dict(
+        options={
+            'resources': {
+                'num_machines': 1,
+                'tot_num_mpiprocs': 1
+            },
+            'withmpi': False
+        }
     )
     inputs['symmetries'] = DataFactory('singlefile')(
         file=sample('symmetries.hdf5')

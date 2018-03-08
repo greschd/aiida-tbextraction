@@ -18,7 +18,7 @@ class WannierInputBase(WorkChain):
         ParameterData = DataFactory('parameter')
         spec.input('structure', valid_type=DataFactory('structure'))
         spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'))
-        spec.input_group('potentials')
+        spec.input_namespace('potentials', dynamic=True)
 
         spec.input(
             'wannier_parameters', valid_type=ParameterData, required=False

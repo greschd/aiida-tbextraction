@@ -15,7 +15,7 @@ def test_vasp_hf_wannier_input(
     """
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List
-    from aiida.work.run import run
+    from aiida.work.launch import run_get_pid
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
 
     kpoints_mesh = DataFactory('array.kpoints')()
@@ -24,9 +24,8 @@ def test_vasp_hf_wannier_input(
     wannier_projections = List()
     wannier_projections.extend(['In : s; px; py; pz', 'Sb : px; py; pz'])
 
-    result, pid = run(
+    result, pid = run_get_pid(
         VaspWannierInput,
-        _return_pid=True,
         kpoints_mesh=kpoints_mesh,
         wannier_parameters=DataFactory('parameter')(
             dict=dict(num_wann=14, num_bands=36, spinors=True)

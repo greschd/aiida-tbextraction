@@ -11,7 +11,7 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
     """
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List, Bool
-    from aiida.work.run import run
+    from aiida.work.launch import run_get_pid
     from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
@@ -36,9 +36,8 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
     }
 
     num_wann = 14
-    result, pid = run(
+    result, pid = run_get_pid(
         SplitFirstPrinciplesRun,
-        _return_pid=True,
         reference_bands_workflow=VaspReferenceBands,
         reference_bands=dict(merge_kpoints=Bool(True), **vasp_subwf_inputs),
         wannier_input_workflow=VaspWannierInput,
@@ -76,7 +75,7 @@ def test_combined_fp_run(
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List, Bool
     from aiida.orm.data.parameter import ParameterData
-    from aiida.work.run import run
+    from aiida.work.launch import run_get_pid
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
 
     KpointsData = DataFactory('array.kpoints')
@@ -93,9 +92,8 @@ def test_combined_fp_run(
     vasp_inputs = get_insb_input
 
     num_wann = 14
-    result, pid = run(
+    result, pid = run_get_pid(
         VaspFirstPrinciplesRun,
-        _return_pid=True,
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
         wannier_parameters=DataFactory('parameter')(

@@ -30,12 +30,8 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
         spec.input('wannier_input_workflow', **WORKCHAIN_INPUT_KWARGS)
 
         # Add dynamic namespaces
-        spec.expose_inputs(
-            ReferenceBandsBase, namespace='reference_bands', include=[]
-        )
-        spec.expose_inputs(
-            WannierInputBase, namespace='wannier_input', include=[]
-        )
+        spec.input_namespace('reference_bands', dynamic=True)
+        spec.input_namespace('wannier_input', dynamic=True)
 
         spec.outline(cls.fp_run, cls.finalize)
 
@@ -69,17 +65,11 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @check_workchain_step
     def finalize(self):
+        self.report('Add reference bands outputs.')
         self.out_many(
-            **
             self.exposed_outputs(self.ctx.reference_bands, ReferenceBandsBase)
         )
-        self.report(
-            str(
-                self.exposed_outputs(
-                    self.ctx.reference_bands, ReferenceBandsBase
-                )
-            )
-        )
+        self.report('Add Wannier input outputs.')
         self.out_many(
-            **self.exposed_outputs(self.ctx.wannier_input, WannierInputBase)
+            self.exposed_outputs(self.ctx.wannier_input, WannierInputBase)
         )
