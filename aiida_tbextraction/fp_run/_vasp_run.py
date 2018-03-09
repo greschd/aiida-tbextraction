@@ -1,3 +1,7 @@
+"""
+Defines a workflow for running the first-principles calculations using VASP.
+"""
+
 import copy
 try:
     from collections import ChainMap
@@ -23,6 +27,10 @@ from ._helpers._inline_calcs import merge_parameters_inline
 
 @export
 class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
+    """
+    Workflow for calculating the inputs needed for tight-binding calculation and evaluation with VASP. The workflow first performs an SCF step, and then passes the WAVECAR file to the bandstructure and Wannier90 input calculations.
+    """
+
     @classmethod
     def define(cls, spec):
         super(VaspFirstPrinciplesRun, cls).define(spec)
@@ -81,6 +89,9 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @check_workchain_step
     def run_scf(self):
+        """
+        Run the SCF calculation step.
+        """
         self.report('Launching SCF calculation.')
         return ToContext(
             scf=self.submit(
@@ -97,6 +108,9 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         )
 
     def _collect_workchain_inputs(self, namespace):
+        """
+        Helper to collect the inputs for the reference bands and wannier input workflows.
+        """
         scf_wavefun = self.ctx.scf.out.wavefunctions
         res = self._collect_common_inputs(namespace)
         res['potentials'] = self.inputs.potentials
@@ -106,6 +120,9 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @check_workchain_step
     def run_bands_and_wannier(self):
+        """
+        Run the reference bands and wannier input workflows.
+        """
         self.report('Launching bands and to_wannier workchains.')
         return ToContext(
             bands=self.submit(

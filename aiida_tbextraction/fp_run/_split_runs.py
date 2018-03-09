@@ -1,3 +1,7 @@
+"""
+Defines a workflow for independently running the bands and Wannier input calculations.
+"""
+
 try:
     from collections import ChainMap
 except ImportError:
@@ -37,6 +41,9 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @check_workchain_step
     def fp_run(self):
+        """
+        Run the first-principles calculation workflows.
+        """
         self.report('Submitting reference_bands workflow.')
         reference_bands = self.submit(
             CLASS_LOADER.load_class(
@@ -65,6 +72,9 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add the outputs of the first-principles workflows.
+        """
         self.report('Add reference bands outputs.')
         self.out_many(
             self.exposed_outputs(self.ctx.reference_bands, ReferenceBandsBase)

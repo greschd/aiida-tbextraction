@@ -1,3 +1,7 @@
+"""
+Workflows for running the first-principles calculations needed as input for the tight-binding calculation and evaluation.
+"""
+
 from ._base import FirstPrinciplesRunBase
 from ._split_runs import SplitFirstPrinciplesRun
 from ._vasp_run import VaspFirstPrinciplesRun

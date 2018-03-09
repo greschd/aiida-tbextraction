@@ -1,3 +1,7 @@
+"""
+Defines helper InlineCalculations for the first-principles workflows.
+"""
+
 try:
     from collections import ChainMap
 except ImportError:

@@ -1,3 +1,7 @@
+"""
+Defines a workflow which optimizes the energy windows.
+"""
+
 import copy
 
 import numpy as np
@@ -34,6 +38,9 @@ class WindowSearch(WorkChain):
 
     @check_workchain_step
     def create_optimization(self):
+        """
+        Run the optimization workchain.
+        """
         self.report('Launching Window optimization.')
         initial_window_list = self.inputs.initial_window.get_attr('list')
         window_simplex = [initial_window_list]
@@ -66,6 +73,9 @@ class WindowSearch(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add the optimization results to the outputs.
+        """
         self.report('Add optimization results to outputs.')
         optimal_calc = load_node(
             self.ctx.optimization.out.calculation_uuid.value
