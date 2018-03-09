@@ -2,6 +2,7 @@
 Defines fixtures to create the InSb input for VASP and the optimization workflows.
 """
 
+import copy
 import pytest
 from ase.io.vasp import read_vasp
 
@@ -105,11 +106,11 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     else:
         assert request.param == 'combined'
         inputs['fp_run_workflow'] = VaspFirstPrinciplesRun
-        inputs['fp_run'] = vasp_subwf_inputs
+        inputs['fp_run'] = copy.deepcopy(vasp_subwf_inputs)
         inputs['fp_run']['scf'] = {
-            'parameters': ParameterData(dict=dict(isym=2))
-        },
-        inputs['fp_run']['bands'] = {'merge_kpoints': Bool(True)},
+            'parameters': ParameterData(dict=dict(isym=2)),
+        }
+        inputs['fp_run']['bands'] = {'merge_kpoints': Bool(True)}
 
     inputs.update(vasp_inputs)
 
