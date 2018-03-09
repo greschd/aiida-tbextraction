@@ -1,3 +1,7 @@
+"""
+Defines a workflow that calculates the Wannier90 input files using VASP.
+"""
+
 from fsc.export import export
 import numpy as np
 
@@ -11,6 +15,10 @@ from . import WannierInputBase
 
 @export
 class VaspWannierInput(WannierInputBase):
+    """
+    Calculates the Wannier90 input files using VASP.
+    """
+
     @classmethod
     def define(cls, spec):
         super(VaspWannierInput, cls).define(spec)
@@ -26,6 +34,9 @@ class VaspWannierInput(WannierInputBase):
 
     @check_workchain_step
     def submit_calculation(self):
+        """
+        Run the Vasp2w90 calculation.
+        """
         self.report("Submitting VASP2W90 calculation.")
         return ToContext(
             vasp_calc=self.submit(
@@ -44,6 +55,9 @@ class VaspWannierInput(WannierInputBase):
 
     @check_workchain_step
     def get_result(self):
+        """
+        Get the VASP result and create the necessary outputs.
+        """
         self.out(
             'wannier_settings',
             DataFactory('parameter')(dict={
@@ -54,8 +68,7 @@ class VaspWannierInput(WannierInputBase):
         retrieved_folder = vasp_calc_output.retrieved
         folder_list = retrieved_folder.get_folder_list()
         assert all(
-            filename in folder_list
-            for filename in
+            filename in folder_list for filename in
             ['wannier90.amn', 'wannier90.mmn', 'wannier90.eig']
         )
         self.report("Adding Wannier90 inputs to output.")

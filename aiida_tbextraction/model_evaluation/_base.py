@@ -1,3 +1,7 @@
+"""
+Defines the base class for workflows that evaluate a tight-binding model.
+"""
+
 from fsc.export import export
 
 from aiida.work.workchain import WorkChain

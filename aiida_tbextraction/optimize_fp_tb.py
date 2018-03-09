@@ -1,3 +1,7 @@
+"""
+Defines the workflow that runs first-principles calculations and creates an optimized tight-binding model.
+"""
+
 try:
     from collections import ChainMap
 except ImportError:
@@ -56,6 +60,9 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
     @check_workchain_step
     def fp_run(self):
+        """
+        Runs the first-principles calculation workflow.
+        """
         self.report("Starting DFT workflows.")
         return ToContext(
             fp_run=self.submit(
@@ -70,6 +77,9 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
     @check_workchain_step
     def run_windowsearch(self):
+        """
+        Runs the workflow which creates the optimized tight-binding model.
+        """
         # check for wannier_settings from wannier_input workflow
         inputs = self.exposed_inputs(WindowSearch)
         self.report(

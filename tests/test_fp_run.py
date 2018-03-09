@@ -52,8 +52,7 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
     )
     assert_finished(pid)
     assert all(
-        key in result
-        for key in [
+        key in result for key in [
             'wannier_input_folder', 'wannier_parameters', 'wannier_bands',
             'bands'
         ]
@@ -107,8 +106,7 @@ def test_combined_fp_run(
     )
     assert_finished(pid)
     assert all(
-        key in result
-        for key in [
+        key in result for key in [
             'wannier_input_folder', 'wannier_parameters', 'wannier_bands',
             'bands'
         ]

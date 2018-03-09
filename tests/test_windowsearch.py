@@ -14,6 +14,9 @@ import numpy as np
 
 @pytest.fixture
 def windowsearch_builder(sample):  # pylint: disable=too-many-locals
+    """
+    Sets up the process builder for windowsearch tests, and adds the inputs.
+    """
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.orm.data.base import List, Float

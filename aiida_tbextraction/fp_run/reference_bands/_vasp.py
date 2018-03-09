@@ -1,3 +1,7 @@
+"""
+Defines a workflow that calculates the reference bandstructure using VASP.
+"""
+
 from fsc.export import export
 
 from aiida.orm.data.base import Bool
@@ -31,6 +35,9 @@ class VaspReferenceBands(ReferenceBandsBase):
 
     @check_workchain_step
     def run_calc(self):
+        """
+        Run the VASP calculation.
+        """
         if self.inputs.merge_kpoints:
             self.report("Merging kpoints and kpoints_mesh.")
             mesh_kpoints = self.inputs.kpoints_mesh
@@ -56,6 +63,9 @@ class VaspReferenceBands(ReferenceBandsBase):
 
     @check_workchain_step
     def get_bands(self):
+        """
+        Get the bands from the VASP calculation and crop the 'mesh' k-points if necessary.
+        """
         bands = self.ctx.vasp_calc.out.bands
         if self.inputs.merge_kpoints:
             self.report("Cropping mesh eigenvalues from bands.")

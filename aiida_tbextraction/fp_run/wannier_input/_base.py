@@ -1,3 +1,7 @@
+"""
+Defines the base class for workflows that calculate the Wannier90 input files.
+"""
+
 from fsc.export import export
 
 from aiida.orm import DataFactory

@@ -53,8 +53,10 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     res['code'] = Code.get_from_string('vasp')
     res['calculation_kwargs'] = dict(
         options=dict(
-            resources={'num_machines': 2,
-                       'num_mpiprocs_per_machine': 18},
+            resources={
+                'num_machines': 2,
+                'num_mpiprocs_per_machine': 18
+            },
             queue_name=get_queue_name_from_code('vasp'),
             withmpi=True,
             max_wallclock_seconds=1200

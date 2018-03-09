@@ -12,7 +12,11 @@ import numpy as np
 
 @pytest.fixture
 def runwindow_input(sample):
-    def inner(window_values, slice_, symmetries):  # pylint: disable=too-many-locals
+    """
+    Returns a function that creates the input for RunWindow tests.
+    """
+
+    def inner(window_values, slice_, symmetries):  # pylint: disable=too-many-locals,missing-docstring
         from aiida.orm import DataFactory
         from aiida.orm.data.base import List
         from aiida.orm.code import Code

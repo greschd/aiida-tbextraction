@@ -35,8 +35,7 @@ def test_vasp_hf_wannier_input(
     )
     assert_finished(pid)
     assert all(
-        key in result
-        for key in
+        key in result for key in
         ['wannier_input_folder', 'wannier_parameters', 'wannier_bands']
     )
     folder_list = result['wannier_input_folder'].get_folder_list()

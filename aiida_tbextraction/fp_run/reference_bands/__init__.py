@@ -1,3 +1,7 @@
+"""
+Contains workflows for calculating the reference bandstructure with first-principles.
+"""
+
 from ._base import ReferenceBandsBase
 from ._vasp import VaspReferenceBands
 

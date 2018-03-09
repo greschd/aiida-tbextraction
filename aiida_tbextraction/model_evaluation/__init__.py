@@ -1,3 +1,7 @@
+"""
+Contains workflows for evaluating a tight-binding model.
+"""
+
 from ._base import ModelEvaluationBase
 from ._band_difference import BandDifferenceModelEvaluation
 
