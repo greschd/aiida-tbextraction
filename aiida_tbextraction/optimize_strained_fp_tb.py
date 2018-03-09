@@ -9,6 +9,7 @@ from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
 from aiida_strain.work import ApplyStrainsWithSymmetry
+from aiida_strain.work.util import get_symmetries_key, get_structure_key, get_suffix
 
 from .optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 
@@ -51,9 +52,9 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         apply_strains_outputs = self.ctx.apply_strains.get_outputs_dict()
         tocontext_kwargs = {}
         for strain in self.inputs.strain_strengths:
-            key = 'tbextraction_{}'.format(strain)
-            structure_key = 'structure_{}'.format(strain)
-            symmetries_key = 'symmetries_{}'.format(strain)
+            key = 'tbextraction' + get_suffix(strain)
+            structure_key = get_structure_key(strain)
+            symmetries_key = get_symmetries_key(strain)
             tocontext_kwargs[key] = self.submit(
                 OptimizeFirstPrinciplesTightBinding,
                 structure=apply_strains_outputs[structure_key],
@@ -68,7 +69,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         Retrieve and output results.
         """
         for strain in self.inputs.strain_strengths:
-            suffix = '_{}'.format(strain)
+            suffix = get_suffix(strain)
             calc = self.ctx['tbextraction' + suffix]
             for label, node in calc.get_outputs(
                 also_labels=True, link_type=LinkType.RETURN
