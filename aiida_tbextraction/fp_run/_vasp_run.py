@@ -54,7 +54,9 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
 
         spec.outline(cls.run_scf, cls.run_bands_and_wannier, cls.finalize)
 
-    def _collect_common_inputs(self, namespace, expand_kwargs=False):
+    def _collect_common_inputs(
+        self, namespace, expand_kwargs=False, force_parameters=None
+    ):
         """
         Join the top-level inputs and inputs set in a specific namespace.
         """
@@ -67,6 +69,11 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
                 param_main=ns_parameters,
                 param_fallback=self.inputs.parameters
             )[1]['parameters']
+            if force_parameters:
+                parameters = merge_parameters_inline(
+                    param_main=ParameterData(dict=force_parameters),
+                    param_fallback=parameters
+                )[1]['parameters']
         calculation_kwargs = copy.deepcopy(
             dict(
                 ChainMap(
@@ -103,7 +110,11 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
                         'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR']
                     }
                 ),
-                **self._collect_common_inputs('scf', expand_kwargs=True)
+                **self._collect_common_inputs(
+                    'scf',
+                    force_parameters={'lwave': True},
+                    expand_kwargs=True
+                )
             )
         )
 
@@ -112,7 +123,11 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         Helper to collect the inputs for the reference bands and wannier input workflows.
         """
         scf_wavefun = self.ctx.scf.out.wavefunctions
-        res = self._collect_common_inputs(namespace)
+        res = self._collect_common_inputs(
+            namespace, force_parameters={
+                'istart': 2
+            }
+        )
         res['potentials'] = self.inputs.potentials
         res['calculation_kwargs']['wavefunctions'] = scf_wavefun
         self.report(res['calculation_kwargs'])

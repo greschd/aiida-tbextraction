@@ -63,15 +63,17 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     return res
 
 
-@pytest.fixture
-def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-many-locals,unused-argument,redefined-outer-name
+@pytest.fixture(params=['combined', 'split'])
+def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disable=too-many-locals,unused-argument,redefined-outer-name,too-many-locals,too-many-statements
     """
     Returns the input for DFT-based tight-binding optimization workflows.
     """
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List, Bool
+    from aiida.orm.data.parameter import ParameterData
     from aiida.orm.code import Code
     from aiida_tools.workchain_inputs import get_fullname
+    from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
     from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
@@ -86,17 +88,27 @@ def get_fp_tb_input(configure, get_insb_input, sample):  # pylint: disable=too-m
         'parameters': vasp_inputs.pop('parameters'),
         'calculation_kwargs': vasp_inputs.pop('calculation_kwargs'),
     }
-    inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
-    inputs['fp_run'] = dict()
-    inputs['fp_run']['reference_bands_workflow'
-                     ] = get_fullname(VaspReferenceBands)
-    inputs['fp_run']['reference_bands'] = dict(
-        merge_kpoints=Bool(True), **vasp_subwf_inputs
-    )
-    inputs['fp_run']['wannier_input_workflow'] = get_fullname(VaspWannierInput)
-    inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
+    if request.param == 'split':
+        inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
+        inputs['fp_run'] = dict()
+        inputs['fp_run']['reference_bands_workflow'
+                         ] = get_fullname(VaspReferenceBands)
+        inputs['fp_run']['reference_bands'] = dict(
+            merge_kpoints=Bool(True), **vasp_subwf_inputs
+        )
+        inputs['fp_run']['wannier_input_workflow'
+                         ] = get_fullname(VaspWannierInput)
+        inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
-    # structure, potentials
+    else:
+        assert request.param == 'combined'
+        inputs['fp_run_workflow'] = VaspFirstPrinciplesRun
+        inputs['fp_run'] = vasp_subwf_inputs
+        inputs['fp_run']['scf'] = {
+            'parameters': ParameterData(dict=dict(isym=2))
+        },
+        inputs['fp_run']['bands'] = {'merge_kpoints': Bool(True)},
+
     inputs.update(vasp_inputs)
 
     kpoints = DataFactory('array.kpoints')()

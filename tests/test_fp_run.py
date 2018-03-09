@@ -68,13 +68,14 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
 
 def test_combined_fp_run(
     configure_with_daemon, assert_finished, get_insb_input
-):  # pylint: disable=unused-argument,redefined-outer-name
+):  # pylint: disable=unused-argument,redefined-outer-name,too-many-locals
     """
     Calculates the Wannier90 inputs from VASP with hybrid functionals.
     """
-    from aiida.orm import DataFactory
+    from aiida.orm import DataFactory, load_node
     from aiida.orm.data.base import List, Bool
     from aiida.orm.data.parameter import ParameterData
+    from aiida.orm.calculation.work import WorkCalculation
     from aiida.work.launch import run_get_pid
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
 
@@ -118,3 +119,15 @@ def test_combined_fp_run(
         filename in folder_list
         for filename in ['wannier90.amn', 'wannier90.mmn', 'wannier90.eig']
     )
+
+    sub_workchains = []
+    for label, node in load_node(pid).get_outputs(also_labels=True):
+        if label == 'CALL' and isinstance(node, WorkCalculation):
+            sub_workchains.append(node)
+
+    for sub_wc in sub_workchains:
+        retrieved_folder = sub_wc.get_retrieved_node()
+        with open(retrieved_folder.get_abs_path('_scheduler-stdout.txt')) as f:
+            stdout = f.read()
+            assert 'WAVECAR not read' not in stdout
+            assert 'reading WAVECAR' in stdout
