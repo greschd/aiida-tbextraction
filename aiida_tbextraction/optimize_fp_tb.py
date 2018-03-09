@@ -19,7 +19,7 @@ from .energy_windows.windowsearch import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
 
 
-@export  # pylint: disable=abstract-method
+@export
 class OptimizeFirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.

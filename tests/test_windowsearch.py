@@ -13,7 +13,7 @@ import numpy as np
 
 
 @pytest.fixture
-def windowsearch_builder(sample):
+def windowsearch_builder(sample):  # pylint: disable=too-many-locals
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.orm.data.base import List, Float
@@ -99,7 +99,7 @@ def windowsearch_builder(sample):
     return builder
 
 
-def test_windowsearch(configure_with_daemon, windowsearch_builder):  # pylint: disable=too-many-locals,unused-argument
+def test_windowsearch(configure_with_daemon, windowsearch_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Run a windowsearch on the sample wannier input folder.
     """
@@ -113,12 +113,17 @@ def test_windowsearch(configure_with_daemon, windowsearch_builder):  # pylint: d
 
 def test_windowsearch_submit(
     configure_with_daemon, windowsearch_builder, wait_for, assert_finished
-):
+):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Submit a windowsearch workflow.
+    """
+    from aiida.orm import load_node
     from aiida.work.launch import submit
 
     pk = submit(windowsearch_builder).pk
     wait_for(pk)
     assert_finished(pk)
+    result = load_node(pk).get_outputs_dict()
     assert all(
         key in result for key in ['cost_value', 'tb_model', 'window', 'plot']
     )

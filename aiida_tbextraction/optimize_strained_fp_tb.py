@@ -14,7 +14,7 @@ from aiida_strain.work.util import get_symmetries_key, get_structure_key, get_su
 from .optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 
 
-@export  # pylint: disable=abstract-method
+@export
 class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
     """
     Workflow to optimize a DFT-based tight-binding model for different strain values.

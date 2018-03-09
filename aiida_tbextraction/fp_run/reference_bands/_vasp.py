@@ -1,4 +1,3 @@
-import numpy as np
 from fsc.export import export
 
 from aiida.orm.data.base import Bool
@@ -11,7 +10,7 @@ from . import ReferenceBandsBase
 from .._helpers._inline_calcs import crop_bands_inline, merge_kpoints_inline
 
 
-@export  # pylint: disable=abstract-method
+@export
 class VaspReferenceBands(ReferenceBandsBase):
     """
     The WorkChain to calculate reference bands with VASP.

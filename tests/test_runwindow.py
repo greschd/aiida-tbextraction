@@ -12,7 +12,7 @@ import numpy as np
 
 @pytest.fixture
 def runwindow_input(sample):
-    def inner(window_values, slice_, symmetries):
+    def inner(window_values, slice_, symmetries):  # pylint: disable=too-many-locals
         from aiida.orm import DataFactory
         from aiida.orm.data.base import List
         from aiida.orm.code import Code
@@ -106,7 +106,7 @@ def runwindow_input(sample):
 
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
-def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries):  # pylint:disable=too-many-locals,unused-argument
+def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries):  # pylint:disable=unused-argument,redefined-outer-name
     """
     Runs the workflow which evaluates an energy window.
     """
@@ -132,7 +132,7 @@ def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries): 
 )
 def test_runwindow_invalid(
     configure_with_daemon, runwindow_input, window_values
-):
+):  # pylint:disable=unused-argument,redefined-outer-name
     """
     Runs an the runwindow workflow with invalid window values.
     """

@@ -9,7 +9,7 @@ from aiida_tools import check_workchain_step
 from . import WannierInputBase
 
 
-@export  # pylint: disable=abstract-method
+@export
 class VaspWannierInput(WannierInputBase):
     @classmethod
     def define(cls, spec):

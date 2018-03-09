@@ -20,7 +20,7 @@ from ..model_evaluation import ModelEvaluationBase
 from ..calculate_tb import TightBindingCalculation
 
 
-@export  # pylint: disable=abstract-method
+@export
 class RunWindow(WorkChain):
     """
     This workchain runs the tight-binding extraction and analysis for a given energy window.

@@ -16,7 +16,7 @@ from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 
-@export  # pylint: disable=abstract-method
+@export
 class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.

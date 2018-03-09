@@ -6,7 +6,7 @@ from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
 
-@export  # pylint: disable=abstract-method
+@export
 class FirstPrinciplesRunBase(WorkChain):
     """
     Base class for first-principles runs, calculation the reference bandstructure and Wannier90 inputs.

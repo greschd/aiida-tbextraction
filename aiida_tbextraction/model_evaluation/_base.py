@@ -6,7 +6,7 @@ from aiida.orm.code import Code
 from aiida.orm.data.base import Float
 
 
-@export  # pylint: disable=abstract-method
+@export
 class ModelEvaluationBase(WorkChain):
     """
     Base class for evaluating a tight-binding model. The workflow returns a cost measure, which should be minimized to get an optimal model.

@@ -13,7 +13,7 @@ from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida_tools import check_workchain_step
 
 
-@export  # pylint: disable=abstract-method
+@export
 class TightBindingCalculation(WorkChain):
     """
     This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.

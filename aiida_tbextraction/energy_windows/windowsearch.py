@@ -16,7 +16,7 @@ from aiida_optimize.workchain import OptimizationWorkChain
 from .runwindow import RunWindow
 
 
-@export  # pylint: disable=abstract-method
+@export
 class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.
