@@ -1,3 +1,7 @@
+"""
+Defines a workflow for calculating a tight-binding model for a given Wannier90 input and symmetries.
+"""
+
 try:
     from collections import ChainMap
 except ImportError:
@@ -104,7 +108,7 @@ class TightBindingCalculation(WorkChain):
         )
 
         spec.outline(
-            cls.run_wswannier, cls.parse,
+            cls.run_wannier, cls.parse,
             if_(cls.has_slice)(cls.slice),
             if_(cls.has_symmetries)(cls.symmetrize), cls.finalize
         )
@@ -116,7 +120,10 @@ class TightBindingCalculation(WorkChain):
         return 'symmetries' in self.inputs
 
     @check_workchain_step
-    def run_wswannier(self):
+    def run_wannier(self):
+        """
+        Run the Wannier90 calculation.
+        """
         wannier_parameters = self.inputs.wannier_parameters.get_dict()
         wannier_parameters.setdefault('write_hr', True)
         wannier_parameters.setdefault('write_xyz', True)
@@ -151,6 +158,9 @@ class TightBindingCalculation(WorkChain):
         ))
 
     def setup_tbmodels(self, calc_string):
+        """
+        Helper function to create the builder for TBmodels calculations.
+        """
         builder = CalculationFactory(calc_string).get_builder()
         builder.code = self.inputs.tbmodels_code
         builder.options = dict(resources={'num_machines': 1}, withmpi=False)
@@ -162,6 +172,9 @@ class TightBindingCalculation(WorkChain):
 
     @check_workchain_step
     def parse(self):
+        """
+        Runs the calculation to parse the Wannier90 output.
+        """
         builder = self.setup_tbmodels('tbmodels.parse')
         builder.wannier_folder = self.ctx.wannier_calc.out.retrieved
         builder.pos_kind = Str('nearest_atom')
@@ -170,6 +183,9 @@ class TightBindingCalculation(WorkChain):
 
     @check_workchain_step
     def slice(self):
+        """
+        Runs the calculation that slices (re-orders) the orbitals.
+        """
         builder = self.setup_tbmodels('tbmodels.slice')
         builder.tb_model = self.tb_model
         builder.slice_idx = self.inputs.slice_idx
@@ -178,6 +194,9 @@ class TightBindingCalculation(WorkChain):
 
     @check_workchain_step
     def symmetrize(self):
+        """
+        Runs the symmetrization calculation.
+        """
         builder = self.setup_tbmodels('tbmodels.symmetrize')
         builder.tb_model = self.tb_model
         builder.symmetries = self.inputs.symmetries
@@ -186,5 +205,8 @@ class TightBindingCalculation(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Adds the final tight-binding model to the output.
+        """
         self.out("tb_model", self.tb_model)
         self.report('Adding tight-binding model to results.')
