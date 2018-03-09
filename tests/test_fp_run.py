@@ -77,6 +77,7 @@ def test_combined_fp_run(
     from aiida.orm.calculation.work import WorkCalculation
     from aiida.work.launch import run_get_pid
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
+    from aiida_vasp.calcs.vasp import VaspCalculation
 
     KpointsData = DataFactory('array.kpoints')
 
@@ -124,8 +125,12 @@ def test_combined_fp_run(
             sub_workchains.append(node)
 
     for sub_wc in sub_workchains:
-        retrieved_folder = sub_wc.get_retrieved_node()
-        with open(retrieved_folder.get_abs_path('_scheduler-stdout.txt')) as f:
-            stdout = f.read()
-            assert 'WAVECAR not read' not in stdout
-            assert 'reading WAVECAR' in stdout
+        for label, node in sub_wc.get_outputs(also_labels=True):
+            if label == 'CALL' and isinstance(node, VaspCalculation):
+                retrieved_folder = node.get_retrieved_node()
+                with open(
+                    retrieved_folder.get_abs_path('_scheduler-stdout.txt')
+                ) as f:
+                    stdout = f.read()
+                    assert 'WAVECAR not read' not in stdout
+                    assert 'reading WAVECAR' in stdout

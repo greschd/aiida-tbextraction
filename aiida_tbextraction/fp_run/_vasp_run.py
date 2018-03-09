@@ -156,8 +156,31 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add outputs of the bandstructure and wannier input calculations.
+        """
+        self.report('Checking that the bands calculation used WAVECAR.')
+        self.check_read_wavecar(self.ctx.bands)
+
+        self.report(
+            'Checking that the wannier input calculation used WAVECAR.'
+        )
+        self.check_read_wavecar(self.ctx.to_wannier)
+
         self.report('Retrieving outputs.')
         self.out_many(self.exposed_outputs(self.ctx.bands, VaspReferenceBands))
         self.out_many(
             self.exposed_outputs(self.ctx.to_wannier, VaspWannierInput)
         )
+
+    @staticmethod
+    def check_read_wavecar(sub_workflow):
+        for label, node in sub_workflow.get_outputs(also_labels=True):
+            if label == 'CALL' and isinstance(node, VaspCalculation):
+                retrieved_folder = node.get_retrieved_node()
+                with open(
+                    retrieved_folder.get_abs_path('_scheduler-stdout.txt')
+                ) as f:
+                    stdout = f.read()
+                    assert 'WAVECAR not read' not in stdout
+                    assert 'reading WAVECAR' in stdout
