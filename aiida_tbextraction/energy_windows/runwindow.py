@@ -1,3 +1,7 @@
+"""
+Defines a workflow for running the tight-binding calculation and evaluation for a given energy window.
+"""
+
 try:
     from collections import ChainMap
 except ImportError:
@@ -46,10 +50,16 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def window_invalid(self):
+        """
+        Check if a window is invalid.
+        """
         return not self.window_valid(show_msg=False)
 
     @check_workchain_step
     def window_valid(self, show_msg=True):
+        """
+        Check if a window is valid.
+        """
         window_list = self.inputs.window.get_attr('list')
         win_min, froz_min, froz_max, win_max = window_list
         num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
@@ -86,6 +96,9 @@ class RunWindow(WorkChain):
         return True
 
     def _count_bands(self, limits):
+        """
+        Count the number of bands within the given limits.
+        """
         lower, upper = sorted(limits)
         bands = self.inputs.wannier_bands.get_bands()
         band_count = np.sum(
@@ -95,6 +108,9 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def calculate_model(self):
+        """
+        Run the tight-binding calculation workflow.
+        """
         inputs = self.exposed_inputs(TightBindingCalculation)
         # set the energy window
         inputs.update(
@@ -110,6 +126,9 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def evaluate_bands(self):
+        """
+        Add the tight-binding model to the outputs and run the evaluation workflow.
+        """
         tb_model = self.ctx.tbextraction_calc.out.tb_model
         self.report("Adding tight-binding model to output.")
         self.out('tb_model', tb_model)
@@ -128,6 +147,9 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add the evaluation outputs.
+        """
         for label, node in self.ctx.model_evaluation_wf.get_outputs(
             also_labels=True, link_type=LinkType.RETURN
         ):
@@ -136,12 +158,18 @@ class RunWindow(WorkChain):
 
     @check_workchain_step
     def abort_invalid(self):
+        """
+        Abort when an invalid window is found. The 'cost_value' is set to infinity.
+        """
         self.report('Window is invalid, assigning infinite cost_value.')
         self.out('cost_value', Float('inf'))
 
 
 @make_inline
 def add_window_parameters_inline(wannier_parameters, window):
+    """
+    Adds the window values to the given Wannier90 input parameters.
+    """
     param_dict = wannier_parameters.get_dict()
     win_min, froz_min, froz_max, win_max = window.get_attr('list')
     param_dict.update(
