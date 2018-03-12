@@ -25,3 +25,25 @@ def test_fp_tb(
     result = run(OptimizeFirstPrinciplesTightBinding, **get_fp_tb_input)
     print(result)
     assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
+
+
+def test_fp_tb_submit(
+    configure_with_daemon,  # pylint: disable=unused-argument
+    get_fp_tb_input,  # pylint: disable=redefined-outer-name
+):
+    """
+    Runs the DFT tight-binding optimization workflow on an InSb sample.
+    """
+    from aiida.orm import load_node
+    from aiida.work.launch import submit
+    from aiida.orm.querybuilder import QueryBuilder
+    from aiida_bands_inspect.calculations.difference import DifferenceCalculation
+    from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
+
+    query = QueryBuilder()
+    query.append(DifferenceCalculation)
+
+    pk = submit(OptimizeFirstPrinciplesTightBinding, **get_fp_tb_input).pk
+    result = load_node(pk).get_outputs_dict()
+    print(result)
+    assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
