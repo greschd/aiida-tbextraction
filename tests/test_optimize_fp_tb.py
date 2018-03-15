@@ -30,6 +30,7 @@ def test_fp_tb(
 def test_fp_tb_submit(
     configure_with_daemon,  # pylint: disable=unused-argument
     get_fp_tb_input,  # pylint: disable=redefined-outer-name
+    wait_for,
 ):
     """
     Runs the DFT tight-binding optimization workflow on an InSb sample.
@@ -44,6 +45,7 @@ def test_fp_tb_submit(
     query.append(DifferenceCalculation)
 
     pk = submit(OptimizeFirstPrinciplesTightBinding, **get_fp_tb_input).pk
+    wait_for(pk)
     result = load_node(pk).get_outputs_dict()
     print(result)
     assert all(key in result for key in ['cost_value', 'tb_model', 'window'])

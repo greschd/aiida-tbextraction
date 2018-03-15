@@ -82,7 +82,6 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
                 )
             )
         )
-        self.report(calculation_kwargs)
         res = dict(
             code=self.inputs.code,
             structure=self.inputs.structure,

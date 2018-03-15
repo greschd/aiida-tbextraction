@@ -33,7 +33,7 @@ def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pyli
     """
     Run the band evaluation workflow.
     """
-    from aiida.work import run
+    from aiida.work.launch import run
     builder = band_difference_builder
     output = run(builder)
     assert np.isclose(output['cost_value'].value, 0.)
