@@ -105,7 +105,9 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
                 paw=self.inputs.potentials,
                 kpoints=self.inputs.kpoints_mesh,
                 settings=ParameterData(
-                    dict={'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR']}
+                    dict={
+                        'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR']
+                    }
                 ),
                 **self._collect_common_inputs(
                     'scf',
@@ -120,9 +122,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         Helper to collect the inputs for the reference bands and wannier input workflows.
         """
         scf_wavefun = self.ctx.scf.out.wavefunctions
-        res = self._collect_common_inputs(
-            namespace, force_parameters={'istart': 2}
-        )
+        res = self._collect_common_inputs(namespace)
         res['potentials'] = self.inputs.potentials
         res['calculation_kwargs']['wavefunctions'] = scf_wavefun
         self.report(res['calculation_kwargs'])
