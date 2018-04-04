@@ -100,7 +100,7 @@ class VaspWannierInput(WannierInputBase):
         Parse the k-points used by Wannier90 from the .win file.
         """
         kpoints = []
-        for line in WinParser(win_file).kpoints:  # pylint: disable=no-member
+        for line in WinParser(win_file).result['kpoints']:
             kpoints.append([float(x) for x in line.split()])
         return np.array(kpoints)
 
