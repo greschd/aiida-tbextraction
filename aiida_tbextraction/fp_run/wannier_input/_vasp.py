@@ -3,7 +3,6 @@ Defines a workflow that calculates the Wannier90 input files using VASP.
 """
 
 from fsc.export import export
-import numpy as np
 
 from aiida.orm import Code, DataFactory, CalculationFactory
 from aiida.work.workchain import ToContext
@@ -68,15 +67,12 @@ class VaspWannierInput(WannierInputBase):
         retrieved_folder = vasp_calc_output.retrieved
         folder_list = retrieved_folder.get_folder_list()
         assert all(
-            filename in folder_list for filename in
+            filename in folder_list
+            for filename in
             ['wannier90.amn', 'wannier90.mmn', 'wannier90.eig']
         )
         self.report("Adding Wannier90 inputs to output.")
         self.out('wannier_input_folder', retrieved_folder)
         self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
-        assert np.allclose(
-            vasp_calc_output.wannier_kpoints.get_kpoints(),
-            vasp_calc_output.bands.get_kpoints()
-        )
         self.out('wannier_bands', vasp_calc_output.bands)
         self.out('wannier_projections', vasp_calc_output.wannier_projections)
