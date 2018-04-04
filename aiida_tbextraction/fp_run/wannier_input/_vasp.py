@@ -3,11 +3,14 @@ Defines a workflow that calculates the Wannier90 input files using VASP.
 """
 
 from fsc.export import export
+import numpy as np
 
 from aiida.orm import Code, DataFactory, CalculationFactory
+from aiida.orm.data.array.bands import BandsData
 from aiida.work.workchain import ToContext
 
 from aiida_tools import check_workchain_step
+from aiida_vasp.io.win import WinParser
 
 from . import WannierInputBase
 
@@ -74,5 +77,51 @@ class VaspWannierInput(WannierInputBase):
         self.report("Adding Wannier90 inputs to output.")
         self.out('wannier_input_folder', retrieved_folder)
         self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
-        self.out('wannier_bands', vasp_calc_output.bands)
+        self.out('wannier_bands', self.parse_wannier_bands(retrieved_folder))
         self.out('wannier_projections', vasp_calc_output.wannier_projections)
+
+    def parse_wannier_bands(self, retrieved_folder):
+        """
+        Parse the Wannier90 bands from the .win and .eig files.
+        """
+        bands = BandsData()
+        bands.set_kpoints(
+            self.parse_kpts(retrieved_folder.get_abs_path('wannier90.win'))
+        )
+        bands.set_bands(
+            self.parse_eig(retrieved_folder.get_abs_path('wannier90.eig'))
+        )
+        return bands
+
+    # TODO: Replace with tools from aiida-wannier90, or integrate in vasp2w90
+    @staticmethod
+    def parse_kpts(win_file):
+        """
+        Parse the k-points used by Wannier90 from the .win file.
+        """
+        kpoints = []
+        for line in WinParser(win_file).kpoints:  # pylint: disable=no-member
+            kpoints.append([float(x) for x in line.split()])
+        return np.array(kpoints)
+
+    # TODO: Replace with tools from aiida-wannier90, or integrate in vasp2w90
+    @staticmethod
+    def parse_eig(eig_file):
+        """
+        Parse the eigenvalues used by Wannier90 from the .eig file.
+        """
+        idx = 1
+        bands = []
+        bands_part = []
+        with open(eig_file, 'r') as in_file:
+            for line in in_file:
+                _, idx_new, val = line.split()
+                idx_new = int(idx_new)
+                val = float(val)
+                if idx_new > idx:
+                    idx = idx_new
+                    bands.append(bands_part)
+                    bands_part = []
+                bands_part.append(val)
+            bands.append(bands_part)
+            return np.array(bands)
