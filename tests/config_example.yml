@@ -5,6 +5,7 @@ computers:
     transport: local
     scheduler: direct
     work_directory: /tmp/test_aiida_tbextraction_run
+    prepend_text: 'unset PYTHONPATH'
 
   monch:
     hostname: monch.cscs.ch
