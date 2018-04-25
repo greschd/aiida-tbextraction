@@ -26,10 +26,17 @@ class VaspWannierInput(WannierInputBase):
         super(VaspWannierInput, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
-        spec.input('code', valid_type=Code)
-        spec.input('parameters', valid_type=ParameterData)
+        spec.input('code', valid_type=Code, help='Code that runs VASP.')
+        spec.input(
+            'parameters',
+            valid_type=ParameterData,
+            help='Parameters for the Vasp2w90 calculation.'
+        )
         spec.input_namespace(
-            'calculation_kwargs', required=False, dynamic=True
+            'calculation_kwargs',
+            required=False,
+            dynamic=True,
+            help='Keyword arguments passed to the Vasp2w90 calculation.'
         )
 
         spec.outline(cls.submit_calculation, cls.get_result)

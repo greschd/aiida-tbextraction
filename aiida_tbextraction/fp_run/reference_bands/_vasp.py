@@ -24,12 +24,25 @@ class VaspReferenceBands(ReferenceBandsBase):
     def define(cls, spec):
         super(VaspReferenceBands, cls).define(spec)
         ParameterData = DataFactory('parameter')
-        spec.input('code', valid_type=Code)
-        spec.input('parameters', valid_type=ParameterData)
-        spec.input_namespace(
-            'calculation_kwargs', required=False, dynamic=True
+        spec.input('code', valid_type=Code, help='Code that runs VASP.')
+        spec.input(
+            'parameters',
+            valid_type=ParameterData,
+            help='Parameters of the VASP calculation.'
         )
-        spec.input('merge_kpoints', valid_type=Bool, default=Bool(False))
+        spec.input_namespace(
+            'calculation_kwargs',
+            required=False,
+            dynamic=True,
+            help='Additional keyword arguments passed to the VASP calculation.'
+        )
+        spec.input(
+            'merge_kpoints',
+            valid_type=Bool,
+            default=Bool(False),
+            help=
+            'Defines whether the k-point mesh is added to the list of k-points for the reference band calculation. This is needed for hybrid functional calculations.'
+        )
 
         spec.outline(cls.run_calc, cls.get_bands)
 

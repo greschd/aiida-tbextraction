@@ -36,7 +36,11 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         # inputs which are inherited at the top level
         spec.expose_inputs(FirstPrinciplesRunBase, exclude=())
         # create namespace for additional inputs
-        spec.input_namespace('fp_run', dynamic=True)
+        spec.input_namespace(
+            'fp_run',
+            dynamic=True,
+            help='Inputs passed to the ``fp_run_workflow``'
+        )
 
         # top-level scope
         spec.expose_inputs(
@@ -50,9 +54,24 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             )
         )
 
-        spec.input('fp_run_workflow', **WORKCHAIN_INPUT_KWARGS)
-        spec.input('slice_reference_bands', valid_type=List, required=False)
-        spec.input('slice_tb_model', valid_type=List, required=False)
+        spec.input(
+            'fp_run_workflow',
+            help='Workflow which executes the first-principles calculations',
+            **WORKCHAIN_INPUT_KWARGS
+        )
+        spec.input(
+            'slice_reference_bands',
+            valid_type=List,
+            required=False,
+            help=
+            'Indices for the reference bands which should be included in the model evaluation.'
+        )
+        spec.input(
+            'slice_tb_model',
+            valid_type=List,
+            required=False,
+            help='Indices for slicing (re-ordering) the tight-binding model.'
+        )
 
         spec.expose_outputs(WindowSearch)
 

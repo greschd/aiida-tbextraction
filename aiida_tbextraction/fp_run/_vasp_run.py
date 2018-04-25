@@ -36,18 +36,39 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         super(VaspFirstPrinciplesRun, cls).define(spec)
 
         # Top-level parameters
-        spec.input('code', valid_type=Code)
-        spec.input('parameters', valid_type=ParameterData)
+        spec.input('code', valid_type=Code, help='Code that runs VASP.')
+        spec.input(
+            'parameters',
+            valid_type=ParameterData,
+            help=
+            'Parameters passed to all VASP calculations, unless explicitly overwritten.'
+        )
         spec.input_namespace(
-            'calculation_kwargs', required=False, dynamic=True
+            'calculation_kwargs',
+            required=False,
+            dynamic=True,
+            help=
+            'Keyword arguments passed to all VASP calculations, unless explicitly overwritten.'
         )
 
         # Optional parameters to override for specific calculations.
         # TODO: Use expose for the sub-workflows.
         for sub_calc in ['scf', 'bands', 'to_wannier']:
-            spec.input_namespace(sub_calc, required=False, dynamic=True)
+            spec.input_namespace(
+                sub_calc,
+                required=False,
+                dynamic=True,
+                help="Inputs passed to the '{}' sub-workflow / calculation".
+                format(sub_calc)
+            )
 
-        spec.input('bands.merge_kpoints', valid_type=Bool, default=Bool(False))
+        spec.input(
+            'bands.merge_kpoints',
+            valid_type=Bool,
+            default=Bool(False),
+            help=
+            'Determines whether the k-point mesh needs to be added for the bandstructure calculation. This is needed for hybrid functional calculations.'
+        )
 
         spec.expose_outputs(VaspReferenceBands)
         spec.expose_outputs(VaspWannierInput)

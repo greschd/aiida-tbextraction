@@ -20,23 +20,55 @@ class WannierInputBase(WorkChain):
         super(WannierInputBase, cls).define(spec)
 
         ParameterData = DataFactory('parameter')
-        spec.input('structure', valid_type=DataFactory('structure'))
-        spec.input('kpoints_mesh', valid_type=DataFactory('array.kpoints'))
-        spec.input_namespace('potentials', dynamic=True)
+        spec.input(
+            'structure',
+            valid_type=DataFactory('structure'),
+            help='Structure of the material.'
+        )
+        spec.input(
+            'kpoints_mesh',
+            valid_type=DataFactory('array.kpoints'),
+            help='K-points mesh used when calculating the Wannier inputs.'
+        )
+        spec.input_namespace(
+            'potentials',
+            dynamic=True,
+            help='Pseudopotentials used in the calculation.'
+        )
 
         spec.input(
-            'wannier_parameters', valid_type=ParameterData, required=False
+            'wannier_parameters',
+            valid_type=ParameterData,
+            required=False,
+            help='Parameters of the Wannier calculation.'
         )
         spec.input(
             'wannier_projections',
             valid_type=(DataFactory('orbital'), List),
-            required=False
+            required=False,
+            help=
+            'Projections used in the Wannier90 calculation, given either as ``OrbitalData``, or a list of strings corresponding to the lines in the ``wannier90.win`` projections input block.'
         )
 
-        spec.output('wannier_input_folder', valid_type=DataFactory('folder'))
-        spec.output('wannier_parameters', valid_type=ParameterData)
-        spec.output('wannier_bands', valid_type=DataFactory('array.bands'))
         spec.output(
-            'wannier_settings', valid_type=ParameterData, required=False
+            'wannier_input_folder',
+            valid_type=DataFactory('folder'),
+            help=
+            'Folder containing the ``.mmn``, ``.amn`` and ``.eig`` input files.'
+        )
+        spec.output(
+            'wannier_parameters',
+            valid_type=ParameterData,
+            help='Parameters for the Wannier90 calculation.'
+        )
+        spec.output(
+            'wannier_bands',
+            valid_type=DataFactory('array.bands'),
+            help='Bands parsed from the ``.eig`` file.'
+        )
+        spec.output(
+            'wannier_settings',
+            valid_type=ParameterData,
+            required=False,
         )
         spec.output('wannier_projections', valid_type=List, required=False)
