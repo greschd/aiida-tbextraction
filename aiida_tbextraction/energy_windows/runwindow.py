@@ -35,18 +35,37 @@ class RunWindow(WorkChain):
         super(RunWindow, cls).define(spec)
         spec.expose_inputs(TightBindingCalculation)
         spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model'])
-        spec.input_namespace('model_evaluation', dynamic=True)
+        spec.input_namespace(
+            'model_evaluation',
+            dynamic=True,
+            help=
+            'Inputs that will be passed to the ``model_evaluation_workflow``.'
+        )
 
-        spec.input('window', valid_type=List)
-        spec.input('wannier_bands', valid_type=DataFactory('array.bands'))
-        spec.input('model_evaluation_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input(
+            'window',
+            valid_type=List,
+            help=
+            'Disentaglement energy windows used by Wannier90, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.'
+        )
+        spec.input(
+            'wannier_bands',
+            valid_type=DataFactory('array.bands'),
+            help=
+            'Input bandstructure for Wannier90, to be written to the ``wannier90.eig`` input file.'
+        )
+        spec.input(
+            'model_evaluation_workflow',
+            help=
+            'AiiDA workflow that will be used to evaluate the tight-binding model.',
+            **WORKCHAIN_INPUT_KWARGS
+        )
 
         spec.expose_outputs(ModelEvaluationBase)
         spec.outline(
             if_(cls.window_valid)(
                 cls.calculate_model, cls.evaluate_bands, cls.finalize
-            ),
-            if_(cls.window_invalid)(cls.abort_invalid)
+            ), if_(cls.window_invalid)(cls.abort_invalid)
         )
 
     @check_workchain_step

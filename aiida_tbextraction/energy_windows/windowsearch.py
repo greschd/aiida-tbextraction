@@ -31,8 +31,18 @@ class WindowSearch(WorkChain):
         super(WindowSearch, cls).define(spec)
 
         spec.expose_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
-        spec.input('initial_window', valid_type=List)
-        spec.input('window_tol', valid_type=Float, default=Float(0.5))
+        spec.input(
+            'initial_window',
+            valid_type=List,
+            help=
+            'Initial value for the disentanglement energy windows, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.'
+        )
+        spec.input(
+            'window_tol',
+            valid_type=Float,
+            default=Float(0.5),
+            help='Tolerance in energy for the window optimization.'
+        )
 
         spec.outline(cls.create_optimization, cls.finalize)
 
