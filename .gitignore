@@ -3,3 +3,5 @@
 .cache
 .pytest_cache
 .ropeproject
+POTCAR
+PSCTR

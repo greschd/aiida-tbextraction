@@ -6,4 +6,3 @@ Tutorial
 
     setup
     example
-    custom_workflow
