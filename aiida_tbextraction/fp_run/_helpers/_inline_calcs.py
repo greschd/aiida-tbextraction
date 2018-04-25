@@ -40,6 +40,18 @@ def merge_kpoints_inline(mesh_kpoints, band_kpoints):
 
 
 @make_inline
+def flatten_bands_inline(bands):
+    """
+    Flatten the bands such that they have dimension 2.
+    """
+    flattened_bands = bands.copy()
+    bands_array = bands.get_bands()
+    flattened_bands.set_bands(bands_array.reshape(bands_array.shape[-2:]))
+
+    return {'bands': flattened_bands}
+
+
+@make_inline
 def crop_bands_inline(bands, kpoints):
     """
     Crop a BandsData to the given kpoints by removing from the front.
@@ -52,8 +64,6 @@ def crop_bands_inline(bands, kpoints):
 
     cropped_bands = DataFactory('array.bands')()
     cropped_bands.set_kpointsdata(kpoints)
-    bands_array = bands.get_bands()
-    assert len(bands_array) == 1
-    cropped_bands_array = bands_array[0, band_slice]
+    cropped_bands_array = bands.get_bands()[band_slice]
     cropped_bands.set_bands(cropped_bands_array)
     return {'bands': cropped_bands}

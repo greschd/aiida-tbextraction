@@ -11,7 +11,7 @@ from aiida.work.workchain import ToContext
 from aiida_tools import check_workchain_step
 
 from . import ReferenceBandsBase
-from .._helpers._inline_calcs import crop_bands_inline, merge_kpoints_inline
+from .._helpers._inline_calcs import flatten_bands_inline, crop_bands_inline, merge_kpoints_inline
 
 
 @export
@@ -80,11 +80,11 @@ class VaspReferenceBands(ReferenceBandsBase):
         Get the bands from the VASP calculation and crop the 'mesh' k-points if necessary.
         """
         bands = self.ctx.vasp_calc.out.bands
+        self.report("Flattening the output bands.")
+        res_bands = flatten_bands_inline(bands=bands)[1]['bands']
         if self.inputs.merge_kpoints:
             self.report("Cropping mesh eigenvalues from bands.")
             res_bands = crop_bands_inline(
-                bands=bands, kpoints=self.inputs.kpoints
+                bands=res_bands, kpoints=self.inputs.kpoints
             )[1]['bands']
-        else:
-            res_bands = bands
         self.out('bands', res_bands)

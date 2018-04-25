@@ -7,6 +7,7 @@ from ase.io.vasp import read_vasp
 from aiida.orm import DataFactory
 from aiida.orm.code import Code
 from aiida.orm.data.list import List
+from aiida.orm.data.float import Float
 from aiida.orm.data.parameter import ParameterData
 from aiida.work.launch import submit
 
@@ -57,7 +58,7 @@ def create_builder():
     # Set the inputs for the VaspFirstPrinciplesRun workflow
     builder.fp_run = dict(
         code=Code.get_from_string('vasp'),
-        parameters=dict( # Parameters common to all VASP calculations
+        parameters=ParameterData(dict=dict( # Parameters common to all VASP calculations
             prec='N',
             lsorbit=True,
             ismear=0,
@@ -66,24 +67,24 @@ def create_builder():
             magmom='600*0.0',
             nbands=36,
             kpar=4,
-        ),
+        )),
         calculation_kwargs=dict(
             options=dict( # Settings for the resource requirements
                 resources={'num_machines': 2, 'num_mpiprocs_per_machine': 18},
                 queue_name='dphys_compute',
                 withmpi=True,
-                max_wallclock_seconds=60
+                max_wallclock_seconds=60 * 60
             )
         )
     )
 
     # Setting the parameters specific for the bands calculation
     builder.fp_run['bands'] = dict(
-        parameters=ParameterData(dict=dict(lwave=False, isym=0.))
+        parameters=ParameterData(dict=dict(lwave=False, isym=0))
     )
     # Setting the parameters specific for the wannier input calculation
     builder.fp_run['to_wannier'] = dict(
-        parameters=ParameterData(dict=dict(lwave=False, isym=0.))
+        parameters=ParameterData(dict=dict(lwave=False, isym=0))
     )
 
     # Setting the k-points for the reference bandstructure
@@ -112,12 +113,22 @@ def create_builder():
         bands_inspect_code=Code.get_from_string('bands_inspect')
     )
 
+    # Set the initial energy window value
+    builder.initial_window = List(list=[-4.5, -4, 6.5, 16])
+
+    # Tolerance for the energy window.
+    builder.window_tol = Float(1.5)
+    # Tolerance for the 'cost_value'.
+    builder.cost_tol = Float(0.3)
+    # The tolerances are set higher than might be appropriate for a 'production'
+    # run to make the example run more quickly.
+
     # Setting the parameters for Wannier90
     builder.wannier_parameters = ParameterData(
         dict=dict(
             num_wann=14,
             num_bands=36,
-            dis_num_iter=1000,
+            dis_num_iter=100,
             num_iter=0,
             spinors=True,
         )

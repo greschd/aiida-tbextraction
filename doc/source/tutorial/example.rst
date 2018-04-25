@@ -37,7 +37,7 @@ Launching the Workflow
 
 The following example runs a simple tight-binding calculation for InSb. It builds up the required inputs step by step, using a process builder. To test that your setup has worked correctly, you can try launching this example. The code is also available on `GitHub <https://github.com/greschd/aiida-tbextraction>`_. Due to the licensing requirements by VASP, you will have to put the potential files into the ``examples/InSb/inputs/potentials`` directory yourself. You will also have to adjust some values specific to your configuration, like the queue name on the compute cluster or the names of the codes.
 
-Once you have successfully ran this example, you can start adapting it to your use case. The :ref:`Reference <optimize_fp_tb_reference>` section can help you understand the individual input values.
+Once you have successfully ran this example, you can start adapting it to your use case. The :ref:`Reference <optimize_fp_tb_reference>` section can help you understand the individual input values. For production runs, you should decrease the tolerances ``window_tol`` and ``cost_tol`` (or use their default values), and use more accurate inputs for the DFT and Wannier calculations (for example, you should increase ``dis_num_iter``). 
 
 .. include:: ../../../examples/InSb/run_optimization.py
     :code: python

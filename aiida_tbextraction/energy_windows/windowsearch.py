@@ -41,7 +41,13 @@ class WindowSearch(WorkChain):
             'window_tol',
             valid_type=Float,
             default=Float(0.5),
-            help='Tolerance in energy for the window optimization.'
+            help='Tolerance in energy windows for the window optimization.'
+        )
+        spec.input(
+            'cost_tol',
+            valid_type=Float,
+            default=Float(0.02),
+            help="Tolerance in the 'cost_value' for the window optimization."
         )
 
         spec.outline(cls.create_optimization, cls.finalize)
