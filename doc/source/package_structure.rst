@@ -1,6 +1,8 @@
 Package Structure
 =================
 
+This is an automatically generated overview of the structure of ``aiida-optimize``. 
+
 Classes
 -------
 

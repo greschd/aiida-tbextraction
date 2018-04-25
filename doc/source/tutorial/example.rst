@@ -3,11 +3,6 @@ Example Calculation
 
 The easiest way to get started with ``aiida-tbextraction`` is by modifying an existing example. For this reason, we will describe such an example here.
 
-Launching the Workflow
-----------------------
-
-
-
 Workflow Structure
 ------------------
 
@@ -35,6 +30,19 @@ The workflow which runs the first-principles calculations can be different depen
 
 |
 |
+
+
+Launching the Workflow
+----------------------
+
+The following example runs a simple tight-binding calculation for InSb. It builds up the required inputs step by step, using a process builder. To test that your setup has worked correctly, you can try launching this example. The code is also available on `GitHub <https://github.com/greschd/aiida-tbextraction>`_. Due to the licensing requirements by VASP, you will have to put the potential files into the ``examples/InSb/inputs/potentials`` directory yourself. You will also have to adjust some values specific to your configuration, like the queue name on the compute cluster or the names of the codes.
+
+Once you have successfully ran this example, you can start adapting it to your use case. The :ref:`Reference <optimize_fp_tb_reference>` section can help you understand the individual input values.
+
+.. include:: ../../../examples/InSb/run_optimization.py
+    :code: python
+
+Note that the result of this example does not accurately represent the band-structure of InSb. This is due to the limitation of PBE, and could be overcome by using costlier hybrid functional calculations.
 
 Customizing the workflow
 ------------------------
