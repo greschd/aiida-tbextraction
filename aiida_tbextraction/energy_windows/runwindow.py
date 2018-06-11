@@ -14,11 +14,10 @@ from aiida.orm import DataFactory
 from aiida.orm.data.base import List, Float
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext, if_
-from aiida.work.class_loader import CLASS_LOADER
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
 
 from ..model_evaluation import ModelEvaluationBase
 from ..calculate_tb import TightBindingCalculation
@@ -65,7 +64,8 @@ class RunWindow(WorkChain):
         spec.outline(
             if_(cls.window_valid)(
                 cls.calculate_model, cls.evaluate_bands, cls.finalize
-            ), if_(cls.window_invalid)(cls.abort_invalid)
+            ),
+            if_(cls.window_invalid)(cls.abort_invalid)
         )
 
     @check_workchain_step
@@ -155,8 +155,7 @@ class RunWindow(WorkChain):
         self.report("Running model evaluation.")
         return ToContext(
             model_evaluation_wf=self.submit(
-                CLASS_LOADER.
-                load_class(self.inputs.model_evaluation_workflow.value),
+                load_object(self.inputs.model_evaluation_workflow),
                 tb_model=tb_model,
                 **ChainMap(
                     self.inputs.model_evaluation,

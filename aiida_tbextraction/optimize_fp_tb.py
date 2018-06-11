@@ -13,11 +13,10 @@ from aiida.orm.data.base import List
 from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 from aiida.work.workchain import WorkChain, ToContext
-from aiida.work.class_loader import CLASS_LOADER
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS
+from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
 
 from .energy_windows.windowsearch import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
@@ -85,7 +84,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         self.report("Starting DFT workflows.")
         return ToContext(
             fp_run=self.submit(
-                CLASS_LOADER.load_class(self.inputs.fp_run_workflow.value),
+                load_object(self.inputs.fp_run_workflow),
                 **ChainMap(
                     self.inputs.fp_run,
                     self.
