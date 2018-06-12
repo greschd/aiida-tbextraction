@@ -112,7 +112,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         wannier_settings = merge_parameterdata_inline(
             param_primary=wannier_settings_explicit,
             param_secondary=wannier_settings_from_wf
-        )[1]['result']
+        )[1]
 
         # prefer wannier_projections from wannier_input workflow if it exists
         wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
@@ -125,7 +125,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(
                 bands=reference_bands, slice_idx=slice_reference_bands
-            )[1]['result']
+            )[1]
 
         # get slice_idx for windowsearch
         slice_idx = self.inputs.get('slice_tb_model', None)
@@ -158,18 +158,13 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
 @make_inline
 def merge_parameterdata_inline(param_primary, param_secondary):
-    return {
-        'result':
-        ParameterData(
-            dict=ChainMap(
-                param_primary.get_dict(), param_secondary.get_dict()
-            )
-        )
-    }
+    return ParameterData(
+        dict=ChainMap(param_primary.get_dict(), param_secondary.get_dict())
+    )
 
 
 @make_inline
 def slice_bands_inline(bands, slice_idx):
     result = bands.copy()
     result.set_bands(result.get_bands()[:, slice_idx.get_attr('list')])
-    return {'result': result}
+    return result
