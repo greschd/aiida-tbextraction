@@ -52,6 +52,7 @@ class FirstPrinciplesTightBinding(WorkChain):
             TightBindingCalculation,
             exclude=(
                 'wannier_bands',
+                'wannier_kpoints',
                 # 'reference_bands',
                 'wannier_parameters',
                 'wannier_input_folder',
@@ -144,6 +145,7 @@ class FirstPrinciplesTightBinding(WorkChain):
             tbextraction_calc=self.submit(
                 TightBindingCalculation,
                 # reference_bands=reference_bands,
+                wannier_kpoints=self.ctx.fp_run.out.wannier_bands,
                 wannier_bands=self.ctx.fp_run.out.wannier_bands,
                 wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
                 wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
@@ -155,6 +157,9 @@ class FirstPrinciplesTightBinding(WorkChain):
 
     @check_workchain_step
     def run_evaluate(self):
+        """
+        Runs the model evaluation workflow.
+        """
         tb_model = self.ctx.tbextraction_calc.out.tb_model
         self.report("Adding tight-binding model to output.")
         self.out('tb_model', tb_model)
