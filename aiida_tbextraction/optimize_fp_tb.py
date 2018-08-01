@@ -112,7 +112,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         wannier_settings = merge_parameterdata_inline(
             param_primary=wannier_settings_explicit,
             param_secondary=wannier_settings_from_wf
-        )[1]
+        )[1]['result']
 
         # prefer wannier_projections from wannier_input workflow if it exists
         wannier_projections = self.ctx.fp_run.get_outputs_dict().get(

@@ -53,7 +53,6 @@ class FirstPrinciplesTightBinding(WorkChain):
             exclude=(
                 'wannier_bands',
                 'wannier_kpoints',
-                # 'reference_bands',
                 'wannier_parameters',
                 'wannier_input_folder',
                 'slice_idx',
@@ -74,6 +73,7 @@ class FirstPrinciplesTightBinding(WorkChain):
             help='Indices for slicing (re-ordering) the tight-binding model.'
         )
 
+        spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model', 'reference_bands'])
         spec.input_namespace(
             'model_evaluation',
             dynamic=True,
@@ -128,7 +128,7 @@ class FirstPrinciplesTightBinding(WorkChain):
         wannier_settings = merge_parameterdata_inline(
             param_primary=wannier_settings_explicit,
             param_secondary=wannier_settings_from_wf
-        )[1]
+        )[1]['result']
 
         # prefer wannier_projections from wannier_input workflow if it exists
         wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
