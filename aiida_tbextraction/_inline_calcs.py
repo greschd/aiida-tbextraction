@@ -20,6 +20,6 @@ def merge_parameterdata_inline(param_primary, param_secondary):
 @export
 @make_inline
 def slice_bands_inline(bands, slice_idx):
-    result = bands.copy()
+    result = bands.clone()
     result.set_bands(result.get_bands()[:, slice_idx.get_attr('list')])
     return result

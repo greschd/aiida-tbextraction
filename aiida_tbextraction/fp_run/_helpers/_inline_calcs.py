@@ -44,7 +44,7 @@ def flatten_bands_inline(bands):
     """
     Flatten the bands such that they have dimension 2.
     """
-    flattened_bands = bands.copy()
+    flattened_bands = bands.clone()
     bands_array = bands.get_bands()
     flattened_bands.set_bands(bands_array.reshape(bands_array.shape[-2:]))
 
