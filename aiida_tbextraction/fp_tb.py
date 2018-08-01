@@ -17,20 +17,21 @@ from aiida.common.links import LinkType
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
 
-from .energy_windows.windowsearch import WindowSearch
+from .model_evaluation import ModelEvaluationBase
+from .calculate_tb import TightBindingCalculation
 from .fp_run import FirstPrinciplesRunBase
 from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
 
 
 @export
-class OptimizeFirstPrinciplesTightBinding(WorkChain):
+class FirstPrinciplesTightBinding(WorkChain):
     """
-    Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.
+    Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then calculating the tight-binding model.
     """
 
     @classmethod
     def define(cls, spec):
-        super(OptimizeFirstPrinciplesTightBinding, cls).define(spec)
+        super(FirstPrinciplesTightBinding, cls).define(spec)
 
         # inputs which are inherited at the top level
         spec.expose_inputs(FirstPrinciplesRunBase, exclude=())
@@ -40,24 +41,24 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             dynamic=True,
             help='Inputs passed to the ``fp_run_workflow``'
         )
+        spec.input(
+            'fp_run_workflow',
+            help='Workflow which executes the first-principles calculations',
+            **WORKCHAIN_INPUT_KWARGS
+        )
 
         # top-level scope
         spec.expose_inputs(
-            WindowSearch,
+            TightBindingCalculation,
             exclude=(
                 'wannier_bands',
-                'reference_bands',
+                # 'reference_bands',
                 'wannier_parameters',
                 'wannier_input_folder',
                 'slice_idx',
             )
         )
 
-        spec.input(
-            'fp_run_workflow',
-            help='Workflow which executes the first-principles calculations',
-            **WORKCHAIN_INPUT_KWARGS
-        )
         spec.input(
             'slice_reference_bands',
             valid_type=List,
@@ -72,9 +73,23 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             help='Indices for slicing (re-ordering) the tight-binding model.'
         )
 
-        spec.expose_outputs(WindowSearch)
+        spec.input_namespace(
+            'model_evaluation',
+            dynamic=True,
+            help=
+            'Inputs that will be passed to the ``model_evaluation_workflow``.'
+        )
+        spec.input(
+            'model_evaluation_workflow',
+            help=
+            'AiiDA workflow that will be used to evaluate the tight-binding model.',
+            **WORKCHAIN_INPUT_KWARGS
+        )
 
-        spec.outline(cls.fp_run, cls.run_windowsearch, cls.finalize)
+        spec.expose_outputs(TightBindingCalculation)
+        spec.expose_outputs(ModelEvaluationBase)
+
+        spec.outline(cls.fp_run, cls.run_tb, cls.run_evaluate, cls.finalize)
 
     @check_workchain_step
     def fp_run(self):
@@ -94,12 +109,12 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         )
 
     @check_workchain_step
-    def run_windowsearch(self):
+    def run_tb(self):
         """
-        Runs the workflow which creates the optimized tight-binding model.
+        Runs the workflow which creates the tight-binding model.
         """
         # check for wannier_settings from wannier_input workflow
-        inputs = self.exposed_inputs(WindowSearch)
+        inputs = self.exposed_inputs(TightBindingCalculation)
         self.report(
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
@@ -119,24 +134,16 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             'wannier_projections', inputs.pop('wannier_projections', None)
         )
 
-        # slice reference bands if necessary
-        reference_bands = self.ctx.fp_run.out.bands
-        slice_reference_bands = self.inputs.get('slice_reference_bands', None)
-        if slice_reference_bands is not None:
-            reference_bands = slice_bands_inline(
-                bands=reference_bands, slice_idx=slice_reference_bands
-            )[1]
-
-        # get slice_idx for windowsearch
+        # get slice_idx for tight-binding calculation
         slice_idx = self.inputs.get('slice_tb_model', None)
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
 
-        self.report("Starting WindowSearch workflow.")
+        self.report("Starting TightBindingCalculation workflow.")
         return ToContext(
-            windowsearch=self.submit(
-                WindowSearch,
-                reference_bands=reference_bands,
+            tbextraction_calc=self.submit(
+                TightBindingCalculation,
+                # reference_bands=reference_bands,
                 wannier_bands=self.ctx.fp_run.out.wannier_bands,
                 wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
                 wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
@@ -147,10 +154,35 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         )
 
     @check_workchain_step
+    def run_evaluate(self):
+        tb_model = self.ctx.tbextraction_calc.out.tb_model
+        self.report("Adding tight-binding model to output.")
+        self.out('tb_model', tb_model)
+
+        # slice reference bands if necessary
+        reference_bands = self.ctx.fp_run.out.bands
+        slice_reference_bands = self.inputs.get('slice_reference_bands', None)
+        if slice_reference_bands is not None:
+            reference_bands = slice_bands_inline(
+                bands=reference_bands, slice_idx=slice_reference_bands
+            )[1]
+        self.report('Starting model evaluation workflow.')
+        return ToContext(
+            model_evaluation_wf=self.submit(
+                load_object(self.inputs.model_evaluation_workflow),
+                tb_model=tb_model,
+                reference_bands=reference_bands,
+                **ChainMap(
+                    self.inputs.model_evaluation,
+                    self.exposed_inputs(ModelEvaluationBase),
+                )
+            )
+        )
+
+    @check_workchain_step
     def finalize(self):
-        self.report("Adding outputs from WindowSearch workflow.")
-        windowsearch = self.ctx.windowsearch
-        for label, node in windowsearch.get_outputs(
+        self.report("Adding outputs from model evaluation workflow.")
+        for label, node in self.ctx.model_evaluation_wf.get_outputs(
             also_labels=True, link_type=LinkType.RETURN
         ):
             self.out(label, node)
