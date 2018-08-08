@@ -53,7 +53,7 @@ codes:
 
 pseudo_families:
   pbe:
-    command_name: aiida_vasp.commands.paw._Paw
+    command_name: aiida_vasp.commands.potcar.uploadfamily
     folder: /home/greschd/programming/aiida/vasp_potentials_minimal
     group_description: VASP 5.4 potpaw_PBE
 
