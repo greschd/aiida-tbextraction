@@ -18,6 +18,10 @@ computers:
     configuration:
       username: greschd
       proxy_command: ssh -W monch.cscs.ch:22 ela.cscs.ch
+      key_filename: /home/greschd/.ssh/monch_rsa
+      timeout: 120
+      safe_interval: 20
+
 
 codes:
   tbmodels:

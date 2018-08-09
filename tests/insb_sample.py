@@ -22,10 +22,10 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     structure.set_ase(read_vasp(sample('InSb/POSCAR')))
     res['structure'] = structure
 
-    Paw = DataFactory('vasp.paw')  # pylint: disable=invalid-name
+    PotcarData = DataFactory('vasp.potcar')  # pylint: disable=invalid-name
     res['potentials'] = {
-        'In': Paw.load_paw(family='pbe', symbol='In_d')[0],
-        'Sb': Paw.load_paw(family='pbe', symbol='Sb')[0]
+        'In': PotcarData.find_one(family='pbe', symbol='In_d'),
+        'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
     }
 
     res['parameters'] = ParameterData(

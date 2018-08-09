@@ -1,5 +1,6 @@
 """
-Defines the workflow that runs first-principles calculations and creates an optimized tight-binding model.
+Defines the workflow that runs first-principles calculations and creates a
+tight-binding model, without running the window optimization.
 """
 
 try:
@@ -73,7 +74,9 @@ class FirstPrinciplesTightBinding(WorkChain):
             help='Indices for slicing (re-ordering) the tight-binding model.'
         )
 
-        spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model', 'reference_bands'])
+        spec.expose_inputs(
+            ModelEvaluationBase, exclude=['tb_model', 'reference_bands']
+        )
         spec.input_namespace(
             'model_evaluation',
             dynamic=True,
@@ -186,6 +189,9 @@ class FirstPrinciplesTightBinding(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add the outputs from the evaluation workflow.
+        """
         self.report("Adding outputs from model evaluation workflow.")
         for label, node in self.ctx.model_evaluation_wf.get_outputs(
             also_labels=True, link_type=LinkType.RETURN

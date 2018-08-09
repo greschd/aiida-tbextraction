@@ -148,6 +148,9 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add the outputs of the windowsearch sub-workflow.
+        """
         self.report("Adding outputs from WindowSearch workflow.")
         windowsearch = self.ctx.windowsearch
         for label, node in windowsearch.get_outputs(

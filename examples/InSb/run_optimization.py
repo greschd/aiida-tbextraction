@@ -140,8 +140,10 @@ def create_builder():
     # Set the resource requirements for the Wannier90 run
     builder.wannier_calculation_kwargs = dict(
         options=dict(
-            resources={'num_machines': 1,
-                       'tot_num_mpiprocs': 1},
+            resources={
+                'num_machines': 1,
+                'tot_num_mpiprocs': 1
+            },
             withmpi=False,
             queue_name='dphys_compute',
         )

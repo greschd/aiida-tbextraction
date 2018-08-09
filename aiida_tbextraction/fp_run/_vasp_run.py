@@ -120,14 +120,19 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         Run the SCF calculation step.
         """
         self.report('Launching SCF calculation.')
+
         return ToContext(
             scf=self.submit(
                 VaspCalculation.process(),
-                paw=self.inputs.potentials,
+                potential={(kind, ): pot
+                           for kind, pot in self.inputs.potentials.items()},
                 kpoints=self.inputs.kpoints_mesh,
                 settings=ParameterData(
                     dict={
-                        'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR']
+                        'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR'],
+                        'parser_settings': {
+                            'add_wavecar': True
+                        }
                     }
                 ),
                 **self._collect_common_inputs(
@@ -142,7 +147,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         """
         Helper to collect the inputs for the reference bands and wannier input workflows.
         """
-        scf_wavefun = self.ctx.scf.out.wavefunctions
+        scf_wavefun = self.ctx.scf.out.wavecar
         res = self._collect_common_inputs(namespace)
         res['potentials'] = self.inputs.potentials
         res['calculation_kwargs']['wavefunctions'] = scf_wavefun
@@ -195,6 +200,10 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @staticmethod
     def check_read_wavecar(sub_workflow):
+        """
+        Check that the calculation in the given sub-workflow uses the
+        wavefunctions input.
+        """
         for label, node in sub_workflow.get_outputs(also_labels=True):
             if label == 'CALL' and isinstance(node, VaspCalculation):
                 retrieved_folder = node.get_retrieved_node()
