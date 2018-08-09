@@ -9,7 +9,7 @@ from insb_sample import *  # pylint: disable=unused-wildcard-import
 
 def test_strained_fp_tb(
     configure_with_daemon,  # pylint: disable=unused-argument
-    get_fp_tb_input,  # pylint: disable=redefined-outer-name
+    get_optimize_fp_tb_input,  # pylint: disable=redefined-outer-name
 ):
     """
     Run the DFT tight-binding optimization workflow with strain on an InSb sample for three strain values.
@@ -18,7 +18,7 @@ def test_strained_fp_tb(
     from aiida.orm.code import Code
     from aiida.orm.data.base import Str, List
     from aiida_tbextraction.optimize_strained_fp_tb import OptimizeStrainedFirstPrinciplesTightBinding
-    inputs = get_fp_tb_input
+    inputs = get_optimize_fp_tb_input
 
     inputs['strain_kind'] = Str('three_five.Biaxial001')
     inputs['strain_parameters'] = Str('InSb')

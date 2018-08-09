@@ -2,26 +2,10 @@
 Defines helper InlineCalculations for the first-principles workflows.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
-
 import numpy as np
 
 from aiida.orm import DataFactory
 from aiida.orm.calculation.inline import make_inline
-
-
-@make_inline
-def merge_parameters_inline(param_main, param_fallback):
-    """
-    Merges two ParameterData objects. The values of ``param_main`` take priority over those of ``param_fallback``.
-    """
-    res_dict = dict(
-        **ChainMap(param_main.get_dict(), param_fallback.get_dict())
-    )
-    return {'parameters': DataFactory('parameter')(dict=res_dict)}
 
 
 @make_inline

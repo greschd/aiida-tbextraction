@@ -22,7 +22,7 @@ from aiida_tools import check_workchain_step
 # from .wannier_input import VaspWannierInput
 # from .reference_bands import VaspReferenceBands
 from ._base import FirstPrinciplesRunBase
-from ._helpers._inline_calcs import merge_parameters_inline
+from ..._inline_calcs import merge_parameterdata_inline
 
 
 @export
@@ -65,15 +65,15 @@ class QEFirstPrinciplesRun(FirstPrinciplesRunBase):
     #     if ns_parameters is None:
     #         parameters = self.inputs.parameters
     #     else:
-    #         parameters = merge_parameters_inline(
+    #         parameters = merge_parameterdata_inline(
     #             param_main=ns_parameters,
     #             param_fallback=self.inputs.parameters
-    #         )[1]['parameters']
+    #         )[1]
     #         if force_parameters:
-    #             parameters = merge_parameters_inline(
+    #             parameters = merge_parameterdata_inline(
     #                 param_main=ParameterData(dict=force_parameters),
     #                 param_fallback=parameters
-    #             )[1]['parameters']
+    #             )[1]
     #     calculation_kwargs = copy.deepcopy(
     #         dict(
     #             ChainMap(
