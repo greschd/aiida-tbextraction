@@ -31,16 +31,17 @@ if __name__ == '__main__':
         setup_requires=['reentry'],
         reentry_register=True,
         install_requires=[
-            'aiida-core', 'aiida-vasp', 'aiida-wannier90',
-            'aiida-bands-inspect', 'aiida-tbmodels', 'aiida-strain',
-            'aiida-optimize', 'fsc.export', 'aiida-tools'
+            'aiida-core', 'aiida-wannier90', 'aiida-bands-inspect',
+            'aiida-tbmodels', 'aiida-optimize', 'fsc.export', 'aiida-tools'
         ],
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],
             'dev': [
                 'pymatgen', 'aiida-pytest', 'ase', 'yapf==0.19', 'pre-commit',
                 'sphinx-rtd-theme', 'sphinx-pyreverse'
-            ]
+            ],
+            'strain': ['aiida-strain'],
+            'vasp': ['aiida-vasp'],
         },
         entry_points={},
     )
