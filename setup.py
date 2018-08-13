@@ -33,7 +33,7 @@ if __name__ == '__main__':
         install_requires=[
             'aiida-core', 'aiida-vasp', 'aiida-wannier90',
             'aiida-bands-inspect', 'aiida-tbmodels', 'aiida-strain',
-            'aiida-optimize', 'fsc.export', 'aiida-tools'
+            'aiida-optimize', 'fsc.export', 'aiida-tools', 'future',
         ],
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],

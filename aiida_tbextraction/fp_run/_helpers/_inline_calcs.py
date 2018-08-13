@@ -7,9 +7,11 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+from past.builtins import basestring
 import numpy as np
 
 from aiida.orm import DataFactory
+from aiida.orm.data.parameter import ParameterData
 from aiida.orm.calculation.inline import make_inline
 
 
@@ -67,3 +69,23 @@ def crop_bands_inline(bands, kpoints):
     cropped_bands_array = bands.get_bands()[band_slice]
     cropped_bands.set_bands(cropped_bands_array)
     return {'bands': cropped_bands}
+
+@make_inline
+def reduce_num_wann_inline(wannier_parameters):
+    wannier_param_dict = wannier_parameters.get_dict()
+    if 'exclude_bands' in wannier_param_dict and 'num_bands' in wannier_param_dict:
+        exclude_bands_val = wannier_param_dict['exclude_bands']
+        if isinstance(exclude_bands_val, basestring):
+            num_excluded = 0
+            for part in exclude_bands_val.split(','):
+                if '-' in part:
+                    lower, upper = [int(x) for x in part.split('-')]
+                    diff = (upper - lower) + 1
+                    assert diff > 0
+                    num_excluded += diff
+                else:
+                    num_excluded += 1
+        wannier_param_dict['num_bands'] = int(wannier_param_dict['num_bands']) - num_excluded
+        return ParameterData(dict=wannier_param_dict)
+    else:
+        return wannier_parameters
