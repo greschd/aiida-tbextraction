@@ -14,6 +14,8 @@ from aiida_vasp.io.win import WinParser
 
 from . import WannierInputBase
 
+from .._helpers._inline_calcs import reduce_num_wann_inline
+
 
 @export
 class VaspWannierInput(WannierInputBase):
@@ -83,7 +85,11 @@ class VaspWannierInput(WannierInputBase):
         )
         self.report("Adding Wannier90 inputs to output.")
         self.out('wannier_input_folder', retrieved_folder)
-        self.out('wannier_parameters', vasp_calc_output.wannier_parameters)
+        # reduce 'num_wann' if 'exclude_bands' is given
+        self.out(
+            'wannier_parameters',
+            reduce_num_wann_inline(vasp_calc_output.wannier_parameters)[1]
+        )
         self.out('wannier_bands', self.parse_wannier_bands(retrieved_folder))
         self.out('wannier_projections', vasp_calc_output.wannier_projections)
 

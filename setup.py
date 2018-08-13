@@ -32,7 +32,7 @@ if __name__ == '__main__':
         reentry_register=True,
         install_requires=[
             'aiida-core', 'aiida-wannier90', 'aiida-bands-inspect',
-            'aiida-tbmodels', 'aiida-optimize', 'fsc.export', 'aiida-tools'
+            'aiida-tbmodels', 'aiida-optimize', 'fsc.export', 'aiida-tools', 'future'
         ],
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],
