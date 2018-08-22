@@ -151,7 +151,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         res = self._collect_common_inputs(namespace)
         res['potentials'] = self.inputs.potentials
         res['calculation_kwargs']['wavefunctions'] = scf_wavefun
-        self.report(res['calculation_kwargs'])
+        self.report('Collected inputs: {}'.format(res))
         return res
 
     @check_workchain_step
@@ -159,24 +159,28 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         """
         Run the reference bands and wannier input workflows.
         """
-        self.report('Launching bands and to_wannier workchains.')
-        return ToContext(
-            bands=self.submit(
-                VaspReferenceBands,
-                kpoints=self.inputs.kpoints,
-                kpoints_mesh=self.inputs.kpoints_mesh,
-                merge_kpoints=self.inputs.bands['merge_kpoints'],
-                **self._collect_workchain_inputs('bands')
+
+        self.report('Launching bands workchain.')
+        bands_run = self.submit(
+            VaspReferenceBands,
+            kpoints=self.inputs.kpoints,
+            kpoints_mesh=self.inputs.kpoints_mesh,
+            merge_kpoints=self.inputs.bands['merge_kpoints'],
+            **self._collect_workchain_inputs('bands')
+        )
+        self.report('Launching to_wannier workchain.')
+        to_wannier_run = self.submit(
+            VaspWannierInput,
+            kpoints_mesh=self.inputs.kpoints_mesh,
+            wannier_parameters=self.inputs.get('wannier_parameters', None),
+            wannier_projections=self.inputs.get(
+                'wannier_projections', None
             ),
-            to_wannier=self.submit(
-                VaspWannierInput,
-                kpoints_mesh=self.inputs.kpoints_mesh,
-                wannier_parameters=self.inputs.get('wannier_parameters', None),
-                wannier_projections=self.inputs.get(
-                    'wannier_projections', None
-                ),
-                **self._collect_workchain_inputs('to_wannier')
-            )
+            **self._collect_workchain_inputs('to_wannier')
+        )
+        return ToContext(
+            bands=bands_run,
+            to_wannier=to_wannier_run
         )
 
     @check_workchain_step
