@@ -22,6 +22,7 @@ from .model_evaluation import ModelEvaluationBase
 from .calculate_tb import TightBindingCalculation
 from .fp_run import FirstPrinciplesRunBase
 from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
+from .energy_windows.auto_guess import add_initial_window_inline
 
 
 @export
@@ -143,14 +144,24 @@ class FirstPrinciplesTightBinding(WorkChain):
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
 
+        # get automatic guess for windows if needed
+        wannier_bands = self.ctx.fp_run.out.wannier_bands
+        wannier_parameters = add_initial_window_inline(
+            wannier_bands=wannier_bands,
+            slice_reference_bands=self.inputs.get(
+                'slice_reference_bands',
+                List(list=range(wannier_bands.get_bands().shape[1]))
+            )
+        )[1]['result']
+
         self.report("Starting TightBindingCalculation workflow.")
         return ToContext(
             tbextraction_calc=self.submit(
                 TightBindingCalculation,
                 # reference_bands=reference_bands,
                 wannier_kpoints=self.ctx.fp_run.out.wannier_bands,
-                wannier_bands=self.ctx.fp_run.out.wannier_bands,
-                wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
+                wannier_bands=wannier_bands,
+                wannier_parameters=wannier_parameters,
                 wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
