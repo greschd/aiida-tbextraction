@@ -20,6 +20,7 @@ from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
 from .energy_windows.windowsearch import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
 from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
+from .energy_windows.auto_guess import get_initial_window_inline
 
 
 @export
@@ -45,12 +46,21 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         spec.expose_inputs(
             WindowSearch,
             exclude=(
+                'initial_window',
                 'wannier_bands',
                 'reference_bands',
                 'wannier_parameters',
                 'wannier_input_folder',
                 'slice_idx',
             )
+        )
+        # initial window is not required because it can be guessed.
+        spec.input(
+            'initial_window',
+            valid_type=List,
+            help=
+            'Initial value for the disentanglement energy windows, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.',
+            required=False
         )
 
         spec.input(
@@ -132,16 +142,29 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
 
+        self.report('Get or guess initial window.')
+        wannier_bands = self.ctx.fp_run.out.wannier_bands
+        initial_window = self.inputs.get('initial_window', None)
+        if initial_window is None:
+            initial_window = get_initial_window_inline(
+                wannier_bands=wannier_bands,
+                slice_reference_bands=self.inputs.get(
+                    'slice_reference_bands',
+                    List(list=range(wannier_bands.get_bands().shape[1]))
+                )
+            )[1]
+
         self.report("Starting WindowSearch workflow.")
         return ToContext(
             windowsearch=self.submit(
                 WindowSearch,
                 reference_bands=reference_bands,
-                wannier_bands=self.ctx.fp_run.out.wannier_bands,
+                wannier_bands=wannier_bands,
                 wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
                 wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
+                initial_window=initial_window,
                 **inputs
             )
         )

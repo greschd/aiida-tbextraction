@@ -8,13 +8,13 @@ from .._inline_calcs import merge_parameterdata_inline
 
 
 @make_inline
-def get_initial_window_inline(wannier_bands, reference_bands_slice):
+def get_initial_window_inline(wannier_bands, slice_reference_bands):
     return {
         'result':
         List(
             list=guess_window(
                 wannier_bands=wannier_bands,
-                reference_bands_slice=reference_bands_slice
+                slice_reference_bands=slice_reference_bands
             )
         )
     }
@@ -22,20 +22,18 @@ def get_initial_window_inline(wannier_bands, reference_bands_slice):
 
 @make_inline
 def add_initial_window_inline(
-    wannier_parameters, wannier_bands, reference_bands_slice
+    wannier_parameters, wannier_bands, slice_reference_bands
 ):
     wannier_param_dict = wannier_parameters.get_dict()
     window_keys = [
         'dis_win_min', 'dis_froz_min', 'dis_froz_max', 'dis_win_max'
     ]
-    # Cases where no disentanglement is needed, or the disentanglement windows
-    # are already set.
+    # Check if disentanglement is needed.
     if (
         ('num_bands' not in wannier_param_dict) or
-        (int(wannier_param_dict['num_bands']) != int(wannier_param_dict['num_wann'])) or
-        any(key in wannier_param_dict for key in window_keys)
+        (int(wannier_param_dict['num_bands']) == int(wannier_param_dict['num_wann']))
     ):
-        return {'result': wannier_parameters}
+        return {'result': ParameterData(dict=wannier_param_dict)}
     else:
         window_dict = {
             key: value
@@ -43,7 +41,7 @@ def add_initial_window_inline(
                 window_keys,
                 guess_window(
                     wannier_bands=wannier_bands,
-                    reference_bands_slice=reference_bands_slice
+                    slice_reference_bands=slice_reference_bands
                 )
             )
         }
@@ -56,9 +54,9 @@ def add_initial_window_inline(
         }
 
 
-def guess_window(wannier_bands, reference_bands_slice):
+def guess_window(wannier_bands, slice_reference_bands):
     DELTA = 0.01
-    bands_sliced = wannier_bands.get_bands()[:, list(reference_bands_slice)]
+    bands_sliced = wannier_bands.get_bands()[:, list(slice_reference_bands)]
     lowest_band = bands_sliced[:, 0]
     highest_band = bands_sliced[:, -1]
     outer_lower = np.min(lowest_band) - DELTA
