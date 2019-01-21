@@ -6,7 +6,7 @@
 Defines helper InlineCalculations for the first-principles workflows.
 """
 
-from past.builtins import basestring
+from past.builtins import basestring  # pylint: disable=redefined-builtin
 import numpy as np
 
 from aiida.orm import DataFactory
@@ -61,19 +61,27 @@ def crop_bands_inline(bands, kpoints):
 
 @make_inline
 def reduce_num_wann_inline(wannier_parameters):
+    """
+    Reduces the ``num_wann`` in a Wannier90 input by the number of bands
+    in its ``exclude_bands`` parameter.
+    """
     wannier_param_dict = wannier_parameters.get_dict()
     if 'exclude_bands' in wannier_param_dict and 'num_bands' in wannier_param_dict:
         exclude_bands_val = wannier_param_dict['exclude_bands']
-        if isinstance(exclude_bands_val, basestring):
-            num_excluded = 0
-            for part in exclude_bands_val.split(','):
-                if '-' in part:
-                    lower, upper = [int(x) for x in part.split('-')]
-                    diff = (upper - lower) + 1
-                    assert diff > 0
-                    num_excluded += diff
-                else:
-                    num_excluded += 1
+        if not isinstance(exclude_bands_val, basestring):
+            raise ValueError(
+                "Invalid value for 'exclude_bands': '{}'".
+                format(exclude_bands_val)
+            )
+        num_excluded = 0
+        for part in exclude_bands_val.split(','):
+            if '-' in part:
+                lower, upper = [int(x) for x in part.split('-')]
+                diff = (upper - lower) + 1
+                assert diff > 0
+                num_excluded += diff
+            else:
+                num_excluded += 1
         wannier_param_dict['num_bands'] = int(
             wannier_param_dict['num_bands']
         ) - num_excluded
