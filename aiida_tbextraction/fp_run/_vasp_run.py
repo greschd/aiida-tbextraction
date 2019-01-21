@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow for running the first-principles calculations using VASP.
 """
@@ -173,15 +177,10 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
             VaspWannierInput,
             kpoints_mesh=self.inputs.kpoints_mesh,
             wannier_parameters=self.inputs.get('wannier_parameters', None),
-            wannier_projections=self.inputs.get(
-                'wannier_projections', None
-            ),
+            wannier_projections=self.inputs.get('wannier_projections', None),
             **self._collect_workchain_inputs('to_wannier')
         )
-        return ToContext(
-            bands=bands_run,
-            to_wannier=to_wannier_run
-        )
+        return ToContext(bands=bands_run, to_wannier=to_wannier_run)
 
     @check_workchain_step
     def finalize(self):

@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow for running the tight-binding calculation and evaluation for a given energy window.
 """
@@ -62,9 +66,8 @@ class RunWindow(WorkChain):
 
         spec.expose_outputs(ModelEvaluationBase)
         spec.outline(
-            if_(cls.window_valid)(
-                cls.calculate_model, cls.evaluate_bands, cls.finalize
-            ),
+            if_(cls.window_valid
+                )(cls.calculate_model, cls.evaluate_bands, cls.finalize),
             if_(cls.window_invalid)(cls.abort_invalid)
         )
 

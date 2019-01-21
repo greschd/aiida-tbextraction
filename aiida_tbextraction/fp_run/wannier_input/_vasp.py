@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow that calculates the Wannier90 input files using VASP.
 """

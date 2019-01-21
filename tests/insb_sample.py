@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines fixtures to create the InSb input for VASP and the optimization workflows.
 """
@@ -94,13 +98,15 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     if request.param == 'split':
         inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
         inputs['fp_run'] = dict()
-        inputs['fp_run']['reference_bands_workflow'
-                         ] = get_fullname(VaspReferenceBands)
+        inputs['fp_run']['reference_bands_workflow'] = get_fullname(
+            VaspReferenceBands
+        )
         inputs['fp_run']['reference_bands'] = dict(
             merge_kpoints=Bool(True), **vasp_subwf_inputs
         )
-        inputs['fp_run']['wannier_input_workflow'
-                         ] = get_fullname(VaspWannierInput)
+        inputs['fp_run']['wannier_input_workflow'] = get_fullname(
+            VaspWannierInput
+        )
         inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
     else:

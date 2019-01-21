@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
+
 import numpy as np
 
 from aiida.orm.data.list import List
@@ -29,10 +34,10 @@ def add_initial_window_inline(
         'dis_win_min', 'dis_froz_min', 'dis_froz_max', 'dis_win_max'
     ]
     # Check if disentanglement is needed.
-    if (
-        ('num_bands' not in wannier_param_dict) or
-        (int(wannier_param_dict['num_bands']) == int(wannier_param_dict['num_wann']))
-    ):
+    if (('num_bands' not in wannier_param_dict) or (
+        int(wannier_param_dict['num_bands']
+            ) == int(wannier_param_dict['num_wann'])
+    )):
         return {'result': ParameterData(dict=wannier_param_dict)}
     else:
         window_dict = {

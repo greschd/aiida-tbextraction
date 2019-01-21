@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Tests the workflow which calculates the tight-binding model from a complete Wannier90 input folder and symmetry + slice inputs.
 """

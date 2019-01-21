@@ -1,4 +1,8 @@
 #!/usr/bin/env runaiida
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 
 import os
 
@@ -34,8 +38,8 @@ def load_potential(name, md5):
             return potential
         except ValueError:
             raise ValueError(
-                "Cannot load potential, check that the potential directory '{}' exists.".
-                format(pot_dir)
+                "Cannot load potential, check that the potential directory '{}' exists."
+                .format(pot_dir)
             )
 
 

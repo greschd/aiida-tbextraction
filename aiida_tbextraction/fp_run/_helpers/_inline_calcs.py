@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines helper InlineCalculations for the first-principles workflows.
 """
@@ -54,6 +58,7 @@ def crop_bands_inline(bands, kpoints):
     cropped_bands.set_bands(cropped_bands_array)
     return {'bands': cropped_bands}
 
+
 @make_inline
 def reduce_num_wann_inline(wannier_parameters):
     wannier_param_dict = wannier_parameters.get_dict()
@@ -69,7 +74,9 @@ def reduce_num_wann_inline(wannier_parameters):
                     num_excluded += diff
                 else:
                     num_excluded += 1
-        wannier_param_dict['num_bands'] = int(wannier_param_dict['num_bands']) - num_excluded
+        wannier_param_dict['num_bands'] = int(
+            wannier_param_dict['num_bands']
+        ) - num_excluded
         return ParameterData(dict=wannier_param_dict)
     else:
         return wannier_parameters
