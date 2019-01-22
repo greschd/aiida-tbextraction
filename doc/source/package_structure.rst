@@ -4,7 +4,7 @@
 Package Structure
 =================
 
-This is an automatically generated overview of the structure of ``aiida-optimize``.
+This is an automatically generated overview of the structure of ``aiida-tbextraction``.
 
 Classes
 -------
