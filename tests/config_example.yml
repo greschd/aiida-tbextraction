@@ -12,7 +12,7 @@ computers:
     description: Piz Daint
     transport: ssh
     scheduler: slurm
-    work_directory: /scratch/snx1600/{username}/test_aiida_tbextraction_run/
+    work_directory: /scratch/snx3000/{username}/test_aiida_tbextraction_run/
     num_cpus: 36
     mpirun_command: srun
     queue_name: normal

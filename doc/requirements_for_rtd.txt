@@ -1,0 +1,8 @@
+aiida-core>=1.0.0a1
+aiida-bands-inspect
+aiida-optimize
+aiida-wannier90
+aiida-tbmodels
+aiida-tools
+fsc.export
+future

@@ -3,8 +3,38 @@
 # © 2017-2019, ETH Zurich, Institut für Theoretische Physik
 # Author: Dominik Gresch <greschd@gmx.ch>
 
+import os
+import sys
+import time
+
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'rtd_settings'
+
 import aiida
-aiida.try_load_dbenv()
+
+from aiida.backends import settings
+
+# We set that we are in documentation mode - even for local compilation
+settings.IN_DOC_MODE = True
+
+# on_rtd is whether we are on readthedocs.org, this line of code grabbed
+# from docs.readthedocs.org
+# NOTE: it is needed to have these lines before load_dbenv()
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if not on_rtd:  # only import and set the theme if we're building docs locally
+    html_theme = 'sphinx_rtd_theme'
+    # Loading the dbenv. The backend should be fixed before compiling the
+    # documentation.
+    aiida.try_load_dbenv()
+else:
+    # Back-end settings for readthedocs online documentation.
+    # from aiida.backends import settings
+    settings.IN_RT_DOC_MODE = True
+    settings.BACKEND = "django"
+    settings.AIIDADB_PROFILE = "default"
+
 import aiida_tbextraction
 
 # -- General configuration ------------------------------------------------
@@ -35,7 +65,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'aiida-tbextraction'
-copyright = u'2017, Dominik Gresch'
+copyright = u'2017-{}, ETH Zurich'.format(time.localtime().tm_year)
 author = u'Dominik Gresch'
 
 # The version info for the project you're documenting, acts as replacement for
