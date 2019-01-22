@@ -4,7 +4,7 @@ aiida-bands-inspect
 aiida-optimize
 aiida-wannier90
 aiida-tbmodels
-parsevasp
+git+https://github.com/greschd/parsevasp.git#egg=parsevasp
 aiida-vasp
 aiida-tools
 fsc.export
