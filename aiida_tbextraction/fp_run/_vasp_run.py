@@ -151,7 +151,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         """
         Helper to collect the inputs for the reference bands and wannier input workflows.
         """
-        scf_wavefun = self.ctx.scf.out.wavecar
+        scf_wavefun = self.ctx.scf.out.output_wavecar
         res = self._collect_common_inputs(namespace)
         res['potentials'] = self.inputs.potentials
         res['calculation_kwargs']['wavefunctions'] = scf_wavefun
