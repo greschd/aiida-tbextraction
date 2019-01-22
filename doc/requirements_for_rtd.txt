@@ -1,3 +1,4 @@
+pymatgen<2019
 aiida-core>=1.0.0a1
 aiida-strain
 aiida-bands-inspect
