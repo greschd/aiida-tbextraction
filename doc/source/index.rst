@@ -5,7 +5,7 @@ AiiDA tight-binding extraction
 
 Please cite:
 
-* *High-throughput construction of symmetrized Wannier tight-binding models from ab initio calculations*, D. Gresch, Q.S. Wu, G. Winkler, R. Häuselmann, M. Troyer, and A. A. Soluyanov,  *in preparation*.
+* *Automated construction of symmetrized Wannier-like tight-binding models from ab initio calculations*, D. Gresch, Q.S. Wu, G. Winkler, R. Häuselmann, M. Troyer, and A. A. Soluyanov,  `Phys. Rev Materials 2 (10), 103805 (2018) <http://dx.doi.org/10.1103/PhysRevMaterials.2.103805>`_.
 * *AiiDA: automated interactive infrastructure and database for computational science*, G. Pizzi, A. Cepellotti, R. Sabatini, N. Marzari, and B. Kozinsky, `Comp. Mat. Sci. 111, 218-230 (2016) <http://dx.doi.org/10.1016/j.commatsci.2015.09.013>`_
 * *An updated version of wannier90: A tool for obtaining maximally-localised Wannier functions*, A. A. Mostofi, J. R. Yates, G. Pizzi, Y. S. Lee, I. Souza, D. Vanderbilt, N. Marzari `Comput. Phys. Commun. 185, 2309 (2014) <http://dx.doi.org/10.1016/j.cpc.2014.05.003>`_
 
