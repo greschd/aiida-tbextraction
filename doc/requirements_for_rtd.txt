@@ -4,6 +4,7 @@ aiida-bands-inspect
 aiida-optimize
 aiida-wannier90
 aiida-tbmodels
+aiida-vasp
 aiida-tools
 fsc.export
 future
