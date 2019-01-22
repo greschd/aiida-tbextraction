@@ -6,3 +6,4 @@ aiida-tbmodels
 aiida-tools
 fsc.export
 future
+sphinx-pyreverse
