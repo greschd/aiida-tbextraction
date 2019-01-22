@@ -15,5 +15,4 @@ try:
     from ._vasp_run import VaspFirstPrinciplesRun
     __all__ += _vasp_run.__all__  # pylint: disable=undefined-variable
 except ImportError:
-    raise
     pass
