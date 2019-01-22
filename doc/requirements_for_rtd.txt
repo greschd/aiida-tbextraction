@@ -6,4 +6,4 @@ aiida-tbmodels
 aiida-tools
 fsc.export
 future
-git+https://github.com/greschd/sphinx-pyreverse#egg=sphinx-pyreverse
+git+https://github.com/greschd/sphinx-pyreverse@flag_feature#egg=sphinx-pyreverse
