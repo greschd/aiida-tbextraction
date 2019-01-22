@@ -1,5 +1,6 @@
 pymatgen<2019
 numpy==1.14.3
+six==1.11.0
 aiida-core>=1.0.0a1
 aiida-strain
 aiida-bands-inspect
