@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines fixtures to create the InSb input for VASP and the optimization workflows.
 """
@@ -22,10 +26,10 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     structure.set_ase(read_vasp(sample('InSb/POSCAR')))
     res['structure'] = structure
 
-    Paw = DataFactory('vasp.paw')  # pylint: disable=invalid-name
+    PotcarData = DataFactory('vasp.potcar')  # pylint: disable=invalid-name
     res['potentials'] = {
-        'In': Paw.load_paw(family='pbe', symbol='In_d')[0],
-        'Sb': Paw.load_paw(family='pbe', symbol='Sb')[0]
+        'In': PotcarData.find_one(family='pbe', symbol='In_d'),
+        'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
     }
 
     res['parameters'] = ParameterData(
@@ -69,7 +73,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
 @pytest.fixture(params=['combined', 'split'])
 def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disable=too-many-locals,unused-argument,redefined-outer-name,too-many-locals,too-many-statements
     """
-    Returns the input for DFT-based tight-binding optimization workflows.
+    Returns the input for DFT-based tight-binding workflows (without optimization).
     """
     from aiida.orm import DataFactory
     from aiida.orm.data.base import List, Bool
@@ -94,19 +98,21 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     if request.param == 'split':
         inputs['fp_run_workflow'] = SplitFirstPrinciplesRun
         inputs['fp_run'] = dict()
-        inputs['fp_run']['reference_bands_workflow'
-                         ] = get_fullname(VaspReferenceBands)
+        inputs['fp_run']['reference_bands_workflow'] = get_fullname(
+            VaspReferenceBands
+        )
         inputs['fp_run']['reference_bands'] = dict(
             merge_kpoints=Bool(True), **vasp_subwf_inputs
         )
-        inputs['fp_run']['wannier_input_workflow'
-                         ] = get_fullname(VaspWannierInput)
+        inputs['fp_run']['wannier_input_workflow'] = get_fullname(
+            VaspWannierInput
+        )
         inputs['fp_run']['wannier_input'] = vasp_subwf_inputs
 
     else:
         assert request.param == 'combined'
         inputs['fp_run_workflow'] = VaspFirstPrinciplesRun
-        inputs['fp_run'] = copy.deepcopy(vasp_subwf_inputs)
+        inputs['fp_run'] = copy.copy(vasp_subwf_inputs)
         inputs['fp_run']['scf'] = {
             'parameters': ParameterData(dict=dict(isym=2)),
         }
@@ -128,10 +134,6 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     inputs['model_evaluation'] = {
         'bands_inspect_code': Code.get_from_string('bands_inspect')
     }
-
-    initial_window = List()
-    initial_window.extend([-4.5, -4, 6.5, 16])
-    inputs['initial_window'] = initial_window
 
     wannier_parameters = DataFactory('parameter')(
         dict=dict(
@@ -166,5 +168,18 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     slice_tb_model = List()
     slice_tb_model.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
     inputs['slice_tb_model'] = slice_tb_model
+
+    return inputs
+
+
+@pytest.fixture
+def get_optimize_fp_tb_input(get_fp_tb_input):  # pylint: disable=redefined-outer-name
+    """
+    Get the input for the first-principles tight-binding workflow with optimization.
+    """
+    from aiida.orm.data.base import List
+
+    inputs = get_fp_tb_input
+    inputs['initial_window'] = List(list=[-4.5, -4, 6.5, 16])
 
     return inputs

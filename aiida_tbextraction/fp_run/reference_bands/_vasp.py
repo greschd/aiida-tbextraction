@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow that calculates the reference bandstructure using VASP.
 """
@@ -5,13 +9,16 @@ Defines a workflow that calculates the reference bandstructure using VASP.
 from fsc.export import export
 
 from aiida.orm.data.base import Bool
-from aiida.orm import Code, DataFactory, CalculationFactory
+from aiida.orm.data.parameter import ParameterData
+from aiida.orm import Code, CalculationFactory
 from aiida.work.workchain import ToContext
 
 from aiida_tools import check_workchain_step
 
 from . import ReferenceBandsBase
-from .._helpers._inline_calcs import flatten_bands_inline, crop_bands_inline, merge_kpoints_inline
+from .._helpers._inline_calcs import (
+    flatten_bands_inline, crop_bands_inline, merge_kpoints_inline
+)
 
 
 @export
@@ -23,7 +30,6 @@ class VaspReferenceBands(ReferenceBandsBase):
     @classmethod
     def define(cls, spec):
         super(VaspReferenceBands, cls).define(spec)
-        ParameterData = DataFactory('parameter')
         spec.input('code', valid_type=Code, help='Code that runs VASP.')
         spec.input(
             'parameters',
@@ -66,10 +72,13 @@ class VaspReferenceBands(ReferenceBandsBase):
             vasp_calc=self.submit(
                 CalculationFactory('vasp.vasp').process(),
                 structure=self.inputs.structure,
-                paw=self.inputs.potentials,
+                potential=self.inputs.potentials,
                 kpoints=kpoints,
                 parameters=self.inputs.parameters,
                 code=self.inputs.code,
+                settings=ParameterData(
+                    dict=dict(parser_settings=dict(add_bands=True))
+                ),
                 **self.inputs.get('calculation_kwargs', {})
             )
         )
@@ -79,7 +88,7 @@ class VaspReferenceBands(ReferenceBandsBase):
         """
         Get the bands from the VASP calculation and crop the 'mesh' k-points if necessary.
         """
-        bands = self.ctx.vasp_calc.out.bands
+        bands = self.ctx.vasp_calc.out.output_bands
         self.report("Flattening the output bands.")
         res_bands = flatten_bands_inline(bands=bands)[1]['bands']
         if self.inputs.merge_kpoints:

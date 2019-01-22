@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
-Defines the workflow that runs first-principles calculations and creates an optimized tight-binding model.
+Defines the workflow that runs first-principles calculations and creates a
+tight-binding model, without running the window optimization.
 """
 
 try:
@@ -9,7 +14,7 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.orm.data.base import List
+from aiida.orm.data.base import List, Bool
 from aiida.orm.data.parameter import ParameterData
 from aiida.work.workchain import WorkChain, ToContext
 from aiida.common.links import LinkType
@@ -20,6 +25,7 @@ from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
 from .model_evaluation import ModelEvaluationBase
 from .calculate_tb import TightBindingCalculation
 from .fp_run import FirstPrinciplesRunBase
+from .energy_windows.auto_guess import add_initial_window_inline
 from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
 
 
@@ -72,8 +78,16 @@ class FirstPrinciplesTightBinding(WorkChain):
             required=False,
             help='Indices for slicing (re-ordering) the tight-binding model.'
         )
+        spec.input(
+            'guess_windows',
+            valid_type=Bool,
+            default=Bool(False),
+            help='Add disentanglement windows guessed from the wannier bands.'
+        )
 
-        spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model', 'reference_bands'])
+        spec.expose_inputs(
+            ModelEvaluationBase, exclude=['tb_model', 'reference_bands']
+        )
         spec.input_namespace(
             'model_evaluation',
             dynamic=True,
@@ -128,7 +142,7 @@ class FirstPrinciplesTightBinding(WorkChain):
         wannier_settings = merge_parameterdata_inline(
             param_primary=wannier_settings_explicit,
             param_secondary=wannier_settings_from_wf
-        )[1]['result']
+        )[1]
 
         # prefer wannier_projections from wannier_input workflow if it exists
         wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
@@ -140,14 +154,26 @@ class FirstPrinciplesTightBinding(WorkChain):
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
 
+        # get automatic guess for windows if needed
+        wannier_bands = self.ctx.fp_run.out.wannier_bands
+        wannier_parameters = self.ctx.fp_run.out.wannier_parameters
+        if self.inputs.guess_windows:
+            wannier_parameters = add_initial_window_inline(
+                wannier_parameters=wannier_parameters,
+                wannier_bands=wannier_bands,
+                slice_reference_bands=self.inputs.get(
+                    'slice_reference_bands',
+                    List(list=range(wannier_bands.get_bands().shape[1]))
+                )
+            )[1]
+
         self.report("Starting TightBindingCalculation workflow.")
         return ToContext(
             tbextraction_calc=self.submit(
                 TightBindingCalculation,
-                # reference_bands=reference_bands,
-                wannier_kpoints=self.ctx.fp_run.out.wannier_bands,
-                wannier_bands=self.ctx.fp_run.out.wannier_bands,
-                wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
+                wannier_kpoints=wannier_bands,
+                wannier_bands=wannier_bands,
+                wannier_parameters=wannier_parameters,
                 wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
@@ -186,6 +212,9 @@ class FirstPrinciplesTightBinding(WorkChain):
 
     @check_workchain_step
     def finalize(self):
+        """
+        Add the outputs from the evaluation workflow.
+        """
         self.report("Adding outputs from model evaluation workflow.")
         for label, node in self.ctx.model_evaluation_wf.get_outputs(
             also_labels=True, link_type=LinkType.RETURN

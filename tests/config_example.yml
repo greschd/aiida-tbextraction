@@ -7,17 +7,26 @@ computers:
     work_directory: /tmp/test_aiida_tbextraction_run
     prepend_text: 'unset PYTHONPATH'
 
-  monch:
-    hostname: monch.cscs.ch
-    description: monch cluster
+  daint:
+    hostname: daint.cscs.ch
+    description: Piz Daint
     transport: ssh
     scheduler: slurm
-    work_directory: /mnt/lnec/{username}/test_aiida_tbextraction_run/
-    num_cpus: 20
-    queue_name: express_compute
+    work_directory: /scratch/snx3000/{username}/test_aiida_tbextraction_run/
+    num_cpus: 36
+    mpirun_command: srun
+    queue_name: normal
+    prepend_text: |
+      #SBATCH --account=eth4
+      #SBATCH --constraint=mc
+    append_text: ''
     configuration:
       username: greschd
-      proxy_command: ssh -W monch.cscs.ch:22 ela.cscs.ch
+      proxy_command: ssh -W daint.cscs.ch:22 ela.cscs.ch
+      key_filename: /home/greschd/.ssh/monch_rsa
+      timeout: 120
+      safe_interval: 30
+
 
 codes:
   tbmodels:
@@ -47,13 +56,13 @@ codes:
   vasp:
     description: VASP
     default_plugin: vasp.vasp
-    remote_computer: monch
-    remote_abspath: /users/greschd/software/vasp/vasp.5.3.5.noncol
+    remote_computer: daint
+    remote_abspath: /users/greschd/easybuild/daint/broadwell/software/VASP/5.4.4-CrayIntel-17.08-w90/bin/vasp_ncl
     prepend_text: source /users/greschd/software/vasp/load_modules.sh
 
 pseudo_families:
   pbe:
-    command_name: aiida_vasp.commands.paw._Paw
+    command_name: aiida_vasp.commands.potcar.uploadfamily
     folder: /home/greschd/programming/aiida/vasp_potentials_minimal
     group_description: VASP 5.4 potpaw_PBE
 

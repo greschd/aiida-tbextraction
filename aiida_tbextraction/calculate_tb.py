@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow for calculating a tight-binding model for a given Wannier90 input and symmetries.
 """
@@ -92,14 +96,14 @@ class TightBindingCalculation(WorkChain):
             valid_type=List,
             required=False,
             help=
-            'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'  # pylint: disable=line-too-long
+            'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'
         )
         spec.input(
             'symmetries',
             valid_type=DataFactory('singlefile'),
             required=False,
             help=
-            'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'  # pylint: disable=line-too-long
+            'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'
         )
         spec.output(
             'tb_model',

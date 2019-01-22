@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow that calculates the Wannier90 input files using VASP.
 """
@@ -53,7 +57,8 @@ class VaspWannierInput(WannierInputBase):
             vasp_calc=self.submit(
                 CalculationFactory('vasp.vasp2w90').process(),
                 structure=self.inputs.structure,
-                paw=self.inputs.potentials,
+                potential={(kind, ): pot
+                           for kind, pot in self.inputs.potentials.items()},
                 kpoints=self.inputs.kpoints_mesh,
                 parameters=self.inputs.parameters,
                 code=self.inputs.code,

@@ -1,3 +1,6 @@
+.. © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+.. Author: Dominik Gresch <greschd@gmx.ch>
+
 AiiDA tight-binding extraction
 ==============================
 
@@ -14,7 +17,6 @@ Please cite:
 
    tutorial/index.rst
    reference/index.rst
-   package_structure.rst
 
 
 Indices and tables

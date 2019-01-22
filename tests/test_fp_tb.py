@@ -13,47 +13,43 @@ from insb_sample import *  # pylint: disable=unused-wildcard-import
 
 def test_fp_tb(
     configure_with_daemon,  # pylint: disable=unused-argument
-    get_optimize_fp_tb_input,  # pylint: disable=redefined-outer-name
+    get_fp_tb_input,  # pylint: disable=redefined-outer-name
 ):
     """
-    Runs the DFT tight-binding optimization workflow on an InSb sample.
+    Runs the DFT tight-binding workflow on an InSb sample.
     """
     from aiida.work import run
     from aiida.orm.querybuilder import QueryBuilder
     from aiida_bands_inspect.calculations.difference import DifferenceCalculation
-    from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
+    from aiida_tbextraction.fp_tb import FirstPrinciplesTightBinding
 
     query = QueryBuilder()
     query.append(DifferenceCalculation)
 
-    result = run(
-        OptimizeFirstPrinciplesTightBinding, **get_optimize_fp_tb_input
-    )
+    result = run(FirstPrinciplesTightBinding, **get_fp_tb_input)
     print(result)
-    assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
+    assert all(key in result for key in ['cost_value', 'tb_model'])
 
 
 def test_fp_tb_submit(
     configure_with_daemon,  # pylint: disable=unused-argument
-    get_optimize_fp_tb_input,  # pylint: disable=redefined-outer-name
+    get_fp_tb_input,  # pylint: disable=redefined-outer-name
     wait_for,
 ):
     """
-    Runs the DFT tight-binding optimization workflow on an InSb sample.
+    Submits the DFT tight-binding workflow on an InSb sample.
     """
     from aiida.orm import load_node
     from aiida.work.launch import submit
     from aiida.orm.querybuilder import QueryBuilder
     from aiida_bands_inspect.calculations.difference import DifferenceCalculation
-    from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
+    from aiida_tbextraction.fp_tb import FirstPrinciplesTightBinding
 
     query = QueryBuilder()
     query.append(DifferenceCalculation)
 
-    pk = submit(
-        OptimizeFirstPrinciplesTightBinding, **get_optimize_fp_tb_input
-    ).pk
+    pk = submit(FirstPrinciplesTightBinding, **get_fp_tb_input).pk
     wait_for(pk)
     result = load_node(pk).get_outputs_dict()
     print(result)
-    assert all(key in result for key in ['cost_value', 'tb_model', 'window'])
+    assert all(key in result for key in ['cost_value', 'tb_model'])

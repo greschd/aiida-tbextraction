@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# © 2017-2019, ETH Zurich, Institut für Theoretische Physik
+# Author: Dominik Gresch <greschd@gmx.ch>
 """
 Defines a workflow for running the first-principles calculations using VASP.
 """
@@ -22,7 +26,7 @@ from aiida_tools import check_workchain_step
 from .wannier_input import VaspWannierInput
 from .reference_bands import VaspReferenceBands
 from ._base import FirstPrinciplesRunBase
-from ._helpers._inline_calcs import merge_parameters_inline
+from .._inline_calcs import merge_parameterdata_inline
 
 
 @export
@@ -86,15 +90,15 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         if ns_parameters is None:
             parameters = self.inputs.parameters
         else:
-            parameters = merge_parameters_inline(
-                param_main=ns_parameters,
-                param_fallback=self.inputs.parameters
-            )[1]['parameters']
+            parameters = merge_parameterdata_inline(
+                param_primary=ns_parameters,
+                param_secondary=self.inputs.parameters
+            )[1]
             if force_parameters:
-                parameters = merge_parameters_inline(
-                    param_main=ParameterData(dict=force_parameters),
-                    param_fallback=parameters
-                )[1]['parameters']
+                parameters = merge_parameterdata_inline(
+                    param_primary=ParameterData(dict=force_parameters),
+                    param_secondary=parameters
+                )[1]
         calculation_kwargs = copy.deepcopy(
             dict(
                 ChainMap(
@@ -120,14 +124,19 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         Run the SCF calculation step.
         """
         self.report('Launching SCF calculation.')
+
         return ToContext(
             scf=self.submit(
                 VaspCalculation.process(),
-                paw=self.inputs.potentials,
+                potential={(kind, ): pot
+                           for kind, pot in self.inputs.potentials.items()},
                 kpoints=self.inputs.kpoints_mesh,
                 settings=ParameterData(
                     dict={
-                        'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR']
+                        'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR'],
+                        'parser_settings': {
+                            'add_wavecar': True
+                        }
                     }
                 ),
                 **self._collect_common_inputs(
@@ -142,11 +151,11 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         """
         Helper to collect the inputs for the reference bands and wannier input workflows.
         """
-        scf_wavefun = self.ctx.scf.out.wavefunctions
+        scf_wavefun = self.ctx.scf.out.output_wavecar
         res = self._collect_common_inputs(namespace)
         res['potentials'] = self.inputs.potentials
         res['calculation_kwargs']['wavefunctions'] = scf_wavefun
-        self.report(res['calculation_kwargs'])
+        self.report('Collected inputs: {}'.format(res))
         return res
 
     @check_workchain_step
@@ -154,25 +163,24 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         """
         Run the reference bands and wannier input workflows.
         """
-        self.report('Launching bands and to_wannier workchains.')
-        return ToContext(
-            bands=self.submit(
-                VaspReferenceBands,
-                kpoints=self.inputs.kpoints,
-                kpoints_mesh=self.inputs.kpoints_mesh,
-                merge_kpoints=self.inputs.bands['merge_kpoints'],
-                **self._collect_workchain_inputs('bands')
-            ),
-            to_wannier=self.submit(
-                VaspWannierInput,
-                kpoints_mesh=self.inputs.kpoints_mesh,
-                wannier_parameters=self.inputs.get('wannier_parameters', None),
-                wannier_projections=self.inputs.get(
-                    'wannier_projections', None
-                ),
-                **self._collect_workchain_inputs('to_wannier')
-            )
+
+        self.report('Launching bands workchain.')
+        bands_run = self.submit(
+            VaspReferenceBands,
+            kpoints=self.inputs.kpoints,
+            kpoints_mesh=self.inputs.kpoints_mesh,
+            merge_kpoints=self.inputs.bands['merge_kpoints'],
+            **self._collect_workchain_inputs('bands')
         )
+        self.report('Launching to_wannier workchain.')
+        to_wannier_run = self.submit(
+            VaspWannierInput,
+            kpoints_mesh=self.inputs.kpoints_mesh,
+            wannier_parameters=self.inputs.get('wannier_parameters', None),
+            wannier_projections=self.inputs.get('wannier_projections', None),
+            **self._collect_workchain_inputs('to_wannier')
+        )
+        return ToContext(bands=bands_run, to_wannier=to_wannier_run)
 
     @check_workchain_step
     def finalize(self):
@@ -195,6 +203,10 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
 
     @staticmethod
     def check_read_wavecar(sub_workflow):
+        """
+        Check that the calculation in the given sub-workflow uses the
+        wavefunctions input.
+        """
         for label, node in sub_workflow.get_outputs(also_labels=True):
             if label == 'CALL' and isinstance(node, VaspCalculation):
                 retrieved_folder = node.get_retrieved_node()
