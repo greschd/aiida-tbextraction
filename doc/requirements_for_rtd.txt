@@ -8,7 +8,7 @@ aiida-optimize
 aiida-wannier90
 aiida-tbmodels
 git+https://github.com/greschd/parsevasp.git#egg=parsevasp
-git+https://github.com/greschd/aiida-vasp.git#egg=aiida-vasp
+git+https://github.com/greschd/aiida-vasp.git@develop#egg=aiida-vasp
 aiida-tools
 fsc.export
 future
