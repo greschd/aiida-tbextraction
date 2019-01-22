@@ -17,7 +17,6 @@ Please cite:
 
    tutorial/index.rst
    reference/index.rst
-   package_structure.rst
 
 
 Indices and tables
