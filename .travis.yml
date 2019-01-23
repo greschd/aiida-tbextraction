@@ -28,10 +28,11 @@ before_install:
   - sudo pip3 install bands-inspect
   - sudo pip3 install tbmodels
 install:
-  - pip install -U 'pip<19' wheel setuptools fastentrypoints
-  - pip install git+https://github.com/aiidateam/aiida_core@v1.0.0a4#egg=aiida_core
+  - pip install -U 'pip<19' wheel setuptools
+  - pip install git+https://github.com/greschd/aiida_core@fix_inf#egg=aiida_core
+  - pip install git+https://github.com/aiidateam/aiida-wannier90.git@workflows#egg=aiida-wannier90
   - pip install git+https://github.com/greschd/aiida_pytest@support_alpha_4#egg=aiida_pytest
-  - pip install .[dev,strain]
+  - pip install .[dev]
   - reentry scan
 env:
   - TEST_TYPE="pre-commit"
