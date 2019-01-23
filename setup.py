@@ -44,7 +44,8 @@ if __name__ == '__main__':
         extras_require={
             ':python_version < "3"': ['chainmap', 'singledispatch'],
             'dev': [
-                'pymatgen',
+                'pymatgen; python_version>="3"',
+                'pymatgen<2019; python_version<"3"',
                 'aiida-pytest',
                 'ase',
                 'yapf==0.25',
