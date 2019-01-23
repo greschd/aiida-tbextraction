@@ -44,4 +44,6 @@ def test_vasp_hybrid_bands(
     assert_finished(pk)
     result = load_node(pk).get_outputs_dict()
     assert 'bands' in result
-    assert result['bands'].get_bands().shape == (10, 36)
+    assert (
+        result['bands'].get_bands().shape == (len(kpoints.get_kpoints()), 36)
+    )
