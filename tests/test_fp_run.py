@@ -84,7 +84,7 @@ def test_combined_fp_run(
     from aiida.orm.calculation.work import WorkCalculation
     from aiida.work.launch import run_get_pid
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
-    from aiida_vasp.calcs.vasp import VaspCalculation
+    from aiida_vasp.calcs.vasp import VaspCalculation  # pylint: disable=import-error,useless-suppression
 
     KpointsData = DataFactory('array.kpoints')
 

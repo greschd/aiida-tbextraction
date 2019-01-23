@@ -19,9 +19,9 @@ from aiida.orm.code import Code
 from aiida.orm.data.base import Bool
 from aiida.orm.data.parameter import ParameterData
 
-from aiida_vasp.calcs.vasp import VaspCalculation
-
 from aiida_tools import check_workchain_step
+
+from aiida_vasp.calcs.vasp import VaspCalculation  # pylint: disable=import-error,useless-suppression
 
 from .wannier_input import VaspWannierInput
 from .reference_bands import VaspReferenceBands
