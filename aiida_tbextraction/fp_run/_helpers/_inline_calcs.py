@@ -6,7 +6,7 @@
 Defines helper InlineCalculations for the first-principles workflows.
 """
 
-from past.builtins import basestring  # pylint: disable=redefined-builtin
+from past.builtins import basestring  # pylint: disable=redefined-builtin,useless-suppression
 import numpy as np
 
 from aiida.orm import DataFactory

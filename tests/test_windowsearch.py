@@ -17,7 +17,7 @@ import numpy as np
 
 
 @pytest.fixture
-def windowsearch_builder(sample):  # pylint: disable=too-many-locals
+def windowsearch_builder(sample):  # pylint: disable=too-many-locals,useless-suppression
     """
     Sets up the process builder for windowsearch tests, and adds the inputs.
     """
