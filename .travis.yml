@@ -38,4 +38,4 @@ env:
   - TEST_TYPE="pre-commit"
   - TEST_TYPE="tests"
 script:
-  - ./.travis-data/test_script.sh
+  - travis_wait 60 ./.travis-data/test_script.sh
