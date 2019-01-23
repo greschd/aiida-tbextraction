@@ -14,7 +14,7 @@ from aiida.orm.data.array.bands import BandsData
 from aiida.work.workchain import ToContext
 
 from aiida_tools import check_workchain_step
-from aiida_vasp.io.win import WinParser
+from aiida_vasp.io.win import WinParser  # pylint: disable=import-error,useless-suppression
 
 from . import WannierInputBase
 

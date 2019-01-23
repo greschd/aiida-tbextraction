@@ -52,6 +52,7 @@ if __name__ == '__main__':
                 'pre-commit',
                 'prospector==0.12.11',
                 'sphinx-rtd-theme',
+                'pylint==1.9.3',
             ],
             'strain': ['aiida-strain'],
             'vasp': ['aiida-vasp'],
