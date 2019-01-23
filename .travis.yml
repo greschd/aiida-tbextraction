@@ -1,0 +1,36 @@
+language: python
+python:
+  - "2.7"
+sudo: true
+dist: xenial
+services:
+  - postgresql
+  - rabbitmq
+addons:
+  apt:
+    packages:
+      - rabbitmq-server
+      - python3
+      - python3-tk
+      - python3-pip
+      - python3-numpy
+      - python3-scipy
+      - python3-h5py
+      - python3-matplotlib
+  postgresql: "9.5"
+before_install:
+  - sudo pip3 install -U setuptools
+  - sudo pip3 install -U scipy decorator
+  - sudo pip3 install bands-inspect
+  - sudo pip3 install tbmodels
+  - sudo pip3 install symmetry-representation
+install:
+  - pip install -U pip wheel setuptools
+  - pip install git+https://github.com/aiidateam/aiida_core@v1.0.0a4#egg=aiida_core
+  - pip install git+https://github.com/greschd/aiida_pytest@support_alpha_4#egg=aiida_pytest
+  - pip install .[dev]
+env:
+  - TEST_TYPE="pre-commit"
+  - TEST_TYPE="tests"
+script:
+  - ./.travis-data/test_script.sh

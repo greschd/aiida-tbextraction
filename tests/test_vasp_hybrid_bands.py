@@ -6,9 +6,12 @@
 Defines tests for the workflow calculating the reference bands with VASP and hybrid functionals.
 """
 
+import pytest
+
 from insb_sample import get_insb_input  # pylint: disable=unused-import
 
 
+@pytest.mark.vasp
 def test_vasp_hybrid_bands(
     configure_with_daemon,  # pylint: disable=unused-argument
     assert_finished,

@@ -1,0 +1,33 @@
+computers:
+  localhost:
+    hostname: localhost
+    description: localhost
+    transport: local
+    scheduler: direct
+    work_directory: /tmp/test_aiida_tbmodels_run
+    prepend_text: 'unset PYTHONPATH'
+
+codes:
+  tbmodels:
+    description: tbmodels
+    default_plugin: tbmodels.parse
+    remote_computer: localhost
+    remote_abspath: {tbmodels_path}
+
+  bands_inspect:
+    description: bands_inspect
+    default_plugin: bands_inspect.difference
+    remote_computer: localhost
+    remote_abspath: {bands_inspect_path}
+
+  symmetry_repr:
+    description: symmetry-repr
+    default_plugin: symmetry_representation.filter_symmetries
+    remote_computer: localhost
+    remote_abspath: {symmetry_repr_path}
+
+  wannier90:
+    description: Wannier90
+    default_plugin: wannier90.wannier90
+    remote_computer: localhost
+    remote_abspath: {wannier_path}

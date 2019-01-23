@@ -6,9 +6,12 @@
 Tests for running the DFT calculations needed as input for the tight-binding calculation.
 """
 
+import pytest
+
 from insb_sample import get_insb_input  # pylint: disable=unused-import
 
 
+@pytest.mark.vasp
 def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Calculates the Wannier90 inputs from VASP with hybrid functionals.

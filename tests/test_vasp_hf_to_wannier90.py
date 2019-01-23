@@ -6,9 +6,12 @@
 Tests for the workflow that calculates the Wannier90 input from VASP with hybrid functionals.
 """
 
+import pytest
+
 from insb_sample import get_insb_input  # pylint: disable=unused-import
 
 
+@pytest.mark.vasp
 def test_vasp_hf_wannier_input(
     configure_with_daemon,  # pylint: disable=unused-argument
     assert_finished,

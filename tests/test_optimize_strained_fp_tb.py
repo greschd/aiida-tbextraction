@@ -8,9 +8,12 @@ Tests the workflow that optimizes a DFT-based tight-binding model for different 
 
 from __future__ import print_function
 
+import pytest
+
 from insb_sample import *  # pylint: disable=unused-wildcard-import
 
 
+@pytest.mark.vasp
 def test_strained_fp_tb(
     configure_with_daemon,  # pylint: disable=unused-argument
     get_optimize_fp_tb_input,  # pylint: disable=redefined-outer-name
