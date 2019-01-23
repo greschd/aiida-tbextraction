@@ -72,6 +72,7 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
     )
 
 
+@pytest.mark.vasp
 def test_combined_fp_run(
     configure_with_daemon, assert_finished, get_insb_input
 ):  # pylint: disable=unused-argument,redefined-outer-name,too-many-locals

@@ -41,37 +41,3 @@ def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pyli
     builder = band_difference_builder
     output = run(builder)
     assert np.isclose(output['cost_value'].value, 0.)
-
-
-def test_bandevaluation_launchmany(
-    configure_with_daemon,  # pylint: disable=unused-argument
-    band_difference_builder,  # pylint: disable=redefined-outer-name
-    wait_for
-):
-    """
-    Launch many band evaluation workflows, and check that the right number of workflows was executed.
-    """
-    from aiida.work import submit
-    from aiida.orm import CalculationFactory
-    from aiida.orm.querybuilder import QueryBuilder
-    qb1 = QueryBuilder()
-    qb2 = QueryBuilder()
-    qb1.append(CalculationFactory('tbmodels.eigenvals'))
-    qb2.append(CalculationFactory('bands_inspect.difference'))
-
-    initial_count1 = qb1.count()
-    initial_count2 = qb2.count()
-    num_workflows = 100
-
-    builder = band_difference_builder
-    pks = []
-    for _ in range(num_workflows):
-        pks.append(submit(builder).pk)
-
-    for process_id in pks:
-        wait_for(process_id)
-
-    end_count1 = qb1.count()
-    end_count2 = qb2.count()
-    assert end_count1 - initial_count1 == num_workflows
-    assert end_count2 - initial_count2 == num_workflows
