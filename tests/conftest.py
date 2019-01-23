@@ -26,8 +26,11 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "vasp: mark tests which run with VASP")
 
 
-def pytest_runtest_setup(item):
-    vasp_marker = item.get_marker("vasp")
+def pytest_runtest_setup(item):  # pylint: disable=missing-docstring
+    try:
+        vasp_marker = item.get_marker("vasp")
+    except AttributeError:
+        vasp_marker = item.get_closest_marker('vasp')
     if vasp_marker is not None:
         if item.config.getoption("--skip-vasp"):
             pytest.skip("Test runs only with VASP.")
