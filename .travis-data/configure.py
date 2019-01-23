@@ -20,14 +20,12 @@ def get_path(codename):
 
 TBMODELS_PATH = get_path('tbmodels')
 BANDS_INSPECT_PATH = get_path('bands-inspect')
-SYMMETRY_REPR_PATH = get_path('symmetry-repr')
 WANNIER_PATH = join(sys.argv[1], 'wannier90/wannier90.x')
 
 with open(sys.argv[2], 'r') as f:
     RES = f.read().format(
         tbmodels_path=TBMODELS_PATH,
         bands_inspect_path=BANDS_INSPECT_PATH,
-        symmetry_repr_path=SYMMETRY_REPR_PATH,
         wannier_path=WANNIER_PATH
     )
 with open(sys.argv[3], 'w') as f:

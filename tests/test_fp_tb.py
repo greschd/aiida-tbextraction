@@ -34,6 +34,7 @@ def test_fp_tb(
     assert all(key in result for key in ['cost_value', 'tb_model'])
 
 
+@pytest.mark.vasp
 def test_fp_tb_submit(
     configure_with_daemon,  # pylint: disable=unused-argument
     get_fp_tb_input,  # pylint: disable=redefined-outer-name

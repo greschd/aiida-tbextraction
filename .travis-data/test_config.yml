@@ -20,12 +20,6 @@ codes:
     remote_computer: localhost
     remote_abspath: {bands_inspect_path}
 
-  symmetry_repr:
-    description: symmetry-repr
-    default_plugin: symmetry_representation.filter_symmetries
-    remote_computer: localhost
-    remote_abspath: {symmetry_repr_path}
-
   wannier90:
     description: Wannier90
     default_plugin: wannier90.wannier90
