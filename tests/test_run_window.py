@@ -15,7 +15,7 @@ import numpy as np
 
 
 @pytest.fixture
-def runwindow_input(sample):
+def run_window_input(sample):
     """
     Returns a function that creates the input for RunWindow tests.
     """
@@ -114,18 +114,20 @@ def runwindow_input(sample):
 
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
-def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries):  # pylint:disable=unused-argument,redefined-outer-name
+def test_run_window(
+    configure_with_daemon, run_window_input, slice_, symmetries
+):  # pylint:disable=unused-argument,redefined-outer-name
     """
     Runs the workflow which evaluates an energy window.
     """
     from aiida.work import run
-    from aiida_tbextraction.energy_windows.runwindow import RunWindow
+    from aiida_tbextraction.energy_windows.run_window import RunWindow
 
     result = run(
         RunWindow,
-        **runwindow_input([-4.5, -4, 6.5, 16],
-                          slice_=slice_,
-                          symmetries=symmetries)
+        **run_window_input([-4.5, -4, 6.5, 16],
+                           slice_=slice_,
+                           symmetries=symmetries)
     )
     assert all(key in result for key in ['cost_value', 'tb_model', 'plot'])
 
@@ -138,17 +140,17 @@ def test_runwindow(configure_with_daemon, runwindow_input, slice_, symmetries): 
         [0, 0, 0, 0],  # outer window too small
     ]
 )
-def test_runwindow_invalid(
-    configure_with_daemon, runwindow_input, window_values
+def test_run_window_invalid(
+    configure_with_daemon, run_window_input, window_values
 ):  # pylint:disable=unused-argument,redefined-outer-name
     """
-    Runs an the runwindow workflow with invalid window values.
+    Runs an the run_window workflow with invalid window values.
     """
     from aiida.work import run
-    from aiida_tbextraction.energy_windows.runwindow import RunWindow
+    from aiida_tbextraction.energy_windows.run_window import RunWindow
 
     result = run(
         RunWindow,
-        **runwindow_input(window_values, slice_=True, symmetries=True)
+        **run_window_input(window_values, slice_=True, symmetries=True)
     )
     assert result['cost_value'] == float('inf')

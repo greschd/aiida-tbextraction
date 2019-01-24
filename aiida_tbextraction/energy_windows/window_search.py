@@ -21,7 +21,7 @@ from aiida_tools import check_workchain_step
 from aiida_optimize.engines import NelderMead
 from aiida_optimize.workchain import OptimizationWorkChain
 
-from .runwindow import RunWindow
+from .run_window import RunWindow
 
 
 @export

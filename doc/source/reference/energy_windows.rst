@@ -4,8 +4,8 @@
 Run and Optimize Energy Windows
 ===============================
 
-.. automodule:: aiida_tbextraction.energy_windows.runwindow
+.. automodule:: aiida_tbextraction.energy_windows.run_window
     :members:
 
-.. automodule:: aiida_tbextraction.energy_windows.windowsearch
+.. automodule:: aiida_tbextraction.energy_windows.window_search
     :members:

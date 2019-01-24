@@ -17,15 +17,15 @@ import numpy as np
 
 
 @pytest.fixture
-def windowsearch_builder(sample):  # pylint: disable=too-many-locals,useless-suppression
+def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-suppression
     """
-    Sets up the process builder for windowsearch tests, and adds the inputs.
+    Sets up the process builder for window_search tests, and adds the inputs.
     """
     from aiida.orm import DataFactory
     from aiida.orm.code import Code
     from aiida.orm.data.base import List, Float
     from aiida_bands_inspect.io import read_bands
-    from aiida_tbextraction.energy_windows.windowsearch import WindowSearch
+    from aiida_tbextraction.energy_windows.window_search import WindowSearch
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
     builder = WindowSearch.get_builder()
@@ -106,28 +106,28 @@ def windowsearch_builder(sample):  # pylint: disable=too-many-locals,useless-sup
     return builder
 
 
-def test_windowsearch(configure_with_daemon, windowsearch_builder):  # pylint: disable=unused-argument,redefined-outer-name
+def test_window_search(configure_with_daemon, window_search_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
-    Run a windowsearch on the sample wannier input folder.
+    Run a window_search on the sample wannier input folder.
     """
     from aiida.work.launch import run
 
-    result = run(windowsearch_builder)
+    result = run(window_search_builder)
     assert all(
         key in result for key in ['cost_value', 'tb_model', 'window', 'plot']
     )
 
 
-def test_windowsearch_submit(
-    configure_with_daemon, windowsearch_builder, wait_for, assert_finished
+def test_window_search_submit(
+    configure_with_daemon, window_search_builder, wait_for, assert_finished
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """
-    Submit a windowsearch workflow.
+    Submit a window_search workflow.
     """
     from aiida.orm import load_node
     from aiida.work.launch import submit
 
-    pk = submit(windowsearch_builder).pk
+    pk = submit(window_search_builder).pk
     wait_for(pk)
     assert_finished(pk)
     result = load_node(pk).get_outputs_dict()

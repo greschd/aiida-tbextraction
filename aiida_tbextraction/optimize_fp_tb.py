@@ -21,7 +21,7 @@ from aiida.common.links import LinkType
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
 
-from .energy_windows.windowsearch import WindowSearch
+from .energy_windows.window_search import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
 from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
 from .energy_windows.auto_guess import get_initial_window_inline
@@ -88,7 +88,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
         spec.expose_outputs(WindowSearch)
 
-        spec.outline(cls.fp_run, cls.run_windowsearch, cls.finalize)
+        spec.outline(cls.fp_run, cls.run_window_search, cls.finalize)
 
     @check_workchain_step
     def fp_run(self):
@@ -108,7 +108,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         )
 
     @check_workchain_step
-    def run_windowsearch(self):
+    def run_window_search(self):
         """
         Runs the workflow which creates the optimized tight-binding model.
         """
@@ -141,7 +141,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 bands=reference_bands, slice_idx=slice_reference_bands
             )[1]
 
-        # get slice_idx for windowsearch
+        # get slice_idx for window_search
         slice_idx = self.inputs.get('slice_tb_model', None)
         if slice_idx is not None:
             inputs['slice_idx'] = slice_idx
@@ -160,7 +160,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
 
         self.report("Starting WindowSearch workflow.")
         return ToContext(
-            windowsearch=self.submit(
+            window_search=self.submit(
                 WindowSearch,
                 reference_bands=reference_bands,
                 wannier_bands=wannier_bands,
@@ -176,11 +176,11 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
     @check_workchain_step
     def finalize(self):
         """
-        Add the outputs of the windowsearch sub-workflow.
+        Add the outputs of the window_search sub-workflow.
         """
         self.report("Adding outputs from WindowSearch workflow.")
-        windowsearch = self.ctx.windowsearch
-        for label, node in windowsearch.get_outputs(
+        window_search = self.ctx.window_search
+        for label, node in window_search.get_outputs(
             also_labels=True, link_type=LinkType.RETURN
         ):
             self.out(label, node)

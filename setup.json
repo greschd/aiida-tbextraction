@@ -1,0 +1,74 @@
+{
+  "name": "aiida-tbextraction",
+  "description": "AiiDA Plugin for extracting tight-binding models",
+  "author": "Dominik Gresch",
+  "author_email": "greschd@gmx.ch",
+  "url": "https://aiida-tbextraction.readthedocs.io",
+  "license": "Apache 2.0",
+  "classifiers": [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Plugins",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.6",
+    "Topic :: Scientific/Engineering :: Physics"
+  ],
+  "keywords": "tight-binding extraction aiida workflows",
+  "include_package_data": true,
+  "setup_requires": [
+    "reentry"
+  ],
+  "reentry_register": true,
+  "install_requires": [
+    "aiida-core",
+    "aiida-wannier90",
+    "aiida-bands-inspect",
+    "aiida-tbmodels",
+    "aiida-optimize",
+    "fsc.export",
+    "aiida-tools",
+    "future"
+  ],
+  "extras_require": {
+    ":python_version < \"3\"": [
+      "chainmap",
+      "singledispatch"
+    ],
+    "dev": [
+      "pymatgen; python_version>=\"3\"",
+      "pymatgen<2019; python_version<\"3\"",
+      "aiida-pytest",
+      "ase",
+      "yapf==0.25",
+      "pre-commit",
+      "prospector==0.12.11",
+      "sphinx-rtd-theme",
+      "pylint==1.9.3"
+    ],
+    "strain": [
+      "aiida-strain"
+    ],
+    "vasp": [
+      "aiida-vasp"
+    ]
+  },
+  "entry_points": {
+    "aiida.workflows": [
+      "tbextraction.fp_run.base = aiida_tbextraction.fp_run:FirstPrinciplesRunBase",
+      "tbextraction.fp_run.split = aiida_tbextraction.fp_run:SplitFirstPrinciplesRun",
+      "tbextraction.fp_run.vasp = aiida_tbextraction.fp_run:VaspFirstPrinciplesRun",
+      "tbextraction.fp_run.reference_bands.base = aiida_tbextraction.fp_run.reference_bands:ReferencebandsBase",
+      "tbextraction.fp_run.reference_bands.vasp = aiida_tbextraction.fp_run.reference_bands:VaspReferencebands",
+      "tbextraction.fp_run.wannier_input.base = aiida_tbextraction.fp_run.wannier_input:WannierInputBase",
+      "tbextraction.fp_run.wannier_input.vasp = aiida_tbextraction.fp_run.wannier_input:VaspWannierInput",
+      "tbextraction.calculate_tb = aiida_tbextraction.calculate_tb:TightBindingCalculation",
+      "tbextraction.model_evaluation.base = aiida_tbextraction.model_evaluation:ModelEvaluationBase",
+      "tbextraction.model_evaluation.band_difference = aiida_tbextraction.model_evaluation:BandDifferenceModelEvaluation",
+      "tbextraction.energy_windows.run_window = aiida_tbextraction.energy_windows.run_window:RunWindow",
+      "tbextraction.energy_windows.window_search = aiida_tbextraction.energy_windows.window_search:WindowSearch",
+      "tbextraction.optimize_fp_tb = aiida_tbextraction.optimize_fp_tb:OptimizeFirstPrinciplesTightBinding",
+      "tbextraction.optimize_strained_fp_tb = aiida_tbextraction.optimize_strained_fp_tb:OptimizeStrainedFirstPrinciplesTightBinding"
+    ]
+  }
+}
