@@ -15,32 +15,11 @@ from aiida.orm.data.float import Float
 from aiida.orm.data.parameter import ParameterData
 from aiida.work.launch import submit
 
-from aiida_vasp.data.paw import PawData
+from aiida_vasp.data.potcar import PotcarData
 
 from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
 from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
-
-POTENTIAL_DIR = 'inputs/potentials'
-
-
-def load_potential(name, md5):
-    """
-    Helper function that gets the potentials or loads them from a folder.
-    """
-    try:
-        return PawData.load_paw(symbol=name, md5=md5)[0]
-    except ValueError:
-        try:
-            pot_dir = os.path.join(POTENTIAL_DIR, name)
-            potential = PawData.from_folder(pot_dir)
-            potential.store()
-            return potential
-        except ValueError:
-            raise ValueError(
-                "Cannot load potential, check that the potential directory '{}' exists."
-                .format(pot_dir)
-            )
 
 
 def create_builder():
@@ -52,8 +31,8 @@ def create_builder():
 
     # Load the potential files (if needed) and set them as input
     builder.potentials = dict(
-        In=load_potential('In_d', md5='56da6eefc0cb43d3911b1d06307691ae'),
-        Sb=load_potential('Sb', md5='80003a45f175e1686bbf2743defcf331')
+        In=PotcarData.find_one(symbol='In_d'),
+        Sb=PotcarData.find_one(symbol='Sb')
     )
 
     # Specify that VaspFirstPrinciplesRun should be used to run the first-principles calculations
