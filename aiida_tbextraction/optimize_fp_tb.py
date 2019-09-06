@@ -13,9 +13,9 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.orm.data.base import List
-from aiida.orm.data.parameter import ParameterData
-from aiida.work.workchain import WorkChain, ToContext
+from aiida.orm import List
+from aiida.orm import Dict
+from aiida.engine import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
@@ -118,10 +118,10 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
         wannier_settings_explicit = inputs.pop(
-            'wannier_settings', ParameterData()
+            'wannier_settings', Dict()
         )
         wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_settings', ParameterData()
+            'wannier_settings', Dict()
         )
         wannier_settings = merge_parameterdata_inline(
             param_primary=wannier_settings_explicit,

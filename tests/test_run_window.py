@@ -21,9 +21,9 @@ def run_window_input(sample):
     """
 
     def inner(window_values, slice_, symmetries):  # pylint: disable=too-many-locals,missing-docstring
-        from aiida.orm import DataFactory
-        from aiida.orm.data.base import List
-        from aiida.orm.code import Code
+        from aiida.plugins import DataFactory
+        from aiida.orm import List
+        from aiida.orm import Code
         from aiida_bands_inspect.io import read_bands
         from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
@@ -120,7 +120,7 @@ def test_run_window(
     """
     Runs the workflow which evaluates an energy window.
     """
-    from aiida.work import run
+    from aiida.engine import run
     from aiida_tbextraction.energy_windows.run_window import RunWindow
 
     result = run(
@@ -146,7 +146,7 @@ def test_run_window_invalid(
     """
     Runs an the run_window workflow with invalid window values.
     """
-    from aiida.work import run
+    from aiida.engine import run
     from aiida_tbextraction.energy_windows.run_window import RunWindow
 
     result = run(

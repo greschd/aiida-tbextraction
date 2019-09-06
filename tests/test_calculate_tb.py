@@ -20,11 +20,11 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
     """
     Run the tight-binding calculation workflow, optionally including symmetrization and slicing of orbitals.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.code import Code
-    from aiida.orm.data.base import List
-    from aiida.orm.data.parameter import ParameterData
-    from aiida.work import run
+    from aiida.plugins import DataFactory
+    from aiida.orm import Code
+    from aiida.orm import List
+    from aiida.orm import Dict
+    from aiida.engine import run
     from aiida_tbextraction.calculate_tb import TightBindingCalculation
 
     inputs = dict()
@@ -63,7 +63,7 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
     )
     inputs['structure'] = structure
 
-    wannier_parameters = ParameterData(
+    wannier_parameters = Dict(
         dict=dict(
             num_wann=14,
             num_bands=36,

@@ -8,8 +8,8 @@ Defines the base class for workflows that calculate the reference bandstructure.
 
 from fsc.export import export
 
-from aiida.orm import DataFactory
-from aiida.work.workchain import WorkChain
+from aiida.plugins import DataFactory
+from aiida.engine import WorkChain
 
 
 @export

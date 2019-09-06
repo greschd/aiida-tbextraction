@@ -8,10 +8,10 @@ Defines the base class for workflows that evaluate a tight-binding model.
 
 from fsc.export import export
 
-from aiida.work.workchain import WorkChain
-from aiida.orm import DataFactory
-from aiida.orm.code import Code
-from aiida.orm.data.base import Float
+from aiida.engine import WorkChain
+from aiida.plugins import DataFactory
+from aiida.orm import Code
+from aiida.orm import Float
 
 
 @export

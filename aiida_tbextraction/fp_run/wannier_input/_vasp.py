@@ -9,9 +9,9 @@ Defines a workflow that calculates the Wannier90 input files using VASP.
 from fsc.export import export
 import numpy as np
 
-from aiida.orm import Code, DataFactory, CalculationFactory
-from aiida.orm.data.array.bands import BandsData
-from aiida.work.workchain import ToContext
+from aiida.plugins import Code, DataFactory, CalculationFactory
+from aiida.orm.nodes.data.array.bands import BandsData
+from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
 from aiida_vasp.io.win import WinParser  # pylint: disable=import-error,useless-suppression

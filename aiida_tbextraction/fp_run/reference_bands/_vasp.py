@@ -8,10 +8,10 @@ Defines a workflow that calculates the reference bandstructure using VASP.
 
 from fsc.export import export
 
-from aiida.orm.data.base import Bool
-from aiida.orm.data.parameter import ParameterData
-from aiida.orm import Code, CalculationFactory
-from aiida.work.workchain import ToContext
+from aiida.orm import Bool
+from aiida.orm import Dict
+from aiida.plugins import Code, CalculationFactory
+from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
 
@@ -76,7 +76,7 @@ class VaspReferenceBands(ReferenceBandsBase):
                 kpoints=kpoints,
                 parameters=self.inputs.parameters,
                 code=self.inputs.code,
-                settings=ParameterData(
+                settings=Dict(
                     dict=dict(parser_settings=dict(add_bands=True))
                 ),
                 **self.inputs.get('calculation_kwargs', {})

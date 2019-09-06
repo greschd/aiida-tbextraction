@@ -17,8 +17,8 @@ def band_difference_builder(configure, sample):  # pylint: disable=unused-argume
     """
     Create inputs for the band difference workflow.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.code import Code
+    from aiida.plugins import DataFactory
+    from aiida.orm import Code
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
     from aiida_bands_inspect.io import read_bands
 
@@ -37,7 +37,7 @@ def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pyli
     """
     Run the band evaluation workflow.
     """
-    from aiida.work.launch import run
+    from aiida.engine.launch import run
     builder = band_difference_builder
     output = run(builder)
     assert np.isclose(output['cost_value'].value, 0.)

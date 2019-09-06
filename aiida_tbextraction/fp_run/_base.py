@@ -8,7 +8,7 @@ Defines the base class for workflows that run the first-principles calculations.
 
 from fsc.export import export
 
-from aiida.work.workchain import WorkChain
+from aiida.engine import WorkChain
 
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase

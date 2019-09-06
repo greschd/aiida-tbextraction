@@ -8,10 +8,10 @@ Defines a workflow which evaluates a tight-binding model by comparing its bandst
 
 from fsc.export import export
 
-from aiida.orm import DataFactory, CalculationFactory
-from aiida.orm.code import Code
-from aiida.orm.data.base import Float
-from aiida.work.workchain import ToContext
+from aiida.plugins import DataFactory, CalculationFactory
+from aiida.orm import Code
+from aiida.orm import Float
+from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
 

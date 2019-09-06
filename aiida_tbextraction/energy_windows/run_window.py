@@ -14,10 +14,10 @@ except ImportError:
 import numpy as np
 from fsc.export import export
 
-from aiida.orm import DataFactory
-from aiida.orm.data.base import List, Float
+from aiida.plugins import DataFactory
+from aiida.orm import List, Float
 from aiida.orm.calculation.inline import make_inline
-from aiida.work.workchain import WorkChain, ToContext, if_
+from aiida.engine import WorkChain, ToContext, if_
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step

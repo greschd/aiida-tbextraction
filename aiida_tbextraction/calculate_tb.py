@@ -13,10 +13,10 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.workchain import WorkChain, if_, ToContext
-from aiida.orm.data.base import List, Str
-from aiida.orm.data.parameter import ParameterData
-from aiida.orm import Code, DataFactory, CalculationFactory
+from aiida.engine import WorkChain, if_, ToContext
+from aiida.orm import List, Str
+from aiida.orm import Dict
+from aiida.plugins import Code, DataFactory, CalculationFactory
 
 from aiida_tools import check_workchain_step
 
@@ -147,11 +147,11 @@ class TightBindingCalculation(WorkChain):
             CalculationFactory('wannier90.wannier90').process(),
             code=self.inputs.wannier_code,
             local_input_folder=self.inputs.wannier_input_folder,
-            parameters=ParameterData(dict=wannier_parameters),
+            parameters=Dict(dict=wannier_parameters),
             kpoints=self.inputs.wannier_kpoints,
-            settings=ParameterData(
+            settings=Dict(
                 dict=ChainMap( # yapf: disable
-                    self.inputs.get('wannier_settings', ParameterData()).get_dict(),
+                    self.inputs.get('wannier_settings', Dict()).get_dict(),
                     dict(
                         retrieve_hoppings=True,
                         additional_retrieve_list=['*_centres.xyz', '*.win']

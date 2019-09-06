@@ -12,9 +12,9 @@ import numpy as np
 from fsc.export import export
 
 from aiida.orm import load_node
-from aiida.orm.data.base import List, Float
-from aiida.orm.data.parameter import ParameterData
-from aiida.work.workchain import WorkChain, ToContext
+from aiida.orm import List, Float
+from aiida.orm import Dict
+from aiida.engine import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
@@ -74,7 +74,7 @@ class WindowSearch(WorkChain):
             optimization=self.submit(
                 OptimizationWorkChain,
                 engine=NelderMead,
-                engine_kwargs=ParameterData(
+                engine_kwargs=Dict(
                     dict=dict(
                         result_key='cost_value',
                         xtol=self.inputs.window_tol.value,

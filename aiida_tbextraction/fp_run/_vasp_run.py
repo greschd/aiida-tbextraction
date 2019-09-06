@@ -14,10 +14,10 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.workchain import ToContext
-from aiida.orm.code import Code
-from aiida.orm.data.base import Bool
-from aiida.orm.data.parameter import ParameterData
+from aiida.engine import ToContext
+from aiida.orm import Code
+from aiida.orm import Bool
+from aiida.orm import Dict
 
 from aiida_tools import check_workchain_step
 
@@ -96,7 +96,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
             )[1]
             if force_parameters:
                 parameters = merge_parameterdata_inline(
-                    param_primary=ParameterData(dict=force_parameters),
+                    param_primary=Dict(dict=force_parameters),
                     param_secondary=parameters
                 )[1]
         calculation_kwargs = copy.deepcopy(
@@ -131,7 +131,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
                 potential={(kind, ): pot
                            for kind, pot in self.inputs.potentials.items()},
                 kpoints=self.inputs.kpoints_mesh,
-                settings=ParameterData(
+                settings=Dict(
                     dict={
                         'ADDITIONAL_RETRIEVE_LIST': ['WAVECAR'],
                         'parser_settings': {

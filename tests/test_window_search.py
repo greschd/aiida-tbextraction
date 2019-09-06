@@ -21,9 +21,9 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
     """
     Sets up the process builder for window_search tests, and adds the inputs.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.code import Code
-    from aiida.orm.data.base import List, Float
+    from aiida.plugins import DataFactory
+    from aiida.orm import Code
+    from aiida.orm import List, Float
     from aiida_bands_inspect.io import read_bands
     from aiida_tbextraction.energy_windows.window_search import WindowSearch
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
@@ -110,7 +110,7 @@ def test_window_search(configure_with_daemon, window_search_builder):  # pylint:
     """
     Run a window_search on the sample wannier input folder.
     """
-    from aiida.work.launch import run
+    from aiida.engine.launch import run
 
     result = run(window_search_builder)
     assert all(
@@ -125,7 +125,7 @@ def test_window_search_submit(
     Submit a window_search workflow.
     """
     from aiida.orm import load_node
-    from aiida.work.launch import submit
+    from aiida.engine.launch import submit
 
     pk = submit(window_search_builder).pk
     wait_for(pk)

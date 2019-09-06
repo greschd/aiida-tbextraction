@@ -16,9 +16,9 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
     """
     Calculates the Wannier90 inputs from VASP with hybrid functionals.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.data.base import List, Bool
-    from aiida.work.launch import run_get_pid
+    from aiida.plugins import DataFactory
+    from aiida.orm import List, Bool
+    from aiida.engine.launch import run_get_pid
     from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
@@ -79,11 +79,11 @@ def test_combined_fp_run(
     """
     Calculates the Wannier90 inputs from VASP with hybrid functionals.
     """
-    from aiida.orm import DataFactory, load_node
-    from aiida.orm.data.base import List, Bool
-    from aiida.orm.data.parameter import ParameterData
+    from aiida.plugins import DataFactory, load_node
+    from aiida.orm import List, Bool
+    from aiida.orm import Dict
     from aiida.orm.calculation.work import WorkCalculation
-    from aiida.work.launch import run_get_pid
+    from aiida.engine.launch import run_get_pid
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
     from aiida_vasp.calcs.vasp import VaspCalculation  # pylint: disable=import-error,useless-suppression
 
@@ -109,7 +109,7 @@ def test_combined_fp_run(
             dict=dict(num_wann=num_wann, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
-        scf={'parameters': ParameterData(dict=dict(isym=2))},
+        scf={'parameters': Dict(dict=dict(isym=2))},
         bands={'merge_kpoints': Bool(True)},
         **vasp_inputs
     )

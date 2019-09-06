@@ -8,8 +8,8 @@ Defines inline calculations to automatically get an initial window guess.
 
 import numpy as np
 
-from aiida.orm.data.list import List
-from aiida.orm.data.parameter import ParameterData
+from aiida.orm.nodes.data.list import List
+from aiida.orm import Dict
 from aiida.orm.calculation.inline import make_inline
 
 from .._inline_calcs import merge_parameterdata_inline
@@ -64,7 +64,7 @@ def add_initial_window_inline(
         int(wannier_param_dict['num_bands']
             ) == int(wannier_param_dict['num_wann'])
     )):
-        return {'result': ParameterData(dict=wannier_param_dict)}
+        return {'result': Dict(dict=wannier_param_dict)}
     else:
         window_dict = {
             key: value
@@ -80,7 +80,7 @@ def add_initial_window_inline(
             'result':
             merge_parameterdata_inline(
                 param_primary=wannier_parameters,
-                param_secondary=ParameterData(dict=window_dict)
+                param_secondary=Dict(dict=window_dict)
             )[1]
         }
 

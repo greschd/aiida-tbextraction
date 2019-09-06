@@ -20,9 +20,9 @@ def test_vasp_hf_wannier_input(
     """
     Runs the workflow that calculates Wannier90 inputs from VASP + hybrids on InSb with a coarse grid.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.data.base import List
-    from aiida.work.launch import run_get_pid
+    from aiida.plugins import DataFactory
+    from aiida.orm import List
+    from aiida.engine.launch import run_get_pid
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
 
     kpoints_mesh = DataFactory('array.kpoints')()

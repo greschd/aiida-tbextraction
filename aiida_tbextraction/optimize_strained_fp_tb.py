@@ -8,7 +8,7 @@ Defines the workflow to optimize tight-binding models from DFT inputs with diffe
 
 from fsc.export import export
 
-from aiida.work.workchain import WorkChain, ToContext
+from aiida.engine import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step

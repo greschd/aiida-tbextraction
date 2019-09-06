@@ -8,12 +8,12 @@ import os
 
 from ase.io.vasp import read_vasp
 
-from aiida.orm import DataFactory
-from aiida.orm.code import Code
-from aiida.orm.data.list import List
-from aiida.orm.data.float import Float
-from aiida.orm.data.parameter import ParameterData
-from aiida.work.launch import submit
+from aiida.plugins import DataFactory
+from aiida.orm import Code
+from aiida.orm.nodes.data.list import List
+from aiida.orm.nodes.data.float import Float
+from aiida.orm import Dict
+from aiida.engine.launch import submit
 
 from aiida_vasp.data.potcar import PotcarData
 
@@ -41,7 +41,7 @@ def create_builder():
     # Set the inputs for the VaspFirstPrinciplesRun workflow
     builder.fp_run = dict(
         code=Code.get_from_string('vasp'),
-        parameters=ParameterData(dict=dict( # Parameters common to all VASP calculations
+        parameters=Dict(dict=dict( # Parameters common to all VASP calculations
             prec='N',
             lsorbit=True,
             ismear=0,
@@ -63,11 +63,11 @@ def create_builder():
 
     # Setting the parameters specific for the bands calculation
     builder.fp_run['bands'] = dict(
-        parameters=ParameterData(dict=dict(lwave=False, isym=0))
+        parameters=Dict(dict=dict(lwave=False, isym=0))
     )
     # Setting the parameters specific for the wannier input calculation
     builder.fp_run['to_wannier'] = dict(
-        parameters=ParameterData(dict=dict(lwave=False, isym=0))
+        parameters=Dict(dict=dict(lwave=False, isym=0))
     )
 
     # Setting the k-points for the reference bandstructure
@@ -107,7 +107,7 @@ def create_builder():
     # run to make the example run more quickly.
 
     # Setting the parameters for Wannier90
-    builder.wannier_parameters = ParameterData(
+    builder.wannier_parameters = Dict(
         dict=dict(
             num_wann=14,
             num_bands=36,

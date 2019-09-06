@@ -13,7 +13,7 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.work.workchain import ToContext
+from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
 from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object

@@ -16,9 +16,9 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
     """
     Create input for the VASP InSb sample.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.code import Code
-    from aiida.orm.data.parameter import ParameterData
+    from aiida.plugins import DataFactory
+    from aiida.orm import Code
+    from aiida.orm import Dict
 
     res = dict()
 
@@ -32,7 +32,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
         'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
     }
 
-    res['parameters'] = ParameterData(
+    res['parameters'] = Dict(
         dict=dict(
             ediff=1e-3,
             lsorbit=True,
@@ -75,10 +75,10 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     """
     Returns the input for DFT-based tight-binding workflows (without optimization).
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.data.base import List, Bool
-    from aiida.orm.data.parameter import ParameterData
-    from aiida.orm.code import Code
+    from aiida.plugins import DataFactory
+    from aiida.orm import List, Bool
+    from aiida.orm import Dict
+    from aiida.orm import Code
     from aiida_tools.workchain_inputs import get_fullname
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
     from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
@@ -114,7 +114,7 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
         inputs['fp_run_workflow'] = VaspFirstPrinciplesRun
         inputs['fp_run'] = copy.copy(vasp_subwf_inputs)
         inputs['fp_run']['scf'] = {
-            'parameters': ParameterData(dict=dict(isym=2)),
+            'parameters': Dict(dict=dict(isym=2)),
         }
         inputs['fp_run']['bands'] = {'merge_kpoints': Bool(True)}
 
@@ -177,7 +177,7 @@ def get_optimize_fp_tb_input(get_fp_tb_input):  # pylint: disable=redefined-oute
     """
     Get the input for the first-principles tight-binding workflow with optimization.
     """
-    from aiida.orm.data.base import List
+    from aiida.orm import List
 
     inputs = get_fp_tb_input
     inputs['initial_window'] = List(list=[-4.5, -4, 6.5, 16])

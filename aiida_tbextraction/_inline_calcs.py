@@ -13,7 +13,7 @@ except ImportError:
 
 from fsc.export import export
 
-from aiida.orm.data.parameter import ParameterData
+from aiida.orm import Dict
 from aiida.orm.calculation.inline import make_inline
 
 
@@ -23,7 +23,7 @@ def merge_parameterdata_inline(param_primary, param_secondary):
     """
     Merges two ParameterData, giving preference to ``param_primary``.
     """
-    return ParameterData(
+    return Dict(
         dict=ChainMap(param_primary.get_dict(), param_secondary.get_dict())
     )
 

@@ -21,9 +21,9 @@ def test_vasp_hybrid_bands(
     """
     Runs the VASP + hybrids reference bands workflow with InSb, on a very coarse grid.
     """
-    from aiida.orm.data.base import Bool
-    from aiida.orm import DataFactory, load_node
-    from aiida.work.run import submit
+    from aiida.orm import Bool
+    from aiida.plugins import DataFactory, load_node
+    from aiida.engine import submit
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
 
     KpointsData = DataFactory('array.kpoints')

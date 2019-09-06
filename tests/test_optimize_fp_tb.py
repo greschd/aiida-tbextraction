@@ -21,7 +21,7 @@ def test_fp_tb(
     """
     Runs the DFT tight-binding optimization workflow on an InSb sample.
     """
-    from aiida.work import run
+    from aiida.engine import run
     from aiida.orm.querybuilder import QueryBuilder
     from aiida_bands_inspect.calculations.difference import DifferenceCalculation
     from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
@@ -46,7 +46,7 @@ def test_fp_tb_submit(
     Runs the DFT tight-binding optimization workflow on an InSb sample.
     """
     from aiida.orm import load_node
-    from aiida.work.launch import submit
+    from aiida.engine.launch import submit
     from aiida.orm.querybuilder import QueryBuilder
     from aiida_bands_inspect.calculations.difference import DifferenceCalculation
     from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding

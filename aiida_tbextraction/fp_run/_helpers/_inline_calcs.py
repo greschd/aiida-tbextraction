@@ -9,8 +9,8 @@ Defines helper InlineCalculations for the first-principles workflows.
 from past.builtins import basestring  # pylint: disable=redefined-builtin,useless-suppression
 import numpy as np
 
-from aiida.orm import DataFactory
-from aiida.orm.data.parameter import ParameterData
+from aiida.plugins import DataFactory
+from aiida.orm import Dict
 from aiida.orm.calculation.inline import make_inline
 
 
@@ -85,6 +85,6 @@ def reduce_num_wann_inline(wannier_parameters):
         wannier_param_dict['num_bands'] = int(
             wannier_param_dict['num_bands']
         ) - num_excluded
-        return ParameterData(dict=wannier_param_dict)
+        return Dict(dict=wannier_param_dict)
     else:
         return wannier_parameters
