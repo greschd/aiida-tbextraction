@@ -38,7 +38,8 @@
       "pytest>=3.6",
       "pytest-cov",
       "aiida-pytest",
-      "ase"
+      "ase",
+      "pymatgen"
     ],
     "docs": [
       "sphinx",

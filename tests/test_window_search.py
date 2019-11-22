@@ -100,6 +100,7 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
     return builder
 
 
+@pytest.skip("Not migrated yet.")
 def test_window_search(configure_with_daemon, window_search_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Run a window_search on the sample wannier input folder.
@@ -112,6 +113,7 @@ def test_window_search(configure_with_daemon, window_search_builder):  # pylint:
     )
 
 
+@pytest.skip("Not migrated yet.")
 def test_window_search_submit(
     configure_with_daemon, window_search_builder, wait_for, assert_finished
 ):  # pylint: disable=unused-argument,redefined-outer-name
