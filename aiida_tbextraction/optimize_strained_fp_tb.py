@@ -13,8 +13,8 @@ from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
 
-from aiida_strain.work import ApplyStrainsWithSymmetry  # pylint: disable=import-error,useless-suppression
-from aiida_strain.work.util import get_symmetries_key, get_structure_key, get_suffix  # pylint: disable=import-error,useless-suppression
+from aiida_strain import ApplyStrainsWithSymmetry
+from aiida_strain._util import get_symmetries_key, get_structure_key, get_suffix
 
 from .optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 

@@ -8,4 +8,4 @@ Contains workflows for calculating the reference bandstructure with first-princi
 
 from ._base import ReferenceBandsBase
 
-__all__ = _base.__all__  # pylint: disable=undefined-variable
+__all__ = ["ReferenceBandsBase"]

@@ -34,9 +34,7 @@ class TightBindingCalculation(WorkChain):
             'Structure of the material for which the tight-binding model should be calculated.'
         )
         spec.expose_inputs(
-            Wannier90Calculation,
-            namespace='wannier',
-            exclude=('structure',)
+            Wannier90Calculation, namespace='wannier', exclude=('structure', )
         )
 
         spec.input(

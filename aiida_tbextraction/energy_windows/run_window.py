@@ -79,7 +79,9 @@ class RunWindow(WorkChain):
         """
         window_list = self.inputs.window.get_list()
         win_min, froz_min, froz_max, win_max = window_list
-        num_wann = int(self.inputs.wannier_parameters.get_attribute('num_wann'))
+        num_wann = int(
+            self.inputs.wannier_parameters.get_attribute('num_wann')
+        )
 
         window_invalid_str = 'Window [{}, ({}, {}), {}] is invalid'.format(
             *window_list

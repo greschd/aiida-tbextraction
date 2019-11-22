@@ -21,7 +21,7 @@ def run_window_input(sample):
     """
     Returns a function that creates the input for RunWindow tests.
     """
-    def inner(window_values, slice_, symmetries):  # pylint: disable=too-many-locals,missing-docstring
+    def inner(window_values, slice_, symmetries):
         from aiida_bands_inspect.io import read_bands
         from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 

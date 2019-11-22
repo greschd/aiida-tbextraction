@@ -64,7 +64,9 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
             'bands'
         ]
     )
-    assert int(result['wannier_parameters'].get_attribute('num_wann')) == num_wann
+    assert int(
+        result['wannier_parameters'].get_attribute('num_wann')
+    ) == num_wann
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(
         filename in folder_list
@@ -120,7 +122,9 @@ def test_combined_fp_run(
             'bands'
         ]
     )
-    assert int(result['wannier_parameters'].get_attribute('num_wann')) == num_wann
+    assert int(
+        result['wannier_parameters'].get_attribute('num_wann')
+    ) == num_wann
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(
         filename in folder_list

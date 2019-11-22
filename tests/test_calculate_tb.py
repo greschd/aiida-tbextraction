@@ -21,7 +21,7 @@ from aiida_tbextraction.calculate_tb import TightBindingCalculation
 
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
-def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pylint: disable=too-many-locals,unused-argument
+def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pylint: disable=unused-argument
     """
     Run the tight-binding calculation workflow, optionally including symmetrization and slicing of orbitals.
     """
