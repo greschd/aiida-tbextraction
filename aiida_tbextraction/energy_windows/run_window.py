@@ -60,7 +60,6 @@ class RunWindow(WorkChain):
             **PROCESS_INPUT_KWARGS
         )
 
-        spec.expose_outputs(TightBindingCalculation)
         spec.expose_outputs(ModelEvaluationBase)
         spec.outputs.dynamic = True
         spec.outline(
@@ -151,12 +150,8 @@ class RunWindow(WorkChain):
         Add the tight-binding model to the outputs and run the evaluation workflow.
         """
         self.report("Adding tight-binding model to output.")
-        tb_calc_outputs = self.exposed_outputs(
-            node=self.ctx.tbextraction_calc,
-            process_class=TightBindingCalculation
-        )
-        self.out_many(tb_calc_outputs)
-        tb_model = tb_calc_outputs['tb_model']
+        tb_model = self.ctx.tbextraction_calc.outputs.tb_model
+        self.out('tb_model', tb_model)
         self.report("Running model evaluation.")
         return ToContext(
             model_evaluation_wf=self.submit(
