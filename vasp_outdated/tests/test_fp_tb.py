@@ -6,8 +6,6 @@
 Test for the workflow that optimizes DFT-based tight-binding models.
 """
 
-from __future__ import print_function
-
 import pytest
 
 from insb_sample import *  # pylint: disable=unused-wildcard-import

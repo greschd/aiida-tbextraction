@@ -13,40 +13,40 @@ import pytest
 import pymatgen
 import numpy as np
 
+from aiida import orm
+
 
 @pytest.fixture
 def run_window_input(sample):
     """
     Returns a function that creates the input for RunWindow tests.
     """
-
     def inner(window_values, slice_, symmetries):  # pylint: disable=too-many-locals,missing-docstring
-        from aiida.plugins import DataFactory
-        from aiida.orm import List
-        from aiida.orm import Code
         from aiida_bands_inspect.io import read_bands
         from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
         inputs = dict()
 
-        input_folder = DataFactory('folder')()
+        input_folder = orm.FolderData()
         input_folder_path = sample('wannier_input_folder')
         for filename in os.listdir(input_folder_path):
-            input_folder.add_path(
-                os.path.abspath(os.path.join(input_folder_path, filename)),
-                filename
+            input_folder.put_object_from_file(
+                path=os.path.abspath(
+                    os.path.join(input_folder_path, filename)
+                ),
+                key=filename
             )
         inputs['wannier_input_folder'] = input_folder
 
-        inputs['wannier_code'] = Code.get_from_string('wannier90')
-        inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
+        inputs['wannier_code'] = orm.Code.get_from_string('wannier90')
+        inputs['tbmodels_code'] = orm.Code.get_from_string('tbmodels')
         inputs['model_evaluation_workflow'] = BandDifferenceModelEvaluation
         inputs['reference_bands'] = read_bands(sample('bands.hdf5'))
         inputs['model_evaluation'] = {
-            'bands_inspect_code': Code.get_from_string('bands_inspect'),
+            'bands_inspect_code': orm.Code.get_from_string('bands_inspect'),
         }
 
-        window = List(list=window_values)
+        window = orm.List(list=window_values)
         inputs['window'] = window
 
         k_values = [
@@ -56,11 +56,11 @@ def run_window_input(sample):
         k_points = [
             list(reversed(k)) for k in itertools.product(k_values, repeat=3)
         ]
-        wannier_kpoints = DataFactory('array.kpoints')()
+        wannier_kpoints = orm.KpointsData()
         wannier_kpoints.set_kpoints(k_points)
         inputs['wannier_kpoints'] = wannier_kpoints
 
-        wannier_bands = DataFactory('array.bands')()
+        wannier_bands = orm.BandsData()
         wannier_bands.set_kpoints(k_points)
         # Just let every energy window be valid.
         wannier_bands.set_bands(
@@ -70,7 +70,7 @@ def run_window_input(sample):
         inputs['wannier_bands'] = wannier_bands
 
         a = 3.2395  # pylint: disable=invalid-name
-        structure = DataFactory('structure')()
+        structure = orm.StructureData()
         structure.set_pymatgen_structure(
             pymatgen.Structure(
                 lattice=[[0, a, a], [a, 0, a], [a, a, 0]],
@@ -79,7 +79,7 @@ def run_window_input(sample):
             )
         )
         inputs['structure'] = structure
-        wannier_parameters = DataFactory('parameter')(
+        wannier_parameters = orm.Dict(
             dict=dict(
                 num_wann=14,
                 num_bands=36,
@@ -100,11 +100,11 @@ def run_window_input(sample):
             }
         )
         if symmetries:
-            inputs['symmetries'] = DataFactory('singlefile')(
+            inputs['symmetries'] = orm.SinglefileData(
                 file=sample('symmetries.hdf5')
             )
         if slice_:
-            slice_idx = List()
+            slice_idx = orm.List()
             slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
             inputs['slice_idx'] = slice_idx
         return inputs

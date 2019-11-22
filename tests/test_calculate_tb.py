@@ -13,6 +13,11 @@ import pytest
 import pymatgen
 import numpy as np
 
+from aiida import orm
+from aiida.engine import run_get_node
+
+from aiida_tbextraction.calculate_tb import TightBindingCalculation
+
 
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
@@ -20,26 +25,23 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
     """
     Run the tight-binding calculation workflow, optionally including symmetrization and slicing of orbitals.
     """
-    from aiida.plugins import DataFactory
-    from aiida.orm import Code
-    from aiida.orm import List
-    from aiida.orm import Dict
-    from aiida.engine import run
-    from aiida_tbextraction.calculate_tb import TightBindingCalculation
 
-    inputs = dict()
+    builder = TightBindingCalculation.get_builder()
 
-    input_folder = DataFactory('folder')()
-    input_folder_path = sample('wannier_input_folder')
-    for filename in os.listdir(input_folder_path):
-        input_folder.add_path(
-            os.path.abspath(os.path.join(input_folder_path, filename)),
-            filename
+    wannier_input_folder = orm.FolderData()
+    wannier_input_folder_path = sample('wannier_input_folder')
+    for filename in os.listdir(wannier_input_folder_path):
+        wannier_input_folder.put_object_from_file(
+            path=os.path.abspath(
+                os.path.join(wannier_input_folder_path, filename)
+            ),
+            key=filename
         )
-    inputs['wannier_input_folder'] = input_folder
+    builder.wannier.local_input_folder = wannier_input_folder
 
-    inputs['wannier_code'] = Code.get_from_string('wannier90')
-    inputs['tbmodels_code'] = Code.get_from_string('tbmodels')
+    builder.wannier.code = orm.Code.get_from_string('wannier90')
+
+    builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
 
     k_values = [
         x if x <= 0.5 else -1 + x
@@ -48,12 +50,12 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
     k_points = [
         list(reversed(k)) for k in itertools.product(k_values, repeat=3)
     ]
-    wannier_kpoints = DataFactory('array.kpoints')()
+    wannier_kpoints = orm.KpointsData()
     wannier_kpoints.set_kpoints(k_points)
-    inputs['wannier_kpoints'] = wannier_kpoints
+    builder.wannier.kpoints = wannier_kpoints
 
     a = 3.2395  # pylint: disable=invalid-name
-    structure = DataFactory('structure')()
+    structure = orm.StructureData()
     structure.set_pymatgen_structure(
         pymatgen.Structure(
             lattice=[[0, a, a], [a, 0, a], [a, a, 0]],
@@ -61,9 +63,9 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
             coords=[[0] * 3, [0.25] * 3]
         )
     )
-    inputs['structure'] = structure
+    builder.structure = structure
 
-    wannier_parameters = Dict(
+    builder.wannier.parameters = orm.Dict(
         dict=dict(
             num_wann=14,
             num_bands=36,
@@ -77,24 +79,20 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
             mp_grid=[6, 6, 6]
         )
     )
-    inputs['wannier_parameters'] = wannier_parameters
-    inputs['wannier_calculation_kwargs'] = dict(
-        options={
-            'resources': {
-                'num_machines': 1,
-                'tot_num_mpiprocs': 1
-            },
-            'withmpi': False
-        }
-    )
+    builder.wannier.metadata.options = {
+        'resources': {
+            'num_machines': 1,
+            'tot_num_mpiprocs': 1
+        },
+        'withmpi': False
+    }
     if symmetries:
-        inputs['symmetries'] = DataFactory('singlefile')(
-            file=sample('symmetries.hdf5')
-        )
+        builder.symmetries = orm.SinglefileData(file=sample('symmetries.hdf5'))
     if slice_:
-        slice_idx = List()
+        slice_idx = orm.List()
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
-        inputs['slice_idx'] = slice_idx
+        builder.slice_idx = slice_idx
 
-    result = run(TightBindingCalculation, **inputs)
+    result, node = run_get_node(builder)
+    assert node.is_finished_ok
     assert 'tb_model' in result

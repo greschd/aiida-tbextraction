@@ -6,35 +6,32 @@
 Defines helper inline calculations.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
 from fsc.export import export
 
-from aiida.orm import Dict
-from aiida.orm.calculation.inline import make_inline
+from aiida import orm
+from aiida.engine import calcfunction
 
 
 @export
-@make_inline
+@calcfunction
 def merge_parameterdata_inline(param_primary, param_secondary):
     """
     Merges two ParameterData, giving preference to ``param_primary``.
     """
-    return Dict(
+    return orm.Dict(
         dict=ChainMap(param_primary.get_dict(), param_secondary.get_dict())
     )
 
 
 @export
-@make_inline
+@calcfunction
 def slice_bands_inline(bands, slice_idx):
     """
     Slices the given BandsData such that only the bands given in ``slice_idx``
     remain, in the given order.  The k-points remain unchanged.
     """
     result = bands.clone()
-    result.set_bands(result.get_bands()[:, slice_idx.get_attr('list')])
+    result.set_bands(result.get_bands()[:, slice_idx.get_list()])
     return result

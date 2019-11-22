@@ -24,7 +24,6 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
     """
     Workflow to optimize a DFT-based tight-binding model for different strain values.
     """
-
     @classmethod
     def define(cls, spec):
         super(OptimizeStrainedFirstPrinciplesTightBinding, cls).define(spec)

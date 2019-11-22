@@ -26,7 +26,7 @@ def create_builder():
     builder = OptimizeFirstPrinciplesTightBinding.get_builder()
 
     # Add the input structure
-    builder.structure = DataFactory('structure')()
+    builder.structure = orm.StructureData()
     builder.structure.set_ase(read_vasp('inputs/POSCAR'))
 
     # Load the potential files (if needed) and set them as input
@@ -71,7 +71,7 @@ def create_builder():
     )
 
     # Setting the k-points for the reference bandstructure
-    builder.kpoints = DataFactory('array.kpoints')()
+    builder.kpoints = orm.KpointsData()
     builder.kpoints.set_kpoints_path([
         ('Z', (0.5, 0.5, 0), 'G', (0., 0., 0.), 21),
         ('G', (0., 0., 0.), 'X', (0., 0.5, 0.5), 21),
@@ -81,7 +81,7 @@ def create_builder():
     ])
 
     # Setting the k-points mesh used to run the SCF and Wannier calculations
-    builder.kpoints_mesh = DataFactory('array.kpoints')()
+    builder.kpoints_mesh = orm.KpointsData()
     builder.kpoints_mesh.set_kpoints_mesh([6, 6, 6])
 
     # Setting the codes
@@ -132,7 +132,7 @@ def create_builder():
         )
     )
     # Set the symmetry file
-    builder.symmetries = DataFactory('singlefile')(
+    builder.symmetries = orm.SinglefileData(
         file=os.path.abspath('inputs/symmetries.hdf5')
     )
 

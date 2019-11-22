@@ -6,10 +6,10 @@
 Tests for the band difference model evaluation workflow.
 """
 
-from __future__ import division, print_function, unicode_literals
-
 import pytest
 import numpy as np
+
+from aiida import orm
 
 
 @pytest.fixture
@@ -17,17 +17,13 @@ def band_difference_builder(configure, sample):  # pylint: disable=unused-argume
     """
     Create inputs for the band difference workflow.
     """
-    from aiida.plugins import DataFactory
-    from aiida.orm import Code
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
     from aiida_bands_inspect.io import read_bands
 
     builder = BandDifferenceModelEvaluation.get_builder()
-    builder.tbmodels_code = Code.get_from_string('tbmodels')
-    builder.bands_inspect_code = Code.get_from_string('bands_inspect')
-    builder.tb_model = DataFactory('singlefile')(
-        file=sample('silicon/model.hdf5')
-    )
+    builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
+    builder.bands_inspect_code = orm.Code.get_from_string('bands_inspect')
+    builder.tb_model = orm.SinglefileData(file=sample('silicon/model.hdf5'))
     builder.reference_bands = read_bands(sample('silicon/bands.hdf5'))
 
     return builder

@@ -9,7 +9,8 @@ Defines a workflow that calculates the Wannier90 input files using VASP.
 from fsc.export import export
 import numpy as np
 
-from aiida.plugins import Code, DataFactory, CalculationFactory
+from aiida.orm import Code
+from aiida.plugins import DataFactory, CalculationFactory
 from aiida.orm.nodes.data.array.bands import BandsData
 from aiida.engine import ToContext
 
@@ -18,7 +19,7 @@ from aiida_vasp.io.win import WinParser  # pylint: disable=import-error,useless-
 
 from . import WannierInputBase
 
-from .._helpers._inline_calcs import reduce_num_wann_inline
+from .._helpers._calcfunctions import reduce_num_wann_inline
 
 
 @export
@@ -26,12 +27,11 @@ class VaspWannierInput(WannierInputBase):
     """
     Calculates the Wannier90 input files using VASP.
     """
-
     @classmethod
     def define(cls, spec):
         super(VaspWannierInput, cls).define(spec)
 
-        ParameterData = DataFactory('parameter')
+        ParameterData = orm.Dict
         spec.input('code', valid_type=Code, help='Code that runs VASP.')
         spec.input(
             'parameters',
@@ -55,7 +55,7 @@ class VaspWannierInput(WannierInputBase):
         self.report("Submitting VASP2W90 calculation.")
         return ToContext(
             vasp_calc=self.submit(
-                CalculationFactory('vasp.vasp2w90').process(),
+                CalculationFactory('vasp.vasp2w90'),
                 structure=self.inputs.structure,
                 potential={(kind, ): pot
                            for kind, pot in self.inputs.potentials.items()},
@@ -74,12 +74,7 @@ class VaspWannierInput(WannierInputBase):
         """
         Get the VASP result and create the necessary outputs.
         """
-        self.out(
-            'wannier_settings',
-            DataFactory('parameter')(dict={
-                'seedname': 'wannier90'
-            })
-        )
+        self.out('wannier_settings', orm.Dict(dict={'seedname': 'wannier90'}))
         vasp_calc_output = self.ctx.vasp_calc.out
         retrieved_folder = vasp_calc_output.retrieved
         folder_list = retrieved_folder.get_folder_list()

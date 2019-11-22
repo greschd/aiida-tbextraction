@@ -18,8 +18,8 @@ from aiida.engine import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
+from aiida_optimize import OptimizationWorkChain
 from aiida_optimize.engines import NelderMead
-from aiida_optimize.workchain import OptimizationWorkChain
 
 from .run_window import RunWindow
 
@@ -29,7 +29,6 @@ class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.
     """
-
     @classmethod
     def define(cls, spec):
         super(WindowSearch, cls).define(spec)
@@ -44,13 +43,13 @@ class WindowSearch(WorkChain):
         spec.input(
             'window_tol',
             valid_type=Float,
-            default=Float(0.5),
+            default=lambda: Float(0.5),
             help='Tolerance in energy windows for the window optimization.'
         )
         spec.input(
             'cost_tol',
             valid_type=Float,
-            default=Float(0.02),
+            default=lambda: Float(0.02),
             help="Tolerance in the 'cost_value' for the window optimization."
         )
 
@@ -62,7 +61,7 @@ class WindowSearch(WorkChain):
         Run the optimization workchain.
         """
         self.report('Launching Window optimization.')
-        initial_window_list = self.inputs.initial_window.get_attr('list')
+        initial_window_list = self.inputs.initial_window.get_list()
         window_simplex = [initial_window_list]
         simplex_dist = 0.5
         for i in range(len(initial_window_list)):
@@ -98,7 +97,7 @@ class WindowSearch(WorkChain):
         """
         self.report('Add optimization results to outputs.')
         optimal_calc = load_node(
-            self.ctx.optimization.out.calculation_uuid.value
+            self.ctx.optimization.outputs.calculation_uuid.value
         )
         self.report('Adding optimal window to outputs.')
         self.out('window', optimal_calc.inp.window)

@@ -6,8 +6,6 @@
 Test the workflow which searches for the optimal energy window.
 """
 
-from __future__ import print_function
-
 import os
 import itertools
 
@@ -15,46 +13,46 @@ import pytest
 import pymatgen
 import numpy as np
 
+from aiida import orm
+from aiida_bands_inspect.io import read_bands
+
+from aiida_tbextraction.energy_windows.window_search import WindowSearch
+from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
+
 
 @pytest.fixture
 def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-suppression
     """
     Sets up the process builder for window_search tests, and adds the inputs.
     """
-    from aiida.plugins import DataFactory
-    from aiida.orm import Code
-    from aiida.orm import List, Float
-    from aiida_bands_inspect.io import read_bands
-    from aiida_tbextraction.energy_windows.window_search import WindowSearch
-    from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
     builder = WindowSearch.get_builder()
 
-    input_folder = DataFactory('folder')()
+    input_folder = orm.FolderData()
     input_folder_path = sample('wannier_input_folder')
     for filename in os.listdir(input_folder_path):
-        input_folder.add_path(
-            os.path.abspath(os.path.join(input_folder_path, filename)),
-            filename
+        input_folder.put_object_from_file(
+            path=os.path.abspath(os.path.join(input_folder_path, filename)),
+            key=filename
         )
     builder.wannier_input_folder = input_folder
 
-    builder.wannier_code = Code.get_from_string('wannier90')
-    builder.tbmodels_code = Code.get_from_string('tbmodels')
+    builder.wannier_code = orm.Code.get_from_string('wannier90')
+    builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
 
     builder.model_evaluation_workflow = BandDifferenceModelEvaluation
     builder.model_evaluation = {
-        'bands_inspect_code': Code.get_from_string('bands_inspect'),
+        'bands_inspect_code': orm.Code.get_from_string('bands_inspect'),
     }
     builder.reference_bands = read_bands(sample('bands.hdf5'))
 
-    initial_window = List()
+    initial_window = orm.List()
     initial_window.extend([-4.5, -4, 6.5, 16])
     builder.initial_window = initial_window
-    builder.window_tol = Float(0.5)
+    builder.window_tol = orm.Float(0.5)
 
     a = 3.2395  # pylint: disable=invalid-name
-    structure = DataFactory('structure')()
+    structure = orm.StructureData()
     structure.set_pymatgen_structure(
         pymatgen.Structure(
             lattice=[[0, a, a], [a, 0, a], [a, a, 0]],
@@ -63,7 +61,7 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
         )
     )
     builder.structure = structure
-    wannier_parameters = DataFactory('parameter')(
+    wannier_parameters = orm.Dict(
         dict=dict(
             num_wann=14,
             num_bands=36,
@@ -84,10 +82,8 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
         }
     )
 
-    builder.symmetries = DataFactory('singlefile')(
-        file=sample('symmetries.hdf5')
-    )
-    slice_idx = List()
+    builder.symmetries = orm.SinglefileData(file=sample('symmetries.hdf5'))
+    slice_idx = orm.List()
     slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
     builder.slice_idx = slice_idx
 
@@ -98,7 +94,7 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
     k_points = [
         list(reversed(k)) for k in itertools.product(k_values, repeat=3)
     ]
-    wannier_bands = DataFactory('array.bands')()
+    wannier_bands = orm.BandsData()
     wannier_bands.set_kpoints(k_points)
     # Just let every energy window be valid.
     wannier_bands.set_bands(np.array([[0] * 14] * len(k_points)))

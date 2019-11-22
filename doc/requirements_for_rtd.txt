@@ -9,4 +9,3 @@ aiida-wannier90
 aiida-tbmodels
 aiida-tools
 fsc.export
-future

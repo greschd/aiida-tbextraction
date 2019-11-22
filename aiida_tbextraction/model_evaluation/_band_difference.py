@@ -8,10 +8,9 @@ Defines a workflow which evaluates a tight-binding model by comparing its bandst
 
 from fsc.export import export
 
-from aiida.plugins import DataFactory, CalculationFactory
-from aiida.orm import Code
-from aiida.orm import Float
+from aiida import orm
 from aiida.engine import ToContext
+from aiida.plugins import CalculationFactory
 
 from aiida_tools import check_workchain_step
 
@@ -23,18 +22,17 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
     """
     Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.
     """
-
     @classmethod
     def define(cls, spec):
         super(BandDifferenceModelEvaluation, cls).define(spec)
         spec.input(
             'bands_inspect_code',
-            valid_type=Code,
+            valid_type=orm.Code,
             help='Code that runs the bands_inspect CLI.'
         )
         spec.output(
             'plot',
-            valid_type=DataFactory('singlefile'),
+            valid_type=orm.SinglefileData,
             help='Plot comparing the reference and evaluated bandstructure.'
         )
 
@@ -49,7 +47,9 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         builder = CalculationFactory(calc_string).get_builder()
         builder.code = self.inputs[code_param]
-        builder.options = dict(resources={'num_machines': 1}, withmpi=False)
+        builder.metadata.options = dict(
+            resources={'num_machines': 1}, withmpi=False
+        )
         return builder
 
     @check_workchain_step
@@ -76,9 +76,9 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         )
         # Inputs for the plot and difference calculations are the same
         diff_builder.bands1 = self.inputs.reference_bands
-        diff_builder.bands2 = self.ctx.calculated_bands.out.bands
+        diff_builder.bands2 = self.ctx.calculated_bands.outputs.bands
         plot_builder.bands1 = self.inputs.reference_bands
-        plot_builder.bands2 = self.ctx.calculated_bands.out.bands
+        plot_builder.bands2 = self.ctx.calculated_bands.outputs.bands
 
         self.report('Running difference and plot calculations.')
         self.report('Running plot calculation.')
@@ -92,5 +92,5 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         Return outputs of the difference and plot calculations.
         """
-        self.out('cost_value', Float(self.ctx.difference.out.difference))
-        self.out('plot', self.ctx.plot.out.plot)
+        self.out('cost_value', self.ctx.difference.outputs.difference)
+        self.out('plot', self.ctx.plot.outputs.plot)

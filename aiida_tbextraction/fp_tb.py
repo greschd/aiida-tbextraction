@@ -7,10 +7,7 @@ Defines the workflow that runs first-principles calculations and creates a
 tight-binding model, without running the window optimization.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
 from fsc.export import export
 
@@ -20,13 +17,13 @@ from aiida.engine import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
+from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from .model_evaluation import ModelEvaluationBase
 from .calculate_tb import TightBindingCalculation
 from .fp_run import FirstPrinciplesRunBase
 from .energy_windows.auto_guess import add_initial_window_inline
-from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
+from ._calcfunctions import merge_parameterdata_inline, slice_bands_inline
 
 
 @export
@@ -34,7 +31,6 @@ class FirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then calculating the tight-binding model.
     """
-
     @classmethod
     def define(cls, spec):
         super(FirstPrinciplesTightBinding, cls).define(spec)
@@ -50,7 +46,7 @@ class FirstPrinciplesTightBinding(WorkChain):
         spec.input(
             'fp_run_workflow',
             help='Workflow which executes the first-principles calculations',
-            **WORKCHAIN_INPUT_KWARGS
+            **PROCESS_INPUT_KWARGS
         )
 
         # top-level scope
@@ -81,7 +77,7 @@ class FirstPrinciplesTightBinding(WorkChain):
         spec.input(
             'guess_windows',
             valid_type=Bool,
-            default=Bool(False),
+            default=lambda: Bool(False),
             help='Add disentanglement windows guessed from the wannier bands.'
         )
 
@@ -98,7 +94,7 @@ class FirstPrinciplesTightBinding(WorkChain):
             'model_evaluation_workflow',
             help=
             'AiiDA workflow that will be used to evaluate the tight-binding model.',
-            **WORKCHAIN_INPUT_KWARGS
+            **PROCESS_INPUT_KWARGS
         )
 
         spec.expose_outputs(TightBindingCalculation)
@@ -133,9 +129,7 @@ class FirstPrinciplesTightBinding(WorkChain):
         self.report(
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
-        wannier_settings_explicit = inputs.pop(
-            'wannier_settings', Dict()
-        )
+        wannier_settings_explicit = inputs.pop('wannier_settings', Dict())
         wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
             'wannier_settings', Dict()
         )
@@ -155,8 +149,8 @@ class FirstPrinciplesTightBinding(WorkChain):
             inputs['slice_idx'] = slice_idx
 
         # get automatic guess for windows if needed
-        wannier_bands = self.ctx.fp_run.out.wannier_bands
-        wannier_parameters = self.ctx.fp_run.out.wannier_parameters
+        wannier_bands = self.ctx.fp_run.outputs.wannier_bands
+        wannier_parameters = self.ctx.fp_run.outputs.wannier_parameters
         if self.inputs.guess_windows:
             wannier_parameters = add_initial_window_inline(
                 wannier_parameters=wannier_parameters,
@@ -174,7 +168,8 @@ class FirstPrinciplesTightBinding(WorkChain):
                 wannier_kpoints=wannier_bands,
                 wannier_bands=wannier_bands,
                 wannier_parameters=wannier_parameters,
-                wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
+                wannier_input_folder=self.ctx.fp_run.outputs.
+                wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
                 **inputs
@@ -186,12 +181,12 @@ class FirstPrinciplesTightBinding(WorkChain):
         """
         Runs the model evaluation workflow.
         """
-        tb_model = self.ctx.tbextraction_calc.out.tb_model
+        tb_model = self.ctx.tbextraction_calc.outputs.tb_model
         self.report("Adding tight-binding model to output.")
         self.out('tb_model', tb_model)
 
         # slice reference bands if necessary
-        reference_bands = self.ctx.fp_run.out.bands
+        reference_bands = self.ctx.fp_run.outputs.bands
         slice_reference_bands = self.inputs.get('slice_reference_bands', None)
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(

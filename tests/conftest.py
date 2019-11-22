@@ -8,29 +8,27 @@ Configuration file for pytest tests.
 
 import pytest
 
-from aiida_pytest import *  # pylint: disable=unused-wildcard-import,redefined-builtin
-from aiida_pytest import pytest_addoption as _pytest_addoption
+pytest_plugins = ['aiida_pytest']  # pylint: disable=invalid-name
 
 
-def pytest_addoption(parser):  # pylint: disable=function-redefined
-    _pytest_addoption(parser)
+def pytest_addoption(parser):
     parser.addoption(
-        '--skip-vasp',
+        '--skip-qe',
         action='store_true',
-        help='Skip tests which require VASP.'
+        help='Skip tests which require Quantum ESPRESSO.'
     )
 
 
 def pytest_configure(config):
     # register additional marker
-    config.addinivalue_line("markers", "vasp: mark tests which run with VASP")
+    config.addinivalue_line("markers", "qe: mark tests which run with QE")
 
 
 def pytest_runtest_setup(item):  # pylint: disable=missing-docstring
     try:
-        vasp_marker = item.get_marker("vasp")
+        vasp_marker = item.get_marker("qe")
     except AttributeError:
-        vasp_marker = item.get_closest_marker('vasp')
+        vasp_marker = item.get_closest_marker('qe')
     if vasp_marker is not None:
-        if item.config.getoption("--skip-vasp"):
-            pytest.skip("Test runs only with VASP.")
+        if item.config.getoption("--skip-qe"):
+            pytest.skip("Test runs only with QE.")

@@ -6,8 +6,6 @@
 Tests the workflow that optimizes a DFT-based tight-binding model for different strain values.
 """
 
-from __future__ import print_function
-
 import pytest
 
 from insb_sample import *  # pylint: disable=unused-wildcard-import

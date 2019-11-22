@@ -19,7 +19,6 @@ class FirstPrinciplesRunBase(WorkChain):
     """
     Base class for first-principles runs, calculation the reference bandstructure and Wannier90 inputs.
     """
-
     @classmethod
     def define(cls, spec):
         super(FirstPrinciplesRunBase, cls).define(spec)

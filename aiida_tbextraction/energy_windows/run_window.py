@@ -6,22 +6,17 @@
 Defines a workflow for running the tight-binding calculation and evaluation for a given energy window.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
 import numpy as np
 from fsc.export import export
 
-from aiida.plugins import DataFactory
-from aiida.orm import List, Float
-from aiida.orm.calculation.inline import make_inline
-from aiida.engine import WorkChain, ToContext, if_
+from aiida import orm
 from aiida.common.links import LinkType
+from aiida.engine import WorkChain, ToContext, if_, calcfunction
 
 from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
+from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from ..model_evaluation import ModelEvaluationBase
 from ..calculate_tb import TightBindingCalculation
@@ -32,7 +27,6 @@ class RunWindow(WorkChain):
     """
     This workchain runs the tight-binding extraction and analysis for a given energy window.
     """
-
     @classmethod
     def define(cls, spec):
         super(RunWindow, cls).define(spec)
@@ -47,13 +41,13 @@ class RunWindow(WorkChain):
 
         spec.input(
             'window',
-            valid_type=List,
+            valid_type=orm.List,
             help=
             'Disentaglement energy windows used by Wannier90, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.'
         )
         spec.input(
             'wannier_bands',
-            valid_type=DataFactory('array.bands'),
+            valid_type=orm.BandsData,
             help=
             'Input bandstructure for Wannier90, to be written to the ``wannier90.eig`` input file.'
         )
@@ -61,7 +55,7 @@ class RunWindow(WorkChain):
             'model_evaluation_workflow',
             help=
             'AiiDA workflow that will be used to evaluate the tight-binding model.',
-            **WORKCHAIN_INPUT_KWARGS
+            **PROCESS_INPUT_KWARGS
         )
 
         spec.expose_outputs(ModelEvaluationBase)
@@ -83,9 +77,9 @@ class RunWindow(WorkChain):
         """
         Check if a window is valid.
         """
-        window_list = self.inputs.window.get_attr('list')
+        window_list = self.inputs.window.get_list()
         win_min, froz_min, froz_max, win_max = window_list
-        num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
+        num_wann = int(self.inputs.wannier_parameters.get_attribute('num_wann'))
 
         window_invalid_str = 'Window [{}, ({}, {}), {}] is invalid'.format(
             *window_list
@@ -152,7 +146,7 @@ class RunWindow(WorkChain):
         """
         Add the tight-binding model to the outputs and run the evaluation workflow.
         """
-        tb_model = self.ctx.tbextraction_calc.out.tb_model
+        tb_model = self.ctx.tbextraction_calc.outputs.tb_model
         self.report("Adding tight-binding model to output.")
         self.out('tb_model', tb_model)
         self.report("Running model evaluation.")
@@ -184,16 +178,16 @@ class RunWindow(WorkChain):
         Abort when an invalid window is found. The 'cost_value' is set to infinity.
         """
         self.report('Window is invalid, assigning infinite cost_value.')
-        self.out('cost_value', Float('inf'))
+        self.out('cost_value', orm.Float('inf').store())
 
 
-@make_inline
+@calcfunction
 def add_window_parameters_inline(wannier_parameters, window):
     """
     Adds the window values to the given Wannier90 input parameters.
     """
     param_dict = wannier_parameters.get_dict()
-    win_min, froz_min, froz_max, win_max = window.get_attr('list')
+    win_min, froz_min, froz_max, win_max = window.get_list()
     param_dict.update(
         dict(
             dis_win_min=win_min,
@@ -202,4 +196,4 @@ def add_window_parameters_inline(wannier_parameters, window):
             dis_froz_max=froz_max,
         )
     )
-    return {'wannier_parameters': DataFactory('parameter')(dict=param_dict)}
+    return {'wannier_parameters': orm.Dict(dict=param_dict)}

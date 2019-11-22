@@ -23,7 +23,7 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
 
-    KpointsData = DataFactory('array.kpoints')
+    KpointsData = orm.KpointsData
 
     kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
@@ -51,7 +51,7 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
         wannier_input=vasp_subwf_inputs,
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
-        wannier_parameters=DataFactory('parameter')(
+        wannier_parameters=orm.Dict(
             dict=dict(num_wann=num_wann, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
@@ -64,7 +64,7 @@ def test_split_fp_run(configure_with_daemon, assert_finished, get_insb_input):  
             'bands'
         ]
     )
-    assert int(result['wannier_parameters'].get_attr('num_wann')) == num_wann
+    assert int(result['wannier_parameters'].get_attribute('num_wann')) == num_wann
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(
         filename in folder_list
@@ -87,7 +87,7 @@ def test_combined_fp_run(
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
     from aiida_vasp.calcs.vasp import VaspCalculation  # pylint: disable=import-error,useless-suppression
 
-    KpointsData = DataFactory('array.kpoints')
+    KpointsData = orm.KpointsData
 
     kpoints_mesh = KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
@@ -105,7 +105,7 @@ def test_combined_fp_run(
         VaspFirstPrinciplesRun,
         kpoints=kpoints,
         kpoints_mesh=kpoints_mesh,
-        wannier_parameters=DataFactory('parameter')(
+        wannier_parameters=orm.Dict(
             dict=dict(num_wann=num_wann, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
@@ -120,7 +120,7 @@ def test_combined_fp_run(
             'bands'
         ]
     )
-    assert int(result['wannier_parameters'].get_attr('num_wann')) == num_wann
+    assert int(result['wannier_parameters'].get_attribute('num_wann')) == num_wann
     folder_list = result['wannier_input_folder'].get_folder_list()
     assert all(
         filename in folder_list

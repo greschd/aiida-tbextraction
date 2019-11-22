@@ -37,7 +37,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         spec.input('code', valid_type=orm.Code, help='Code that runs VASP.')
         spec.input(
             'parameters',
-            valid_type=orm.Dict,
+            valid_type=ParameterData,
             help=
             'Parameters passed to all VASP calculations, unless explicitly overwritten.'
         )
@@ -90,7 +90,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
             )[1]
             if force_parameters:
                 parameters = merge_parameterdata_inline(
-                    param_primary=orm.Dict(dict=force_parameters),
+                    param_primary=orm.Dict(dict=force_parameters).store(),
                     param_secondary=parameters
                 )[1]
         calculation_kwargs = copy.deepcopy(

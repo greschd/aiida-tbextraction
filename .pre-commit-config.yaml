@@ -1,6 +1,6 @@
 repos:
 - repo: git://github.com/pre-commit/mirrors-yapf
-  rev: v0.25.0
+  rev: v0.28.0
   hooks:
   - id: yapf
     language: system
@@ -11,4 +11,21 @@ repos:
     entry: prospector
     types: [file, python]
     language: system
-    exclude: '^(doc/)|(examples/)|(futures/)'
+    exclude: '^(doc/)|(examples/)|(vasp_outdated/)'
+  - id: version-number
+    name: Check version numbers
+    entry: python ./utils/validate_version_consistency.py
+    language: system
+    files: >-
+      (?x)^(
+        setup.json|
+        utils/validate_version_consistency.py|
+        aiida_tbextraction/__init__.py
+      )$
+    pass_filenames: false
+  - id: mypy
+    name: Run mypy
+    entry: mypy aiida_tbextraction
+    types: [file, python]
+    language: system
+    pass_filenames: false

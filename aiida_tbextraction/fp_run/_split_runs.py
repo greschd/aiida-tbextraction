@@ -6,17 +6,14 @@
 Defines a workflow for independently running the bands and Wannier input calculations.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
 from fsc.export import export
 
 from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
+from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from ._base import FirstPrinciplesRunBase
 from .reference_bands import ReferenceBandsBase
@@ -28,13 +25,12 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.
     """
-
     @classmethod
     def define(cls, spec):
         super(SplitFirstPrinciplesRun, cls).define(spec)
 
-        spec.input('reference_bands_workflow', **WORKCHAIN_INPUT_KWARGS)
-        spec.input('wannier_input_workflow', **WORKCHAIN_INPUT_KWARGS)
+        spec.input('reference_bands_workflow', **PROCESS_INPUT_KWARGS)
+        spec.input('wannier_input_workflow', **PROCESS_INPUT_KWARGS)
 
         # Add dynamic namespaces
         spec.input_namespace('reference_bands', dynamic=True)

@@ -1,50 +1,56 @@
 {
   "name": "aiida-tbextraction",
+  "version": "0.2.0",
   "description": "AiiDA Plugin for extracting tight-binding models",
   "author": "Dominik Gresch",
   "author_email": "greschd@gmx.ch",
   "url": "https://aiida-tbextraction.readthedocs.io",
   "license": "Apache 2.0",
   "classifiers": [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Environment :: Plugins",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.6",
-    "Topic :: Scientific/Engineering :: Physics"
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Framework :: AiiDA"
   ],
   "keywords": "tight-binding extraction aiida workflows",
   "include_package_data": true,
+  "requires_python": ">=3.6",
   "setup_requires": [
     "reentry"
   ],
   "reentry_register": true,
   "install_requires": [
-    "aiida-core",
+    "aiida-core>=1.0.0<2",
     "aiida-wannier90",
-    "aiida-bands-inspect",
-    "aiida-tbmodels",
-    "aiida-optimize",
-    "fsc.export",
-    "aiida-tools",
-    "future"
+    "aiida-bands-inspect>=0.3.0",
+    "aiida-tbmodels>=0.2.0",
+    "aiida-optimize>=0.3.0",
+    "aiida-tools>=0.3.0",
+    "fsc.export"
   ],
   "extras_require": {
-    ":python_version < \"3\"": [
-      "chainmap",
-      "singledispatch"
-    ],
-    "dev": [
-      "pymatgen; python_version>=\"3\"",
-      "pymatgen<2019; python_version<\"3\"",
+    "testing": [
+      "pytest>=3.6",
+      "pytest-cov",
       "aiida-pytest",
-      "ase",
-      "yapf==0.25",
-      "pre-commit",
-      "prospector==0.12.11",
+      "ase"
+    ],
+    "docs": [
+      "sphinx",
       "sphinx-rtd-theme",
-      "pylint==1.9.3"
+      "sphinxcontrib-details-directive"
+    ],
+    "dev_precommit": [
+      "yapf==0.28",
+      "pre-commit",
+      "prospector==1.1.7",
+      "pylint==2.3.1",
+      "mypy==0.740"
     ],
     "strain": [
       "aiida-strain"

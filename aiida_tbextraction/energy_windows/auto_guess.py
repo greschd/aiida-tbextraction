@@ -8,14 +8,13 @@ Defines inline calculations to automatically get an initial window guess.
 
 import numpy as np
 
-from aiida.orm.nodes.data.list import List
-from aiida.orm import Dict
-from aiida.orm.calculation.inline import make_inline
+from aiida import orm
+from aiida.engine import calcfunction
 
-from .._inline_calcs import merge_parameterdata_inline
+from .._calcfunctions import merge_parameterdata_inline
 
 
-@make_inline
+@calcfunction
 def get_initial_window_inline(wannier_bands, slice_reference_bands):
     """
     InlineCalculation which returns the automatic guess for the window based on the Wannier bands.
@@ -29,7 +28,7 @@ def get_initial_window_inline(wannier_bands, slice_reference_bands):
     """
     return {
         'result':
-        List(
+        orm.List(
             list=guess_window(
                 wannier_bands=wannier_bands,
                 slice_reference_bands=slice_reference_bands
@@ -38,7 +37,7 @@ def get_initial_window_inline(wannier_bands, slice_reference_bands):
     }
 
 
-@make_inline
+@calcfunction
 def add_initial_window_inline(
     wannier_parameters, wannier_bands, slice_reference_bands
 ):
@@ -64,7 +63,7 @@ def add_initial_window_inline(
         int(wannier_param_dict['num_bands']
             ) == int(wannier_param_dict['num_wann'])
     )):
-        return {'result': Dict(dict=wannier_param_dict)}
+        return {'result': orm.Dict(dict=wannier_param_dict)}
     else:
         window_dict = {
             key: value
@@ -80,7 +79,7 @@ def add_initial_window_inline(
             'result':
             merge_parameterdata_inline(
                 param_primary=wannier_parameters,
-                param_secondary=Dict(dict=window_dict)
+                param_secondary=orm.Dict(dict=window_dict)
             )[1]
         }
 

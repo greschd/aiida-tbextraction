@@ -20,27 +20,26 @@ def test_vasp_hf_wannier_input(
     """
     Runs the workflow that calculates Wannier90 inputs from VASP + hybrids on InSb with a coarse grid.
     """
-    from aiida.plugins import DataFactory
-    from aiida.orm import List
-    from aiida.engine.launch import run_get_pid
+    from aiida import orm
+    from aiida.engine import run_get_node
     from aiida_tbextraction.fp_run.wannier_input import VaspWannierInput
 
-    kpoints_mesh = DataFactory('array.kpoints')()
+    kpoints_mesh = orm.KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
 
-    wannier_projections = List()
+    wannier_projections = orm.List()
     wannier_projections.extend(['In : s; px; py; pz', 'Sb : px; py; pz'])
 
-    result, pid = run_get_pid(
+    result, node = run_get_node(
         VaspWannierInput,
         kpoints_mesh=kpoints_mesh,
-        wannier_parameters=DataFactory('parameter')(
+        wannier_parameters=orm.Dict(
             dict=dict(num_wann=14, num_bands=36, spinors=True)
         ),
         wannier_projections=wannier_projections,
         **get_insb_input
     )
-    assert_finished(pid)
+    assert node.is_finished_ok
     assert all(
         key in result for key in
         ['wannier_input_folder', 'wannier_parameters', 'wannier_bands']

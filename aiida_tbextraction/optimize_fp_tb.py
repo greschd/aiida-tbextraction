@@ -6,10 +6,7 @@
 Defines the workflow that runs first-principles calculations and creates an optimized tight-binding model.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
 from fsc.export import export
 
@@ -19,11 +16,11 @@ from aiida.engine import WorkChain, ToContext
 from aiida.common.links import LinkType
 
 from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
+from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from .energy_windows.window_search import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
-from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
+from ._calcfunctions import merge_parameterdata_inline, slice_bands_inline
 from .energy_windows.auto_guess import get_initial_window_inline
 
 
@@ -32,7 +29,6 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.
     """
-
     @classmethod
     def define(cls, spec):
         super(OptimizeFirstPrinciplesTightBinding, cls).define(spec)
@@ -70,7 +66,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         spec.input(
             'fp_run_workflow',
             help='Workflow which executes the first-principles calculations',
-            **WORKCHAIN_INPUT_KWARGS
+            **PROCESS_INPUT_KWARGS
         )
         spec.input(
             'slice_reference_bands',
@@ -117,9 +113,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         self.report(
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
-        wannier_settings_explicit = inputs.pop(
-            'wannier_settings', Dict()
-        )
+        wannier_settings_explicit = inputs.pop('wannier_settings', Dict())
         wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
             'wannier_settings', Dict()
         )
@@ -134,7 +128,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         )
 
         # slice reference bands if necessary
-        reference_bands = self.ctx.fp_run.out.bands
+        reference_bands = self.ctx.fp_run.outputs.bands
         slice_reference_bands = self.inputs.get('slice_reference_bands', None)
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(
@@ -147,7 +141,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             inputs['slice_idx'] = slice_idx
 
         self.report('Get or guess initial window.')
-        wannier_bands = self.ctx.fp_run.out.wannier_bands
+        wannier_bands = self.ctx.fp_run.outputs.wannier_bands
         initial_window = self.inputs.get('initial_window', None)
         if initial_window is None:
             initial_window = get_initial_window_inline(
@@ -164,8 +158,9 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 WindowSearch,
                 reference_bands=reference_bands,
                 wannier_bands=wannier_bands,
-                wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
-                wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
+                wannier_parameters=self.ctx.fp_run.outputs.wannier_parameters,
+                wannier_input_folder=self.ctx.fp_run.outputs.
+                wannier_input_folder,
                 wannier_settings=wannier_settings,
                 wannier_projections=wannier_projections,
                 initial_window=initial_window,

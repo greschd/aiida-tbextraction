@@ -22,7 +22,7 @@ def get_insb_input(configure, sample, get_queue_name_from_code):  # pylint: disa
 
     res = dict()
 
-    structure = DataFactory('structure')()
+    structure = orm.StructureData()
     structure.set_ase(read_vasp(sample('InSb/POSCAR')))
     res['structure'] = structure
 
@@ -79,7 +79,7 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
     from aiida.orm import List, Bool
     from aiida.orm import Dict
     from aiida.orm import Code
-    from aiida_tools.workchain_inputs import get_fullname
+    from aiida_tools.process_inputs import get_fullname
     from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
     from aiida_tbextraction.fp_run import SplitFirstPrinciplesRun
     from aiida_tbextraction.fp_run.reference_bands import VaspReferenceBands
@@ -120,10 +120,10 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
 
     inputs.update(vasp_inputs)
 
-    kpoints = DataFactory('array.kpoints')()
+    kpoints = orm.KpointsData()
     kpoints.set_kpoints_path([('G', (0, 0, 0), 'M', (0.5, 0.5, 0.5))])
     inputs['kpoints'] = kpoints
-    kpoints_mesh = DataFactory('array.kpoints')()
+    kpoints_mesh = orm.KpointsData()
     kpoints_mesh.set_kpoints_mesh([2, 2, 2])
     inputs['kpoints_mesh'] = kpoints_mesh
 
@@ -135,7 +135,7 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
         'bands_inspect_code': Code.get_from_string('bands_inspect')
     }
 
-    wannier_parameters = DataFactory('parameter')(
+    wannier_parameters = orm.Dict(
         dict=dict(
             num_wann=14,
             num_bands=36,
@@ -157,9 +157,7 @@ def get_fp_tb_input(configure, get_insb_input, sample, request):  # pylint: disa
             'withmpi': False
         }
     )
-    inputs['symmetries'] = DataFactory('singlefile')(
-        file=sample('symmetries.hdf5')
-    )
+    inputs['symmetries'] = orm.SinglefileData(file=sample('symmetries.hdf5'))
 
     slice_reference_bands = List()
     slice_reference_bands.extend(list(range(12, 26)))
