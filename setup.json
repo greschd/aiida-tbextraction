@@ -30,7 +30,7 @@
     "aiida-bands-inspect>=0.3.0",
     "aiida-tbmodels>=0.2.0",
     "aiida-optimize>=0.3.0",
-    "aiida-tools>=0.3.0",
+    "aiida-tools>=0.3.1",
     "fsc.export"
   ],
   "extras_require": {

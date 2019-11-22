@@ -15,9 +15,8 @@ from aiida.orm import load_node
 from aiida.orm import List, Float
 from aiida.orm import Dict
 from aiida.engine import WorkChain, ToContext
-from aiida.common.links import LinkType
 
-from aiida_tools import check_workchain_step
+from aiida_tools import check_workchain_step, get_outputs_dict
 from aiida_optimize import OptimizationWorkChain
 from aiida_optimize.engines import NelderMead
 
@@ -101,9 +100,6 @@ class WindowSearch(WorkChain):
         )
         self.report('Adding optimal window to outputs.')
         self.out('window', optimal_calc.inp.window)
-        for label, node in optimal_calc.get_outputs(
-            also_labels=True, link_type=LinkType.RETURN
-        ):
-            self.report("Adding {} to outputs.".format(label))
-            self.out(label, node)
+        self.report("Adding outputs of the optimal calculation.")
+        self.out_many(get_outputs_dict(optimal_calc))
         self.report('Finished!')

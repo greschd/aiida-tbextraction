@@ -35,9 +35,9 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
             path=os.path.abspath(os.path.join(input_folder_path, filename)),
             key=filename
         )
-    builder.wannier_input_folder = input_folder
+    builder.wannier.local_input_folder = input_folder
 
-    builder.wannier_code = orm.Code.get_from_string('wannier90')
+    builder.wannier.code = orm.Code.get_from_string('wannier90')
     builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
 
     builder.model_evaluation_workflow = BandDifferenceModelEvaluation
@@ -71,16 +71,14 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
             mp_grid=[6, 6, 6],
         )
     )
-    builder.wannier_parameters = wannier_parameters
-    builder.wannier_calculation_kwargs = dict(
-        options={
-            'resources': {
-                'num_machines': 1,
-                'tot_num_mpiprocs': 1
-            },
-            'withmpi': False
-        }
-    )
+    builder.wannier.parameters = wannier_parameters
+    builder.wannier.metadata.options = {
+        'resources': {
+            'num_machines': 1,
+            'tot_num_mpiprocs': 1
+        },
+        'withmpi': False
+    }
 
     builder.symmetries = orm.SinglefileData(file=sample('symmetries.hdf5'))
     slice_idx = orm.List()

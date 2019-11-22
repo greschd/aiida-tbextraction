@@ -29,6 +29,7 @@ def band_difference_builder(configure, sample):  # pylint: disable=unused-argume
     return builder
 
 
+@pytest.skip("Not yet migrated.")
 def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Run the band evaluation workflow.

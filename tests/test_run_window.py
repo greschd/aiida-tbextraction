@@ -14,18 +14,20 @@ import pymatgen
 import numpy as np
 
 from aiida import orm
+from aiida.engine import run_get_node
+from aiida_bands_inspect.io import read_bands
+
+from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
+from aiida_tbextraction.energy_windows.run_window import RunWindow
 
 
 @pytest.fixture
-def run_window_input(sample):
+def run_window_builder(sample):
     """
     Returns a function that creates the input for RunWindow tests.
     """
     def inner(window_values, slice_, symmetries):
-        from aiida_bands_inspect.io import read_bands
-        from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
-
-        inputs = dict()
+        builder = RunWindow.get_builder()
 
         input_folder = orm.FolderData()
         input_folder_path = sample('wannier_input_folder')
@@ -36,18 +38,18 @@ def run_window_input(sample):
                 ),
                 key=filename
             )
-        inputs['wannier_input_folder'] = input_folder
+        builder.wannier.local_input_folder = input_folder
 
-        inputs['wannier_code'] = orm.Code.get_from_string('wannier90')
-        inputs['tbmodels_code'] = orm.Code.get_from_string('tbmodels')
-        inputs['model_evaluation_workflow'] = BandDifferenceModelEvaluation
-        inputs['reference_bands'] = read_bands(sample('bands.hdf5'))
-        inputs['model_evaluation'] = {
+        builder.wannier.code = orm.Code.get_from_string('wannier90')
+        builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
+        builder.model_evaluation_workflow = BandDifferenceModelEvaluation
+        builder.reference_bands = read_bands(sample('bands.hdf5'))
+        builder.model_evaluation = {
             'bands_inspect_code': orm.Code.get_from_string('bands_inspect'),
         }
 
         window = orm.List(list=window_values)
-        inputs['window'] = window
+        builder.window = window
 
         k_values = [
             x if x <= 0.5 else -1 + x
@@ -58,7 +60,7 @@ def run_window_input(sample):
         ]
         wannier_kpoints = orm.KpointsData()
         wannier_kpoints.set_kpoints(k_points)
-        inputs['wannier_kpoints'] = wannier_kpoints
+        builder.wannier.kpoints = wannier_kpoints
 
         wannier_bands = orm.BandsData()
         wannier_bands.set_kpoints(k_points)
@@ -67,7 +69,7 @@ def run_window_input(sample):
             np.array([[-20] * 10 + [-0.5] * 7 + [0.5] * 7 + [20] * 12] *
                      len(k_points))
         )
-        inputs['wannier_bands'] = wannier_bands
+        builder.wannier_bands = wannier_bands
 
         a = 3.2395  # pylint: disable=invalid-name
         structure = orm.StructureData()
@@ -78,7 +80,7 @@ def run_window_input(sample):
                 coords=[[0] * 3, [0.25] * 3]
             )
         )
-        inputs['structure'] = structure
+        builder.structure = structure
         wannier_parameters = orm.Dict(
             dict=dict(
                 num_wann=14,
@@ -89,25 +91,23 @@ def run_window_input(sample):
                 mp_grid=[6, 6, 6],
             )
         )
-        inputs['wannier_parameters'] = wannier_parameters
-        inputs['wannier_calculation_kwargs'] = dict(
-            options={
-                'resources': {
-                    'num_machines': 1,
-                    'tot_num_mpiprocs': 1
-                },
-                'withmpi': False
-            }
-        )
+        builder.wannier.parameters = wannier_parameters
+        builder.wannier.metadata.options = {
+            'resources': {
+                'num_machines': 1,
+                'tot_num_mpiprocs': 1
+            },
+            'withmpi': False
+        }
         if symmetries:
-            inputs['symmetries'] = orm.SinglefileData(
+            builder.symmetries = orm.SinglefileData(
                 file=sample('symmetries.hdf5')
             )
         if slice_:
             slice_idx = orm.List()
             slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])
-            inputs['slice_idx'] = slice_idx
-        return inputs
+            builder.slice_idx = slice_idx
+        return builder
 
     return inner
 
@@ -115,20 +115,18 @@ def run_window_input(sample):
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
 def test_run_window(
-    configure_with_daemon, run_window_input, slice_, symmetries
+    configure_with_daemon, run_window_builder, slice_, symmetries
 ):  # pylint:disable=unused-argument,redefined-outer-name
     """
     Runs the workflow which evaluates an energy window.
     """
-    from aiida.engine import run
-    from aiida_tbextraction.energy_windows.run_window import RunWindow
 
-    result = run(
-        RunWindow,
-        **run_window_input([-4.5, -4, 6.5, 16],
+    result, node = run_get_node(
+        run_window_builder([-4.5, -4, 6.5, 16],
                            slice_=slice_,
                            symmetries=symmetries)
     )
+    assert node.is_finished_ok
     assert all(key in result for key in ['cost_value', 'tb_model', 'plot'])
 
 
@@ -141,16 +139,13 @@ def test_run_window(
     ]
 )
 def test_run_window_invalid(
-    configure_with_daemon, run_window_input, window_values
+    configure_with_daemon, run_window_builder, window_values
 ):  # pylint:disable=unused-argument,redefined-outer-name
     """
     Runs an the run_window workflow with invalid window values.
     """
-    from aiida.engine import run
-    from aiida_tbextraction.energy_windows.run_window import RunWindow
-
-    result = run(
-        RunWindow,
-        **run_window_input(window_values, slice_=True, symmetries=True)
+    result, node = run_get_node(
+        run_window_builder(window_values, slice_=True, symmetries=True)
     )
+    assert node.is_finished_ok
     assert result['cost_value'] == float('inf')

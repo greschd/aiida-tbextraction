@@ -14,9 +14,8 @@ from fsc.export import export
 from aiida.orm import List, Bool
 from aiida.orm import Dict
 from aiida.engine import WorkChain, ToContext
-from aiida.common.links import LinkType
 
-from aiida_tools import check_workchain_step
+from aiida_tools import check_workchain_step, get_outputs_dict
 from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from .model_evaluation import ModelEvaluationBase
@@ -130,18 +129,18 @@ class FirstPrinciplesTightBinding(WorkChain):
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
         wannier_settings_explicit = inputs.pop('wannier_settings', Dict())
-        wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_settings', Dict()
-        )
+        wannier_settings_from_wf = get_outputs_dict(
+            self.ctx.fp_run
+        ).get('wannier_settings', Dict())
         wannier_settings = merge_parameterdata_inline(
             param_primary=wannier_settings_explicit,
             param_secondary=wannier_settings_from_wf
         )[1]
 
         # prefer wannier_projections from wannier_input workflow if it exists
-        wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_projections', inputs.pop('wannier_projections', None)
-        )
+        wannier_projections = get_outputs_dict(
+            self.ctx.fp_run
+        ).get('wannier_projections', inputs.pop('wannier_projections', None))
 
         # get slice_idx for tight-binding calculation
         slice_idx = self.inputs.get('slice_tb_model', None)
@@ -211,7 +210,4 @@ class FirstPrinciplesTightBinding(WorkChain):
         Add the outputs from the evaluation workflow.
         """
         self.report("Adding outputs from model evaluation workflow.")
-        for label, node in self.ctx.model_evaluation_wf.get_outputs(
-            also_labels=True, link_type=LinkType.RETURN
-        ):
-            self.out(label, node)
+        self.out_many(get_outputs_dict(self.ctx.model_evaluation_wf))

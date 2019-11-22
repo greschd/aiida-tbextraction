@@ -13,9 +13,8 @@ from fsc.export import export
 from aiida.orm import List
 from aiida.orm import Dict
 from aiida.engine import WorkChain, ToContext
-from aiida.common.links import LinkType
 
-from aiida_tools import check_workchain_step
+from aiida_tools import check_workchain_step, get_outputs_dict
 from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from .energy_windows.window_search import WindowSearch
@@ -174,8 +173,4 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         Add the outputs of the window_search sub-workflow.
         """
         self.report("Adding outputs from WindowSearch workflow.")
-        window_search = self.ctx.window_search
-        for label, node in window_search.get_outputs(
-            also_labels=True, link_type=LinkType.RETURN
-        ):
-            self.out(label, node)
+        self.out_many(get_outputs_dict(self.ctx.window_search))

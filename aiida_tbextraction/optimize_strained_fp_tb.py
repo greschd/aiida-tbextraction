@@ -9,9 +9,8 @@ Defines the workflow to optimize tight-binding models from DFT inputs with diffe
 from fsc.export import export
 
 from aiida.engine import WorkChain, ToContext
-from aiida.common.links import LinkType
 
-from aiida_tools import check_workchain_step
+from aiida_tools import check_workchain_step, get_outputs_dict
 
 from aiida_strain import ApplyStrainsWithSymmetry
 from aiida_strain._util import get_symmetries_key, get_structure_key, get_suffix
@@ -75,7 +74,5 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         for strain in self.inputs.strain_strengths:
             suffix = get_suffix(strain)
             calc = self.ctx['tbextraction' + suffix]
-            for label, node in calc.get_outputs(
-                also_labels=True, link_type=LinkType.RETURN
-            ):
+            for label, node in get_outputs_dict(calc).items():
                 self.out(label + suffix, node)
