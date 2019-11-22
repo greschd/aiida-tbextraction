@@ -148,4 +148,4 @@ def test_run_window_invalid(
         run_window_builder(window_values, slice_=True, symmetries=True)
     )
     assert node.is_finished_ok
-    assert result['cost_value'] == float('inf')
+    assert result['cost_value'] > 1e10

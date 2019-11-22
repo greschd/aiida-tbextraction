@@ -12,7 +12,7 @@ case "$TEST_TYPE" in
         # Run the AiiDA tests
         cd ${TRAVIS_BUILD_DIR}/.travis-data; ./build_wannier90.sh
         python ${TRAVIS_BUILD_DIR}/.travis-data/configure.py ${TRAVIS_BUILD_DIR}/.travis-data ${TRAVIS_BUILD_DIR}/.travis-data/test_config.yml ${TRAVIS_BUILD_DIR}/tests/config.yml;
-        cd ${TRAVIS_BUILD_DIR}/tests; pytest --skip-vasp --quiet-wipe --print-status
+        cd ${TRAVIS_BUILD_DIR}/tests; pytest --skip-qe --quiet-wipe --print-status
         ;;
     pre-commit)
         pre-commit run --all-files
