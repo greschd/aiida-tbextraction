@@ -180,10 +180,12 @@ class RunWindow(WorkChain):
     @check_workchain_step
     def abort_invalid(self):
         """
-        Abort when an invalid window is found. The 'cost_value' is set to infinity.
+        Abort when an invalid window is found. The 'cost_value' is set to a
+        very large number. Infinity cannot be serialized into the AiiDA
+        database.
         """
-        self.report('Window is invalid, assigning infinite cost_value.')
-        self.out('cost_value', orm.Float('inf').store())
+        self.report('Window is invalid, assigning very large cost_value.')
+        self.out('cost_value', orm.Float(314159265358979323).store())
 
 
 @calcfunction
