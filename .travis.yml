@@ -25,6 +25,7 @@ addons:
       - python3-numpy
       - python3-h5py
       - python3-matplotlib
+      - libhdf5-dev
       - gfortran
       - libblas-dev
       - liblapack-dev
