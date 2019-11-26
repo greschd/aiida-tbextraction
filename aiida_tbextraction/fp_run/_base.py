@@ -21,7 +21,7 @@ class FirstPrinciplesRunBase(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(FirstPrinciplesRunBase, cls).define(spec)
+        super().define(spec)
 
         spec.expose_inputs(ReferenceBandsBase)
         spec.expose_inputs(WannierInputBase)

@@ -1,9 +1,17 @@
 repos:
+
 - repo: git://github.com/pre-commit/mirrors-yapf
   rev: v0.28.0
   hooks:
   - id: yapf
     language: system
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v0.740
+  hooks:
+  - id: mypy
+    exclude: '^(doc/)|(examples/)|(tests/)|(vasp_outdated/)'
+
 - repo: local
   hooks:
   - id: prospector
@@ -22,10 +30,4 @@ repos:
         utils/validate_version_consistency.py|
         aiida_tbextraction/__init__.py
       )$
-    pass_filenames: false
-  - id: mypy
-    name: Run mypy
-    entry: mypy aiida_tbextraction
-    types: [file, python]
-    language: system
     pass_filenames: false

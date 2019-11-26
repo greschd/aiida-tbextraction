@@ -24,7 +24,7 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
     """
     @classmethod
     def define(cls, spec):
-        super(BandDifferenceModelEvaluation, cls).define(spec)
+        super().define(spec)
         spec.input(
             'bands_inspect_code',
             valid_type=orm.Code,

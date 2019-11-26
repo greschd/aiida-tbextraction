@@ -41,6 +41,7 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
     builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
 
     builder.model_evaluation_workflow = BandDifferenceModelEvaluation
+    # print(builder.model_evaluation.dynamic)
     builder.model_evaluation = {
         'bands_inspect_code': orm.Code.get_from_string('bands_inspect'),
     }
@@ -100,7 +101,6 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
     return builder
 
 
-@pytest.mark.skip("Not migrated yet.")
 def test_window_search(configure_with_daemon, window_search_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Run a window_search on the sample wannier input folder.
@@ -113,7 +113,6 @@ def test_window_search(configure_with_daemon, window_search_builder):  # pylint:
     )
 
 
-@pytest.mark.skip("Not migrated yet.")
 def test_window_search_submit(
     configure_with_daemon, window_search_builder, wait_for, assert_finished
 ):  # pylint: disable=unused-argument,redefined-outer-name
@@ -126,7 +125,8 @@ def test_window_search_submit(
     pk = submit(window_search_builder).pk
     wait_for(pk)
     assert_finished(pk)
-    result = load_node(pk).get_outputs_dict()
+    node = load_node(pk)
     assert all(
-        key in result for key in ['cost_value', 'tb_model', 'window', 'plot']
+        key in node.outputs
+        for key in ['cost_value', 'tb_model', 'window', 'plot']
     )

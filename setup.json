@@ -19,7 +19,7 @@
   ],
   "keywords": "tight-binding extraction aiida workflows",
   "include_package_data": true,
-  "requires_python": ">=3.6",
+  "python_requires": ">=3.6",
   "setup_requires": [
     "reentry"
   ],
@@ -29,9 +29,9 @@
     "aiida-wannier90",
     "aiida-bands-inspect>=0.3.0",
     "aiida-tbmodels>=0.2.0",
-    "aiida-optimize>=0.3.0",
+    "aiida-optimize>=0.3.1",
     "aiida-tools>=0.3.2",
-    "fsc.export"
+    "fsc.export>=1.2.0"
   ],
   "extras_require": {
     "testing": [

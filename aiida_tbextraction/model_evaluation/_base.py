@@ -19,7 +19,7 @@ class ModelEvaluationBase(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(ModelEvaluationBase, cls).define(spec)
+        super().define(spec)
         spec.input(
             'tb_model',
             valid_type=orm.SinglefileData,

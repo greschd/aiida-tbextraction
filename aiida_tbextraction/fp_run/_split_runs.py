@@ -27,7 +27,7 @@ class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     """
     @classmethod
     def define(cls, spec):
-        super(SplitFirstPrinciplesRun, cls).define(spec)
+        super().define(spec)
 
         spec.input('reference_bands_workflow', **PROCESS_INPUT_KWARGS)
         spec.input('wannier_input_workflow', **PROCESS_INPUT_KWARGS)

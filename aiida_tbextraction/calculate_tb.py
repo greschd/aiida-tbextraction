@@ -25,7 +25,7 @@ class TightBindingCalculation(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(TightBindingCalculation, cls).define(spec)
+        super().define(spec)
 
         spec.input(
             'structure',

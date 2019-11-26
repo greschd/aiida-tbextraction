@@ -19,7 +19,7 @@ class WannierInputBase(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(WannierInputBase, cls).define(spec)
+        super().define(spec)
 
         ParameterData = orm.Dict
         spec.input(

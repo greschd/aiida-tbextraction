@@ -32,7 +32,7 @@ class FirstPrinciplesTightBinding(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(FirstPrinciplesTightBinding, cls).define(spec)
+        super().define(spec)
 
         # inputs which are inherited at the top level
         spec.expose_inputs(FirstPrinciplesRunBase, exclude=())

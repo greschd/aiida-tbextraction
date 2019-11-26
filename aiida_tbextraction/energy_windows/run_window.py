@@ -28,7 +28,7 @@ class RunWindow(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(RunWindow, cls).define(spec)
+        super().define(spec)
         spec.expose_inputs(TightBindingCalculation)
         spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model'])
         spec.input_namespace(

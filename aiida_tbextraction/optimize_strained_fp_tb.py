@@ -25,7 +25,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
     """
     @classmethod
     def define(cls, spec):
-        super(OptimizeStrainedFirstPrinciplesTightBinding, cls).define(spec)
+        super().define(spec)
 
         spec.expose_inputs(ApplyStrainsWithSymmetry)
         spec.expose_inputs(
