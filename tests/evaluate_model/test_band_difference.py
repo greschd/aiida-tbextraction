@@ -13,7 +13,7 @@ from aiida import orm
 
 
 @pytest.fixture
-def band_difference_builder(configure, sample):  # pylint: disable=unused-argument
+def band_difference_builder(configure, shared_datadir):  # pylint: disable=unused-argument
     """
     Create inputs for the band difference workflow.
     """
@@ -23,13 +23,13 @@ def band_difference_builder(configure, sample):  # pylint: disable=unused-argume
     builder = BandDifferenceModelEvaluation.get_builder()
     builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
     builder.bands_inspect_code = orm.Code.get_from_string('bands_inspect')
-    builder.tb_model = orm.SinglefileData(file=sample('silicon/model.hdf5'))
-    builder.reference_bands = read_bands(sample('silicon/bands.hdf5'))
+    with (shared_datadir / 'silicon/model.hdf5').open('rb') as model_file:
+        builder.tb_model = orm.SinglefileData(file=model_file)
+    builder.reference_bands = read_bands(shared_datadir / 'silicon/bands.hdf5')
 
     return builder
 
 
-@pytest.mark.skip("Not yet migrated.")
 def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Run the band evaluation workflow.
