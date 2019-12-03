@@ -6,7 +6,7 @@
 set -ev
 
 pip install -U 'pip<19' wheel setuptools
-pip install git+https://github.com/aiidateam/aiida-wannier90.git@develop
+pip install git+https://github.com/greschd/aiida-wannier90.git@fix_no_kpoint_path_when_parsing
 
 cd ${TRAVIS_BUILD_DIR}
 
