@@ -12,7 +12,7 @@ from aiida.plugins import CalculationFactory
 
 from aiida_tools import check_workchain_step
 
-from . import ModelEvaluationBase
+from ._base import ModelEvaluationBase
 
 __all__ = ('BandDifferenceModelEvaluation', )
 
