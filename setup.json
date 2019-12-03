@@ -37,7 +37,6 @@
       "pytest>=3.6",
       "pytest-cov",
       "aiida-pytest",
-      "ase",
       "pymatgen",
       "pytest-datadir"
     ],
@@ -51,7 +50,8 @@
       "pre-commit",
       "prospector==1.1.7",
       "pylint==2.3.1",
-      "mypy==0.740"
+      "mypy==0.740",
+      "pymatgen"
     ],
     "strain": [
       "aiida-strain"
