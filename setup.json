@@ -56,19 +56,16 @@
     "strain": [
       "aiida-strain"
     ],
-    "vasp": [
-      "aiida-vasp"
+    "qe": [
+      "aiida-quantumespresso"
     ]
   },
   "entry_points": {
     "aiida.workflows": [
       "tbextraction.fp_run.base = aiida_tbextraction.fp_run:FirstPrinciplesRunBase",
       "tbextraction.fp_run.split = aiida_tbextraction.fp_run:SplitFirstPrinciplesRun",
-      "tbextraction.fp_run.vasp = aiida_tbextraction.fp_run:VaspFirstPrinciplesRun",
       "tbextraction.fp_run.reference_bands.base = aiida_tbextraction.fp_run.reference_bands:ReferenceBandsBase",
-      "tbextraction.fp_run.reference_bands.vasp = aiida_tbextraction.fp_run.reference_bands:VaspReferenceBands",
       "tbextraction.fp_run.wannier_input.base = aiida_tbextraction.fp_run.wannier_input:WannierInputBase",
-      "tbextraction.fp_run.wannier_input.vasp = aiida_tbextraction.fp_run.wannier_input:VaspWannierInput",
       "tbextraction.calculate_tb = aiida_tbextraction.calculate_tb:TightBindingCalculation",
       "tbextraction.model_evaluation.base = aiida_tbextraction.model_evaluation:ModelEvaluationBase",
       "tbextraction.model_evaluation.band_difference = aiida_tbextraction.model_evaluation:BandDifferenceModelEvaluation",
