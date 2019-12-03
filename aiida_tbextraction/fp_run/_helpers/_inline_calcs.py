@@ -6,7 +6,6 @@
 Defines helper InlineCalculations for the first-principles workflows.
 """
 
-from past.builtins import basestring  # pylint: disable=redefined-builtin,useless-suppression
 import numpy as np
 
 from aiida import orm
@@ -67,7 +66,7 @@ def reduce_num_wann_inline(wannier_parameters):
     wannier_param_dict = wannier_parameters.get_dict()
     if 'exclude_bands' in wannier_param_dict and 'num_bands' in wannier_param_dict:
         exclude_bands_val = wannier_param_dict['exclude_bands']
-        if not isinstance(exclude_bands_val, basestring):
+        if not isinstance(exclude_bands_val, str):
             raise ValueError(
                 "Invalid value for 'exclude_bands': '{}'".
                 format(exclude_bands_val)

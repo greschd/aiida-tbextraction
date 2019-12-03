@@ -9,8 +9,6 @@ tight-binding model, without running the window optimization.
 
 from collections import ChainMap
 
-from fsc.export import export
-
 from aiida.orm import List, Bool
 from aiida.orm import Dict
 from aiida.engine import WorkChain, ToContext
@@ -24,8 +22,9 @@ from .fp_run import FirstPrinciplesRunBase
 from .energy_windows.auto_guess import add_initial_window_inline
 from ._calcfunctions import merge_parameterdata_inline, slice_bands_inline
 
+__all__ = ('FirstPrinciplesTightBinding', )
 
-@export
+
 class FirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then calculating the tight-binding model.

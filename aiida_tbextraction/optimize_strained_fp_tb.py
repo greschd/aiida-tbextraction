@@ -6,8 +6,6 @@
 Defines the workflow to optimize tight-binding models from DFT inputs with different strain values.
 """
 
-from fsc.export import export
-
 from aiida.engine import WorkChain, ToContext
 
 from aiida_tools import check_workchain_step, get_outputs_dict
@@ -17,8 +15,9 @@ from aiida_strain._util import get_symmetries_key, get_structure_key, get_suffix
 
 from .optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 
+__all__ = ('OptimizeStrainedFirstPrinciplesTightBinding', )
 
-@export
+
 class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
     """
     Workflow to optimize a DFT-based tight-binding model for different strain values.

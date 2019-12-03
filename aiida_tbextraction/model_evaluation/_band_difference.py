@@ -6,8 +6,6 @@
 Defines a workflow which evaluates a tight-binding model by comparing its bandstructure to a reference bandstructure.
 """
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.engine import ToContext
 from aiida.plugins import CalculationFactory
@@ -16,8 +14,9 @@ from aiida_tools import check_workchain_step
 
 from . import ModelEvaluationBase
 
+__all__ = ('BandDifferenceModelEvaluation', )
 
-@export
+
 class BandDifferenceModelEvaluation(ModelEvaluationBase):
     """
     Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.

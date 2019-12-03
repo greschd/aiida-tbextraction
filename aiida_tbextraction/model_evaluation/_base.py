@@ -6,13 +6,12 @@
 Defines the base class for workflows that evaluate a tight-binding model.
 """
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.engine import WorkChain
 
+__all__ = ('ModelEvaluationBase', )
 
-@export
+
 class ModelEvaluationBase(WorkChain):
     """
     Base class for evaluating a tight-binding model. The workflow returns a cost measure, which should be minimized to get an optimal model.

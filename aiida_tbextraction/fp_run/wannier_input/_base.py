@@ -6,13 +6,12 @@
 Defines the base class for workflows that calculate the Wannier90 input files.
 """
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.engine import WorkChain
 
+__all__ = ('WannierInputBase', )
 
-@export
+
 class WannierInputBase(WorkChain):
     """
     The base class for WorkChains which can be used to calculate the Wannier90 input files. It defines the inputs required by these WorkChains.

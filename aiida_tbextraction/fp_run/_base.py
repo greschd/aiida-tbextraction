@@ -6,15 +6,14 @@
 Defines the base class for workflows that run the first-principles calculations.
 """
 
-from fsc.export import export
-
 from aiida.engine import WorkChain
 
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
+__all__ = ('FirstPrinciplesRunBase', )
 
-@export
+
 class FirstPrinciplesRunBase(WorkChain):
     """
     Base class for first-principles runs, calculation the reference bandstructure and Wannier90 inputs.

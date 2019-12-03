@@ -8,8 +8,6 @@ Defines the workflow that runs first-principles calculations and creates an opti
 
 from collections import ChainMap
 
-from fsc.export import export
-
 from aiida.orm import List
 from aiida.orm import Dict
 from aiida.engine import WorkChain, ToContext
@@ -22,8 +20,9 @@ from .fp_run import FirstPrinciplesRunBase
 from ._calcfunctions import merge_parameterdata_inline, slice_bands_inline
 from .energy_windows.auto_guess import get_initial_window_inline
 
+__all__ = ('OptimizeFirstPrinciplesTightBinding', )
 
-@export
+
 class OptimizeFirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.

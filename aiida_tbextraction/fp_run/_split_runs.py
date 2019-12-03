@@ -8,8 +8,6 @@ Defines a workflow for independently running the bands and Wannier input calcula
 
 from collections import ChainMap
 
-from fsc.export import export
-
 from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
@@ -19,8 +17,9 @@ from ._base import FirstPrinciplesRunBase
 from .reference_bands import ReferenceBandsBase
 from .wannier_input import WannierInputBase
 
+__all__ = ('SplitFirstPrinciplesRun', )
 
-@export
+
 class SplitFirstPrinciplesRun(FirstPrinciplesRunBase):
     """
     Independently runs the DFT calculations for creating the reference bands and Wannier90 input.

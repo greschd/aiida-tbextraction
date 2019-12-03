@@ -9,7 +9,6 @@ Defines a workflow for running the tight-binding calculation and evaluation for 
 from collections import ChainMap
 
 import numpy as np
-from fsc.export import export
 
 from aiida import orm
 from aiida.engine import WorkChain, ToContext, if_, calcfunction
@@ -20,8 +19,9 @@ from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 from ..model_evaluation import ModelEvaluationBase
 from ..calculate_tb import TightBindingCalculation
 
+__all__ = ('RunWindow', )
 
-@export
+
 class RunWindow(WorkChain):
     """
     This workchain runs the tight-binding extraction and analysis for a given energy window.

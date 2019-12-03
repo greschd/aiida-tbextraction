@@ -8,8 +8,6 @@ Defines a workflow for calculating a tight-binding model for a given Wannier90 i
 
 from collections import ChainMap
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.plugins import CalculationFactory
 from aiida.engine import WorkChain, if_, ToContext
@@ -17,8 +15,9 @@ from aiida.engine import WorkChain, if_, ToContext
 from aiida_tools import check_workchain_step
 from aiida_wannier90.calculations import Wannier90Calculation
 
+__all__ = ('TightBindingCalculation', )
 
-@export
+
 class TightBindingCalculation(WorkChain):
     """
     This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.

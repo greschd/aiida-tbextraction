@@ -8,13 +8,12 @@ Defines helper inline calculations.
 
 from collections import ChainMap
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.engine import calcfunction
 
+__all__ = ('merge_parameterdata_inline', 'slice_bands_inline')
 
-@export
+
 @calcfunction
 def merge_parameterdata_inline(param_primary, param_secondary):
     """
@@ -25,7 +24,6 @@ def merge_parameterdata_inline(param_primary, param_secondary):
     )
 
 
-@export
 @calcfunction
 def slice_bands_inline(bands, slice_idx):
     """

@@ -8,8 +8,6 @@ Defines a workflow which optimizes the energy windows.
 
 import copy
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.engine import WorkChain, ToContext
 
@@ -19,8 +17,9 @@ from aiida_optimize.engines import NelderMead
 
 from .run_window import RunWindow
 
+__all__ = ('WindowSearch', )
 
-@export
+
 class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.

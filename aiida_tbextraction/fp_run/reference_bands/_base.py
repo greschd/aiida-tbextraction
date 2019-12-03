@@ -6,13 +6,12 @@
 Defines the base class for workflows that calculate the reference bandstructure.
 """
 
-from fsc.export import export
-
 from aiida import orm
 from aiida.engine import WorkChain
 
+__all__ = ('ReferenceBandsBase', )
 
-@export
+
 class ReferenceBandsBase(WorkChain):
     """
     The base class for WorkChains which can be used to calculate the reference bandstructure. It defines the inputs required by these WorkChains.
