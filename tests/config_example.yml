@@ -46,11 +46,3 @@ codes:
     default_plugin: symmetry_representation.filter_symmetries
     remote_computer: localhost
     remote_abspath: /home/greschd/.virtualenvs/symmetry_representation_test/bin/symmetry-repr
-
-  wannier90:
-    description: Wannier90
-    default_plugin: wannier90.wannier90
-    remote_computer: localhost
-    remote_abspath: /home/greschd/software/wannier90-dev/wannier90.x
-
-daemon_interval_time: 15

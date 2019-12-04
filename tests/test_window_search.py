@@ -21,7 +21,7 @@ from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 
 @pytest.fixture
-def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-suppression
+def window_search_builder(sample, code_wannier90):  # pylint: disable=too-many-locals,useless-suppression
     """
     Sets up the process builder for window_search tests, and adds the inputs.
     """
@@ -37,7 +37,7 @@ def window_search_builder(sample):  # pylint: disable=too-many-locals,useless-su
         )
     builder.wannier.local_input_folder = input_folder
 
-    builder.wannier.code = orm.Code.get_from_string('wannier90')
+    builder.wannier.code = code_wannier90
     builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
 
     builder.model_evaluation_workflow = BandDifferenceModelEvaluation

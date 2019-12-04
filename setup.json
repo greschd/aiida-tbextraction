@@ -38,7 +38,8 @@
       "pytest-cov",
       "aiida-pytest",
       "pymatgen",
-      "pytest-datadir"
+      "pytest-datadir",
+      "aiida-pytest-mock-codes"
     ],
     "docs": [
       "sphinx",

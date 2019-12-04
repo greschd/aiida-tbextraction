@@ -21,7 +21,9 @@ from aiida_tbextraction.calculate_tb import TightBindingCalculation
 
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
-def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pylint: disable=unused-argument
+def test_tbextraction(
+    configure_with_daemon, sample, slice_, symmetries, code_wannier90
+):  # pylint: disable=unused-argument
     """
     Run the tight-binding calculation workflow, optionally including symmetrization and slicing of orbitals.
     """
@@ -39,7 +41,7 @@ def test_tbextraction(configure_with_daemon, sample, slice_, symmetries):  # pyl
         )
     builder.wannier.local_input_folder = wannier_input_folder
 
-    builder.wannier.code = orm.Code.get_from_string('wannier90')
+    builder.wannier.code = code_wannier90
 
     builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
 
