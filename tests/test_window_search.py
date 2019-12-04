@@ -50,7 +50,7 @@ def window_search_builder(sample, code_wannier90):  # pylint: disable=too-many-l
     initial_window = orm.List()
     initial_window.extend([-4.5, -4, 6.5, 16])
     builder.initial_window = initial_window
-    builder.window_tol = orm.Float(0.5)
+    builder.window_tol = orm.Float(1.5)
 
     a = 3.2395  # pylint: disable=invalid-name
     structure = orm.StructureData()
