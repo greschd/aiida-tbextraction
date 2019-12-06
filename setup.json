@@ -30,7 +30,10 @@
     "aiida-bands-inspect>=0.3.0",
     "aiida-tbmodels>=0.2.0",
     "aiida-optimize>=0.3.1",
-    "aiida-tools>=0.3.2"
+    "aiida-tools>=0.3.2",
+    "aiida-vasp",
+    "numpy",
+    "multipledispatch"
   ],
   "extras_require": {
     "testing": [
@@ -64,7 +67,6 @@
   "entry_points": {
     "aiida.workflows": [
       "tbextraction.fp_run.base = aiida_tbextraction.fp_run:FirstPrinciplesRunBase",
-      "tbextraction.fp_run.split = aiida_tbextraction.fp_run:SplitFirstPrinciplesRun",
       "tbextraction.fp_run.reference_bands.base = aiida_tbextraction.fp_run.reference_bands:ReferenceBandsBase",
       "tbextraction.fp_run.wannier_input.base = aiida_tbextraction.fp_run.wannier_input:WannierInputBase",
       "tbextraction.calculate_tb = aiida_tbextraction.calculate_tb:TightBindingCalculation",

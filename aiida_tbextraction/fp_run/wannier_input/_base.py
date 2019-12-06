@@ -20,7 +20,6 @@ class WannierInputBase(WorkChain):
     def define(cls, spec):
         super().define(spec)
 
-        ParameterData = orm.Dict
         spec.input(
             'structure',
             valid_type=orm.StructureData,
@@ -31,17 +30,12 @@ class WannierInputBase(WorkChain):
             valid_type=orm.KpointsData,
             help='K-points mesh used when calculating the Wannier inputs.'
         )
-        spec.input_namespace(
-            'potentials',
-            dynamic=True,
-            help='Pseudopotentials used in the calculation.'
-        )
 
         spec.input(
             'wannier_parameters',
-            valid_type=ParameterData,
+            valid_type=orm.Dict,
             required=False,
-            help='Parameters of the Wannier calculation.'
+            help='Parameters of the Wannier calculation. This output needs to be set if the parameters are modified by the workchain in any way.'
         )
         spec.input(
             'wannier_projections',
@@ -59,7 +53,7 @@ class WannierInputBase(WorkChain):
         )
         spec.output(
             'wannier_parameters',
-            valid_type=ParameterData,
+            valid_type=orm.Dict,
             help='Parameters for the Wannier90 calculation.'
         )
         spec.output(
@@ -69,7 +63,7 @@ class WannierInputBase(WorkChain):
         )
         spec.output(
             'wannier_settings',
-            valid_type=ParameterData,
+            valid_type=orm.Dict,
             required=False,
         )
         spec.output('wannier_projections', valid_type=orm.List, required=False)

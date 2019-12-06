@@ -37,7 +37,7 @@ class TightBindingCalculation(WorkChain):
         )
 
         spec.input(
-            'tbmodels_code',
+            'code_tbmodels',
             valid_type=orm.Code,
             help='Code that runs the TBmodels CLI.'
         )
@@ -110,7 +110,7 @@ class TightBindingCalculation(WorkChain):
         Helper function to create the builder for TBmodels calculations.
         """
         builder = CalculationFactory(calc_string).get_builder()
-        builder.code = self.inputs.tbmodels_code
+        builder.code = self.inputs.code_tbmodels
         builder.metadata.options = dict(
             resources={'num_machines': 1}, withmpi=False
         )

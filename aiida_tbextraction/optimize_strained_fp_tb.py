@@ -31,6 +31,11 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
             OptimizeFirstPrinciplesTightBinding,
             exclude=('structure', 'symmetries')
         )
+        # Workaround for plumpy issue #135 (https://github.com/aiidateam/plumpy/issues/135)
+        spec.inputs['fp_run'].dynamic = True
+        spec.inputs['model_evaluation'].dynamic = True
+
+        spec.outputs.dynamic = True
 
         spec.outline(cls.run_strain, cls.run_optimize_dft_tb, cls.finalize)
 
@@ -51,7 +56,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         """
         Run the tight-binding optimization for each strained structure.
         """
-        apply_strains_outputs = self.ctx.apply_strains.get_outputs_dict()
+        apply_strains_outputs = get_outputs_dict(self.ctx.apply_strains)
         tocontext_kwargs = {}
         for strain in self.inputs.strain_strengths:
             key = 'tbextraction' + get_suffix(strain)

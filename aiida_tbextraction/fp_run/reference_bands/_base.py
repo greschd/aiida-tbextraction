@@ -30,18 +30,6 @@ class ReferenceBandsBase(WorkChain):
             valid_type=orm.KpointsData,
             help='k-points on which the bandstructure is evaluated.'
         )
-        spec.input(
-            'kpoints_mesh',
-            valid_type=orm.KpointsData,
-            required=False,
-            help=
-            'k-point mesh used to perform the initial convergence. This is needed e.g. for VASP hybrids calculations.'
-        )
-        spec.input_namespace(
-            'potentials',
-            dynamic=True,
-            help='Pseudopotentials used in the calculation.'
-        )
 
         spec.output(
             'bands',

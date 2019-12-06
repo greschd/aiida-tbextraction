@@ -30,7 +30,7 @@ class ModelEvaluationBase(WorkChain):
             help='Bandstructure of the reference model.'
         )
         spec.input(
-            'tbmodels_code',
+            'code_tbmodels',
             valid_type=orm.Code,
             help='Code that runs the TBmodels CLI.'
         )

@@ -9,6 +9,6 @@ Workflows for running the first-principles calculations needed as input for the 
 # type : ignore
 
 from ._base import FirstPrinciplesRunBase
-from ._split_runs import SplitFirstPrinciplesRun
+from ._qe_run import QuantumEspressoFirstPrinciplesRun
 
-__all__ = ["FirstPrinciplesRunBase", "SplitFirstPrinciplesRun"]
+__all__ = ("FirstPrinciplesRunBase", "QuantumEspressoFirstPrinciplesRun")

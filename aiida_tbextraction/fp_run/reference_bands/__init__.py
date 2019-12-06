@@ -7,5 +7,6 @@ Contains workflows for calculating the reference bandstructure with first-princi
 """
 
 from ._base import ReferenceBandsBase
+from ._qe import QuantumEspressoReferenceBands
 
-__all__ = ["ReferenceBandsBase"]
+__all__ = ("ReferenceBandsBase", "QuantumEspressoReferenceBands")

@@ -22,7 +22,7 @@ from aiida_tbextraction.calculate_tb import TightBindingCalculation
 @pytest.mark.parametrize('slice_', [True, False])
 @pytest.mark.parametrize('symmetries', [True, False])
 def test_tbextraction(
-    configure_with_daemon, sample, slice_, symmetries, code_wannier90
+    configure_with_daemon, test_data_dir, slice_, symmetries, code_wannier90
 ):  # pylint: disable=unused-argument
     """
     Run the tight-binding calculation workflow, optionally including symmetrization and slicing of orbitals.
@@ -31,19 +31,17 @@ def test_tbextraction(
     builder = TightBindingCalculation.get_builder()
 
     wannier_input_folder = orm.FolderData()
-    wannier_input_folder_path = sample('wannier_input_folder')
+    wannier_input_folder_path = test_data_dir / 'wannier_input_folder'
     for filename in os.listdir(wannier_input_folder_path):
         wannier_input_folder.put_object_from_file(
-            path=os.path.abspath(
-                os.path.join(wannier_input_folder_path, filename)
-            ),
+            path=str((wannier_input_folder_path / filename).resolve()),
             key=filename
         )
     builder.wannier.local_input_folder = wannier_input_folder
 
     builder.wannier.code = code_wannier90
 
-    builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
+    builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
 
     k_values = [
         x if x <= 0.5 else -1 + x
@@ -89,7 +87,9 @@ def test_tbextraction(
         'withmpi': False
     }
     if symmetries:
-        builder.symmetries = orm.SinglefileData(file=sample('symmetries.hdf5'))
+        builder.symmetries = orm.SinglefileData(
+            file=str(test_data_dir / 'symmetries.hdf5')
+        )
     if slice_:
         slice_idx = orm.List()
         slice_idx.extend([0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11])

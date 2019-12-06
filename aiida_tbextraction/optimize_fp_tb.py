@@ -6,18 +6,19 @@
 Defines the workflow that runs first-principles calculations and creates an optimized tight-binding model.
 """
 
+import contextlib
 from collections import ChainMap
 
-from aiida.orm import List
-from aiida.orm import Dict
+from aiida import orm
 from aiida.engine import WorkChain, ToContext
+from aiida.common.exceptions import NotExistent
 
 from aiida_tools import check_workchain_step, get_outputs_dict
 from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from .energy_windows.window_search import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
-from ._calcfunctions import merge_parameterdata_inline, slice_bands_inline
+from ._calcfunctions import merge_nested_dict, slice_bands_inline
 from .energy_windows.auto_guess import get_initial_window_inline
 
 __all__ = ('OptimizeFirstPrinciplesTightBinding', )
@@ -45,17 +46,20 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             WindowSearch,
             exclude=(
                 'initial_window',
-                'wannier_bands',
                 'reference_bands',
-                'wannier_parameters',
-                'wannier_input_folder',
+                'wannier_bands',
+                'wannier.parameters',
+                'wannier.local_input_folder',
                 'slice_idx',
             )
         )
+        # Workaround for plumpy issue #135 (https://github.com/aiidateam/plumpy/issues/135)
+        spec.inputs['model_evaluation'].dynamic = True
+
         # initial window is not required because it can be guessed.
         spec.input(
             'initial_window',
-            valid_type=List,
+            valid_type=orm.List,
             help=
             'Initial value for the disentanglement energy windows, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.',
             required=False
@@ -68,19 +72,20 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         )
         spec.input(
             'slice_reference_bands',
-            valid_type=List,
+            valid_type=orm.List,
             required=False,
             help=
             'Indices for the reference bands which should be included in the model evaluation.'
         )
         spec.input(
             'slice_tb_model',
-            valid_type=List,
+            valid_type=orm.List,
             required=False,
             help='Indices for slicing (re-ordering) the tight-binding model.'
         )
 
         spec.expose_outputs(WindowSearch)
+        spec.outputs.dynamic = True
 
         spec.outline(cls.fp_run, cls.run_window_search, cls.finalize)
 
@@ -111,27 +116,34 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         self.report(
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
-        wannier_settings_explicit = inputs.pop('wannier_settings', Dict())
-        wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_settings', Dict()
-        )
-        wannier_settings = merge_parameterdata_inline(
-            param_primary=wannier_settings_explicit,
-            param_secondary=wannier_settings_from_wf
-        )[1]
 
-        # prefer wannier_projections from wannier_input workflow if it exists
-        wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_projections', inputs.pop('wannier_projections', None)
-        )
+        fp_run_outputs = self.ctx.fp_run.outputs
+        wannier_namespace_inputs = inputs.pop('wannier', {})
+
+        with contextlib.suppress(NotExistent, KeyError):
+            wannier_settings_explicit = wannier_namespace_inputs['settings']
+            wannier_settings_from_wf = fp_run_outputs.wannier_settings
+            wannier_namespace_inputs['settings'] = merge_nested_dict(
+                dict_primary=wannier_settings_explicit,
+                dict_secondary=wannier_settings_from_wf
+            )
+
+        with contextlib.suppress(NotExistent):
+            wannier_namespace_inputs['projections'
+                                     ] = fp_run_outputs.wannier_projections
+
+        wannier_namespace_inputs['parameters'
+                                 ] = fp_run_outputs.wannier_parameters
+        wannier_namespace_inputs['local_input_folder'
+                                 ] = fp_run_outputs.wannier_input_folder
 
         # slice reference bands if necessary
-        reference_bands = self.ctx.fp_run.outputs.bands
+        reference_bands = fp_run_outputs.bands
         slice_reference_bands = self.inputs.get('slice_reference_bands', None)
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(
                 bands=reference_bands, slice_idx=slice_reference_bands
-            )[1]
+            )
 
         # get slice_idx for window_search
         slice_idx = self.inputs.get('slice_tb_model', None)
@@ -139,28 +151,24 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             inputs['slice_idx'] = slice_idx
 
         self.report('Get or guess initial window.')
-        wannier_bands = self.ctx.fp_run.outputs.wannier_bands
+        wannier_bands = fp_run_outputs.wannier_bands
         initial_window = self.inputs.get('initial_window', None)
         if initial_window is None:
             initial_window = get_initial_window_inline(
                 wannier_bands=wannier_bands,
                 slice_reference_bands=self.inputs.get(
                     'slice_reference_bands',
-                    List(list=range(wannier_bands.get_bands().shape[1]))
+                    orm.List(list=range(wannier_bands.get_bands().shape[1]))
                 )
-            )[1]
+            )
 
         self.report("Starting WindowSearch workflow.")
         return ToContext(
             window_search=self.submit(
                 WindowSearch,
                 reference_bands=reference_bands,
+                wannier=wannier_namespace_inputs,
                 wannier_bands=wannier_bands,
-                wannier_parameters=self.ctx.fp_run.outputs.wannier_parameters,
-                wannier_input_folder=self.ctx.fp_run.outputs.
-                wannier_input_folder,
-                wannier_settings=wannier_settings,
-                wannier_projections=wannier_projections,
                 initial_window=initial_window,
                 **inputs
             )

@@ -7,5 +7,6 @@ Contains workflows for calculating the Wannier90 input files with first-principl
 """
 
 from ._base import WannierInputBase
+from ._qe import QuantumEspressoWannierInput
 
-__all__ = ["WannierInputBase"]
+__all__ = ("WannierInputBase", "QuantumEspressoWannierInput")

@@ -21,8 +21,8 @@ def band_difference_builder(configure, shared_datadir):  # pylint: disable=unuse
     from aiida_bands_inspect.io import read_bands
 
     builder = BandDifferenceModelEvaluation.get_builder()
-    builder.tbmodels_code = orm.Code.get_from_string('tbmodels')
-    builder.bands_inspect_code = orm.Code.get_from_string('bands_inspect')
+    builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
+    builder.code_bands_inspect = orm.Code.get_from_string('bands_inspect')
     with (shared_datadir / 'silicon/model.hdf5').open('rb') as model_file:
         builder.tb_model = orm.SinglefileData(file=model_file)
     builder.reference_bands = read_bands(shared_datadir / 'silicon/bands.hdf5')

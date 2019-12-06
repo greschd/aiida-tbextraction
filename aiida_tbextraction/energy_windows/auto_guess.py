@@ -11,7 +11,7 @@ import numpy as np
 from aiida import orm
 from aiida.engine import calcfunction
 
-from .._calcfunctions import merge_parameterdata_inline
+from .._calcfunctions import merge_nested_dict
 
 
 @calcfunction
@@ -26,15 +26,12 @@ def get_initial_window_inline(wannier_bands, slice_reference_bands):
     slice_reference_bands : aiida.orm.data.list.List
         Indices of the reference bands which should be considered.
     """
-    return {
-        'result':
-        orm.List(
-            list=guess_window(
-                wannier_bands=wannier_bands,
-                slice_reference_bands=slice_reference_bands
-            )
+    return orm.List(
+        list=guess_window(
+            wannier_bands=wannier_bands,
+            slice_reference_bands=slice_reference_bands
         )
-    }
+    )
 
 
 @calcfunction
@@ -75,13 +72,10 @@ def add_initial_window_inline(
                 )
             )
         }
-        return {
-            'result':
-            merge_parameterdata_inline(
-                param_primary=wannier_parameters,
-                param_secondary=orm.Dict(dict=window_dict)
-            )[1]
-        }
+        return merge_nested_dict(
+            dict_primary=wannier_parameters,
+            dict_secondary=orm.Dict(dict=window_dict)
+        )
 
 
 def guess_window(wannier_bands, slice_reference_bands):

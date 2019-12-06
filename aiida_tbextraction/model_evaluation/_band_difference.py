@@ -25,7 +25,7 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
     def define(cls, spec):
         super().define(spec)
         spec.input(
-            'bands_inspect_code',
+            'code_bands_inspect',
             valid_type=orm.Code,
             help='Code that runs the bands_inspect CLI.'
         )
@@ -56,7 +56,7 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         Calculate the bandstructure of the given tight-binding model.
         """
-        builder = self.setup_calc('tbmodels.eigenvals', 'tbmodels_code')
+        builder = self.setup_calc('tbmodels.eigenvals', 'code_tbmodels')
         builder.tb_model = self.inputs.tb_model
         builder.kpoints = self.inputs.reference_bands
         self.report("Running TBmodels eigenvals calculation.")
@@ -68,10 +68,10 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         Calculate the difference between the tight-binding and reference bandstructures, and plot them.
         """
         diff_builder = self.setup_calc(
-            'bands_inspect.difference', 'bands_inspect_code'
+            'bands_inspect.difference', 'code_bands_inspect'
         )
         plot_builder = self.setup_calc(
-            'bands_inspect.plot', 'bands_inspect_code'
+            'bands_inspect.plot', 'code_bands_inspect'
         )
         # Inputs for the plot and difference calculations are the same
         diff_builder.bands1 = self.inputs.reference_bands
