@@ -158,7 +158,9 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 wannier_bands=wannier_bands,
                 slice_reference_bands=self.inputs.get(
                     'slice_reference_bands',
-                    orm.List(list=range(wannier_bands.get_bands().shape[1]))
+                    orm.List(
+                        list=list(range(wannier_bands.get_bands().shape[1]))
+                    )
                 )
             )
 

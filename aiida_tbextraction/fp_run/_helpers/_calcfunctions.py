@@ -3,9 +3,14 @@
 # © 2017-2019, ETH Zurich, Institut für Theoretische Physik
 # Author: Dominik Gresch <greschd@gmx.ch>
 """
-Defines helper InlineCalculations for the first-principles workflows.
+Defines helper calcfunctions for the first-principles workflows.
 """
 
+import itertools
+
+import numpy as np
+
+from aiida import orm
 from aiida.engine import calcfunction
 
 
@@ -20,6 +25,28 @@ def flatten_bands_inline(bands):
 
     return flattened_bands
 
+@calcfunction
+def make_explicit_kpoints(kpoints_mesh):
+    """
+    Creates an explicit KpointsData from a KpointsData specified as
+    a mesh.
+    """
+    mesh, offset = kpoints_mesh.get_kpoints_mesh()
+
+    kpts_explicit_array = np.array(
+        list(
+            itertools.product(
+                *[
+                    np.linspace(0, 1, mesh_size, endpoint=False)
+                    for mesh_size in mesh
+                ]
+            )
+        )
+    )
+    kpts_explicit_array += offset
+    kpts_explicit = orm.KpointsData()
+    kpts_explicit.set_kpoints(kpts_explicit_array)
+    return kpts_explicit
 
 # @calcfunction
 # def reduce_num_wann_inline(wannier_parameters):

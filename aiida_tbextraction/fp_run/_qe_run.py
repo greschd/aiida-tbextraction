@@ -54,11 +54,15 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         )
 
         spec.expose_inputs(
-            QuantumEspressoWannierInput, include=['structure', 'kpoints_mesh']
+            QuantumEspressoWannierInput,
+            include=['structure', 'kpoints_mesh']
         )
         spec.expose_inputs(
             QuantumEspressoWannierInput,
-            exclude=['structure', 'kpoints_mesh', 'parent_folder'],
+            exclude=[
+                'structure', 'kpoints_mesh', 'parent_folder',
+                'wannier_parameters', 'wannier_projections'
+            ],
             namespace='to_wannier',
             namespace_options={
                 'help':
@@ -113,12 +117,15 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         )
         wannier_inputs['nscf']['parent_folder'
                                ] = self.ctx.scf.outputs.remote_folder
-        to_wannier = self.submit(
-            QuantumEspressoWannierInput,
-            wannier_parameters=self.inputs.get('wannier_parameters', None),
-            wannier_projections=self.inputs.get('wannier_projections', None),
-            **wannier_inputs
-        )
+
+        if 'wannier_parameters' in self.inputs:
+            wannier_inputs['wannier_parameters'
+                           ] = self.inputs.wannier_parameters
+        if 'wannier_projections' in self.inputs:
+            wannier_inputs['wannier_projections'
+                           ] = self.inputs.wannier_projections
+
+        to_wannier = self.submit(QuantumEspressoWannierInput, **wannier_inputs)
 
         return ToContext(bands=bands_run, to_wannier=to_wannier)
 

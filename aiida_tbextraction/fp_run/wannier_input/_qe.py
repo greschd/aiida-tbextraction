@@ -8,6 +8,7 @@ Defines a workflow that calculates the Wannier90 input files using Quantum ESPRE
 
 from aiida import orm
 from aiida.engine import ToContext
+from aiida.common.exceptions import InputValidationError
 
 from aiida_tools import check_workchain_step
 from aiida_wannier90.calculations import Wannier90Calculation
@@ -16,6 +17,7 @@ from aiida_quantumespresso.calculations.pw2wannier90 import Pw2wannier90Calculat
 
 from . import WannierInputBase
 
+from .._helpers._calcfunctions import make_explicit_kpoints
 from ..._calcfunctions import merge_nested_dict
 
 __all__ = ("QuantumEspressoWannierInput", )
@@ -28,6 +30,9 @@ class QuantumEspressoWannierInput(WannierInputBase):
     @classmethod
     def define(cls, spec):
         super().define(spec)
+        # Set to required because QE does not produce num_wann
+        # by itself. Might consider getting it from the NSCF run.
+        spec.inputs['wannier_parameters'].required = True
 
         spec.expose_inputs(Wannier90Calculation, include=['structure'])
         spec.expose_inputs(
@@ -77,7 +82,9 @@ class QuantumEspressoWannierInput(WannierInputBase):
         )
         return ToContext(
             nscf=self.submit(
-                PwCalculation, kpoints=self.inputs.kpoints_mesh, **nscf_inputs
+                PwCalculation,
+                kpoints=make_explicit_kpoints(self.inputs.kpoints_mesh),
+                **nscf_inputs
             )
         )
 
@@ -92,14 +99,23 @@ class QuantumEspressoWannierInput(WannierInputBase):
                 }
             ), self.inputs.get('wannier_parameters', orm.Dict())
         )
+
         self.out('wannier_parameters', wannier_parameters)
+        if 'num_wann' not in wannier_parameters.keys():
+            raise InputValidationError(
+                "The target number of Wannier functions 'num_wann' is not specified."
+            )
+
+        projections_input = {}
+        if 'wannier_projections' in self.inputs:
+            projections_input['projections'] = self.inputs.wannier_projections
         return ToContext(
             wannier90_preproc=self.submit(
                 Wannier90Calculation,
                 kpoints=self.ctx.nscf.outputs.output_band,
                 settings=orm.Dict(dict={'postproc_setup': True}),
                 parameters=wannier_parameters,
-                projections=self.inputs.get('wannier_projections', None),
+                **projections_input,
                 **
                 self.exposed_inputs(Wannier90Calculation, namespace='wannier')
             )
@@ -149,4 +165,5 @@ class QuantumEspressoWannierInput(WannierInputBase):
         # to always perfectly map aiida.eig to a floating-point value.
         # Discrepancy should be roughly ~< 1e-06
         self.out('wannier_bands', self.ctx.nscf.outputs.output_band)
-        self.out('wannier_projections', self.inputs.wannier_projections)
+        if 'wannier_projections' in self.inputs:
+            self.out('wannier_projections', self.inputs.wannier_projections)
