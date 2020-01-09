@@ -7,27 +7,6 @@ computers:
     work_directory: /tmp/test_aiida_tbextraction_run
     prepend_text: 'unset PYTHONPATH'
 
-  daint:
-    hostname: daint.cscs.ch
-    description: Piz Daint
-    transport: ssh
-    scheduler: slurm
-    work_directory: /scratch/snx3000/{username}/test_aiida_tbextraction_run/
-    num_cpus: 36
-    mpirun_command: srun
-    queue_name: normal
-    prepend_text: |
-      #SBATCH --account=eth4
-      #SBATCH --constraint=mc
-    append_text: ''
-    configuration:
-      username: greschd
-      proxy_command: ssh -W daint.cscs.ch:22 ela.cscs.ch
-      key_filename: /home/greschd/.ssh/monch_rsa
-      timeout: 120
-      safe_interval: 30
-
-
 codes:
   tbmodels:
     description: tbmodels

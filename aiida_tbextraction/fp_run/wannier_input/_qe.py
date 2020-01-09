@@ -30,9 +30,6 @@ class QuantumEspressoWannierInput(WannierInputBase):
     @classmethod
     def define(cls, spec):
         super().define(spec)
-        # Set to required because QE does not produce num_wann
-        # by itself. Might consider getting it from the NSCF run.
-        spec.inputs['wannier_parameters'].required = True
 
         spec.expose_inputs(Wannier90Calculation, include=['structure'])
         spec.expose_inputs(
@@ -90,14 +87,29 @@ class QuantumEspressoWannierInput(WannierInputBase):
 
     @check_workchain_step
     def run_wannier90_preproc(self):
+        """
+        Run Wannier90 with the -pp option to create the nnkp file.
+        """
         self.report("Submitting wannier90 -pp calculation.")
 
+        wannier_parameters_input = self.inputs.get(
+            'wannier_parameters', orm.Dict()
+        )
+        nscf_bands = self.ctx.nscf.outputs.output_band
+        num_bands = nscf_bands.attributes['array|bands'][-1]
+        if 'num_bands' in wannier_parameters_input.keys():
+            if num_bands != wannier_parameters_input['num_bands']:
+                raise InputValidationError((
+                    "The 'num_bands' specified in 'wannier_parameters' ({}) "
+                    "does not match the number of bands ({}) of the NSCF calculation."
+                ).format(wannier_parameters_input['num_bands'], num_bands))
         wannier_parameters = merge_nested_dict(
             orm.Dict(
                 dict={
+                    'num_bands': num_bands,
                     'mp_grid': self.inputs.kpoints_mesh.get_kpoints_mesh()[0]
-                }
-            ), self.inputs.get('wannier_parameters', orm.Dict())
+                },
+            ), wannier_parameters_input
         )
 
         self.out('wannier_parameters', wannier_parameters)
@@ -112,7 +124,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
         return ToContext(
             wannier90_preproc=self.submit(
                 Wannier90Calculation,
-                kpoints=self.ctx.nscf.outputs.output_band,
+                kpoints=nscf_bands,
                 settings=orm.Dict(dict={'postproc_setup': True}),
                 parameters=wannier_parameters,
                 **projections_input,
