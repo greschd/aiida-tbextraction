@@ -7,8 +7,11 @@ Run First-Principles Calculations
 Complete First-Principles Calculations
 --------------------------------------
 
-.. automodule:: aiida_tbextraction.fp_run
-    :members:
+.. aiida-workchain:: FirstPrinciplesRunBase
+    :module: aiida_tbextraction.fp_run
+
+.. aiida-workchain:: QuantumEspressoFirstPrinciplesRun
+    :module: aiida_tbextraction.fp_run
 
 Reference Bands Workflows
 -------------------------

@@ -1,7 +1,6 @@
 ignore-paths:
   - doc
   - examples
-  - futures
 
 pep8:
   disable:

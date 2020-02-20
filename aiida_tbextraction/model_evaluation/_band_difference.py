@@ -6,35 +6,32 @@
 Defines a workflow which evaluates a tight-binding model by comparing its bandstructure to a reference bandstructure.
 """
 
-from fsc.export import export
-
-from aiida.orm import DataFactory, CalculationFactory
-from aiida.orm.code import Code
-from aiida.orm.data.base import Float
-from aiida.work.workchain import ToContext
+from aiida import orm
+from aiida.engine import ToContext
+from aiida.plugins import CalculationFactory
 
 from aiida_tools import check_workchain_step
 
-from . import ModelEvaluationBase
+from ._base import ModelEvaluationBase
+
+__all__ = ('BandDifferenceModelEvaluation', )
 
 
-@export
 class BandDifferenceModelEvaluation(ModelEvaluationBase):
     """
     Evaluates a tight-binding model by comparing its bandstructure to the reference bandstructure.
     """
-
     @classmethod
     def define(cls, spec):
-        super(BandDifferenceModelEvaluation, cls).define(spec)
+        super().define(spec)
         spec.input(
-            'bands_inspect_code',
-            valid_type=Code,
+            'code_bands_inspect',
+            valid_type=orm.Code,
             help='Code that runs the bands_inspect CLI.'
         )
         spec.output(
             'plot',
-            valid_type=DataFactory('singlefile'),
+            valid_type=orm.SinglefileData,
             help='Plot comparing the reference and evaluated bandstructure.'
         )
 
@@ -49,7 +46,9 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         builder = CalculationFactory(calc_string).get_builder()
         builder.code = self.inputs[code_param]
-        builder.options = dict(resources={'num_machines': 1}, withmpi=False)
+        builder.metadata.options = dict(
+            resources={'num_machines': 1}, withmpi=False
+        )
         return builder
 
     @check_workchain_step
@@ -57,7 +56,7 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         Calculate the bandstructure of the given tight-binding model.
         """
-        builder = self.setup_calc('tbmodels.eigenvals', 'tbmodels_code')
+        builder = self.setup_calc('tbmodels.eigenvals', 'code_tbmodels')
         builder.tb_model = self.inputs.tb_model
         builder.kpoints = self.inputs.reference_bands
         self.report("Running TBmodels eigenvals calculation.")
@@ -69,16 +68,16 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         Calculate the difference between the tight-binding and reference bandstructures, and plot them.
         """
         diff_builder = self.setup_calc(
-            'bands_inspect.difference', 'bands_inspect_code'
+            'bands_inspect.difference', 'code_bands_inspect'
         )
         plot_builder = self.setup_calc(
-            'bands_inspect.plot', 'bands_inspect_code'
+            'bands_inspect.plot', 'code_bands_inspect'
         )
         # Inputs for the plot and difference calculations are the same
         diff_builder.bands1 = self.inputs.reference_bands
-        diff_builder.bands2 = self.ctx.calculated_bands.out.bands
+        diff_builder.bands2 = self.ctx.calculated_bands.outputs.bands
         plot_builder.bands1 = self.inputs.reference_bands
-        plot_builder.bands2 = self.ctx.calculated_bands.out.bands
+        plot_builder.bands2 = self.ctx.calculated_bands.outputs.bands
 
         self.report('Running difference and plot calculations.')
         self.report('Running plot calculation.')
@@ -92,5 +91,5 @@ class BandDifferenceModelEvaluation(ModelEvaluationBase):
         """
         Return outputs of the difference and plot calculations.
         """
-        self.out('cost_value', Float(self.ctx.difference.out.difference))
-        self.out('plot', self.ctx.plot.out.plot)
+        self.out('cost_value', self.ctx.difference.outputs.difference)
+        self.out('plot', self.ctx.plot.outputs.plot)

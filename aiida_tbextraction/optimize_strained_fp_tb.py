@@ -6,34 +6,36 @@
 Defines the workflow to optimize tight-binding models from DFT inputs with different strain values.
 """
 
-from fsc.export import export
+from aiida.engine import WorkChain, ToContext
 
-from aiida.work.workchain import WorkChain, ToContext
-from aiida.common.links import LinkType
+from aiida_tools import check_workchain_step, get_outputs_dict
 
-from aiida_tools import check_workchain_step
-
-from aiida_strain.work import ApplyStrainsWithSymmetry  # pylint: disable=import-error,useless-suppression
-from aiida_strain.work.util import get_symmetries_key, get_structure_key, get_suffix  # pylint: disable=import-error,useless-suppression
+from aiida_strain import ApplyStrainsWithSymmetry
+from aiida_strain._util import get_symmetries_key, get_structure_key, get_suffix
 
 from .optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
 
+__all__ = ('OptimizeStrainedFirstPrinciplesTightBinding', )
 
-@export
+
 class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
     """
     Workflow to optimize a DFT-based tight-binding model for different strain values.
     """
-
     @classmethod
     def define(cls, spec):
-        super(OptimizeStrainedFirstPrinciplesTightBinding, cls).define(spec)
+        super().define(spec)
 
         spec.expose_inputs(ApplyStrainsWithSymmetry)
         spec.expose_inputs(
             OptimizeFirstPrinciplesTightBinding,
             exclude=('structure', 'symmetries')
         )
+        # Workaround for plumpy issue #135 (https://github.com/aiidateam/plumpy/issues/135)
+        spec.inputs['fp_run'].dynamic = True
+        spec.inputs['model_evaluation'].dynamic = True
+
+        spec.outputs.dynamic = True
 
         spec.outline(cls.run_strain, cls.run_optimize_dft_tb, cls.finalize)
 
@@ -54,7 +56,7 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         """
         Run the tight-binding optimization for each strained structure.
         """
-        apply_strains_outputs = self.ctx.apply_strains.get_outputs_dict()
+        apply_strains_outputs = get_outputs_dict(self.ctx.apply_strains)
         tocontext_kwargs = {}
         for strain in self.inputs.strain_strengths:
             key = 'tbextraction' + get_suffix(strain)
@@ -76,7 +78,5 @@ class OptimizeStrainedFirstPrinciplesTightBinding(WorkChain):
         for strain in self.inputs.strain_strengths:
             suffix = get_suffix(strain)
             calc = self.ctx['tbextraction' + suffix]
-            for label, node in calc.get_outputs(
-                also_labels=True, link_type=LinkType.RETURN
-            ):
+            for label, node in get_outputs_dict(calc).items():
                 self.out(label + suffix, node)

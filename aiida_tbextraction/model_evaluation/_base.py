@@ -6,37 +6,33 @@
 Defines the base class for workflows that evaluate a tight-binding model.
 """
 
-from fsc.export import export
+from aiida import orm
+from aiida.engine import WorkChain
 
-from aiida.work.workchain import WorkChain
-from aiida.orm import DataFactory
-from aiida.orm.code import Code
-from aiida.orm.data.base import Float
+__all__ = ('ModelEvaluationBase', )
 
 
-@export
 class ModelEvaluationBase(WorkChain):
     """
     Base class for evaluating a tight-binding model. The workflow returns a cost measure, which should be minimized to get an optimal model.
     """
-
     @classmethod
     def define(cls, spec):
-        super(ModelEvaluationBase, cls).define(spec)
+        super().define(spec)
         spec.input(
             'tb_model',
-            valid_type=DataFactory('singlefile'),
+            valid_type=orm.SinglefileData,
             help='Tight-binding model to be evaluated, in TBmodels HDF5 format.'
         )
         spec.input(
             'reference_bands',
-            valid_type=DataFactory('array.bands'),
+            valid_type=orm.BandsData,
             help='Bandstructure of the reference model.'
         )
         spec.input(
-            'tbmodels_code',
-            valid_type=Code,
+            'code_tbmodels',
+            valid_type=orm.Code,
             help='Code that runs the TBmodels CLI.'
         )
 
-        spec.output('cost_value', valid_type=Float)
+        spec.output('cost_value', valid_type=orm.Float)

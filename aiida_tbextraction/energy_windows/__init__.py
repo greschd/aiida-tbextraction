@@ -6,4 +6,6 @@
 This module contains workflows to evaluate energy windows and search for optimal window values.
 """
 
-from . import runwindow, windowsearch
+from . import run_window, window_search
+
+__all__ = ['run_window', 'window_search']

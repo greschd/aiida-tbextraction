@@ -6,108 +6,58 @@
 Defines a workflow for calculating a tight-binding model for a given Wannier90 input and symmetries.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
-from fsc.export import export
-
-from aiida.work.workchain import WorkChain, if_, ToContext
-from aiida.orm.data.base import List, Str
-from aiida.orm.data.parameter import ParameterData
-from aiida.orm import Code, DataFactory, CalculationFactory
+from aiida import orm
+from aiida.plugins import CalculationFactory
+from aiida.engine import WorkChain, if_, ToContext
 
 from aiida_tools import check_workchain_step
+from aiida_wannier90.calculations import Wannier90Calculation
+
+__all__ = ('TightBindingCalculation', )
 
 
-@export
 class TightBindingCalculation(WorkChain):
     """
     This workchain creates a tight-binding model from the Wannier90 input and a symmetry file.
     """
-
     @classmethod
     def define(cls, spec):
-        super(TightBindingCalculation, cls).define(spec)
+        super().define(spec)
 
         spec.input(
             'structure',
-            valid_type=DataFactory('structure'),
-            required=False,
+            valid_type=orm.StructureData,
             help=
             'Structure of the material for which the tight-binding model should be calculated.'
         )
-        spec.input(
-            'wannier_code',
-            valid_type=Code,
-            help='Code that executes Wannier90.'
-        )
-        spec.input(
-            'wannier_input_folder',
-            valid_type=DataFactory('folder'),
-            help=
-            'A folder containing the Wannier90 ``.mmn`` and ``.amn`` input files.'
-        )
-        spec.input_namespace(
-            'wannier_calculation_kwargs',
-            dynamic=True,
-            help=
-            'Additional keyword arguments passed to the ``wannier90.wannier90`` calculation.'
-        )
-        spec.input(
-            'wannier_calculation_kwargs.options',
-            non_db=True,
-            help='Resource options for the Wannier90 calculation.'
+        spec.expose_inputs(
+            Wannier90Calculation, namespace='wannier', exclude=('structure', )
         )
 
         spec.input(
-            'wannier_parameters',
-            valid_type=ParameterData,
-            help="Wannier90 paramaters written to the ``.win`` file."
-        )
-        spec.input(
-            'wannier_settings',
-            valid_type=ParameterData,
-            required=False,
-            help="Settings for the ``wannier90.wannier90`` calculation."
-        )
-        spec.input(
-            'wannier_projections',
-            valid_type=(DataFactory('orbital'), List),
-            required=False,
-            help=
-            'Projections used, either as OrbitalData or as a list of strings in Wannier90\'s projections format.'
-        )
-        spec.input(
-            'wannier_kpoints',
-            valid_type=DataFactory('array.kpoints'),
-            help=
-            'The k-points used in the Wannier90 run. These must match the k-points used in the ``.amn`` and ``.mmn`` input files.'
-        )
-
-        spec.input(
-            'tbmodels_code',
-            valid_type=Code,
+            'code_tbmodels',
+            valid_type=orm.Code,
             help='Code that runs the TBmodels CLI.'
         )
         spec.input(
             'slice_idx',
-            valid_type=List,
+            valid_type=orm.List,
             required=False,
             help=
             'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'
         )
         spec.input(
             'symmetries',
-            valid_type=DataFactory('singlefile'),
+            valid_type=orm.SinglefileData,
             required=False,
             help=
             'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'
         )
         spec.output(
             'tb_model',
-            valid_type=DataFactory('singlefile'),
+            valid_type=orm.SinglefileData,
             help='The calculated tight-binding model, in TBmodels HDF5 format.'
         )
 
@@ -128,51 +78,47 @@ class TightBindingCalculation(WorkChain):
         """
         Run the Wannier90 calculation.
         """
-        wannier_parameters = self.inputs.wannier_parameters.get_dict()
+        wannier_inputs = self.exposed_inputs(
+            Wannier90Calculation, namespace='wannier'
+        )
+        wannier_parameters = wannier_inputs['parameters'].get_dict()
         wannier_parameters.setdefault('write_hr', True)
         wannier_parameters.setdefault('write_xyz', True)
         wannier_parameters.setdefault('use_ws_distance', True)
         self.report("Running Wannier90 calculation.")
 
-        # optional inputs
-        inputs = dict(
-            projections=self.inputs.get('wannier_projections', None),
-            structure=self.inputs.get('structure', None),
+        wannier_inputs['parameters'] = orm.Dict(dict=wannier_parameters)
+        wannier_inputs['settings'] = orm.Dict(
+            dict=ChainMap(
+                wannier_inputs.get('settings', orm.Dict()).get_dict(), {
+                    "retrieve_hoppings": True,
+                    "additional_retrieve_list": ['*_centres.xyz', '*.win']
+                }
+            )
         )
-        inputs = {k: v for k, v in inputs.items() if v is not None}
 
-        inputs.update(self.inputs.wannier_calculation_kwargs)
-
-        return ToContext(wannier_calc=self.submit(
-            CalculationFactory('wannier90.wannier90').process(),
-            code=self.inputs.wannier_code,
-            local_input_folder=self.inputs.wannier_input_folder,
-            parameters=ParameterData(dict=wannier_parameters),
-            kpoints=self.inputs.wannier_kpoints,
-            settings=ParameterData(
-                dict=ChainMap( # yapf: disable
-                    self.inputs.get('wannier_settings', ParameterData()).get_dict(),
-                    dict(
-                        retrieve_hoppings=True,
-                        additional_retrieve_list=['*_centres.xyz', '*.win']
-                    )
-                )
-            ),
-            **inputs
-        ))
+        return ToContext(
+            wannier_calc=self.submit(
+                Wannier90Calculation,
+                structure=self.inputs.structure,
+                **wannier_inputs
+            )
+        )
 
     def setup_tbmodels(self, calc_string):
         """
         Helper function to create the builder for TBmodels calculations.
         """
         builder = CalculationFactory(calc_string).get_builder()
-        builder.code = self.inputs.tbmodels_code
-        builder.options = dict(resources={'num_machines': 1}, withmpi=False)
+        builder.code = self.inputs.code_tbmodels
+        builder.metadata.options = dict(
+            resources={'num_machines': 1}, withmpi=False
+        )
         return builder
 
     @property
     def tb_model(self):
-        return self.ctx.tbmodels_calc.out.tb_model
+        return self.ctx.tbmodels_calc.outputs.tb_model
 
     @check_workchain_step
     def parse(self):
@@ -180,8 +126,8 @@ class TightBindingCalculation(WorkChain):
         Runs the calculation to parse the Wannier90 output.
         """
         builder = self.setup_tbmodels('tbmodels.parse')
-        builder.wannier_folder = self.ctx.wannier_calc.out.retrieved
-        builder.pos_kind = Str('nearest_atom')
+        builder.wannier_folder = self.ctx.wannier_calc.outputs.retrieved
+        builder.pos_kind = orm.Str('nearest_atom')
         self.report("Parsing Wannier90 output to tbmodels format.")
         return ToContext(tbmodels_calc=self.submit(builder))
 

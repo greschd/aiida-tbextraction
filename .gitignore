@@ -1,3 +1,4 @@
+__pycache__
 *.pyc
 *.egg*
 .cache
@@ -5,3 +6,6 @@
 .ropeproject
 POTCAR
 PSCTR
+dist
+.vscode
+.mypy_cache

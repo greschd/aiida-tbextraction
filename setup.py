@@ -6,56 +6,21 @@
 Usage: pip install .[dev]
 """
 
-import re
+import os
+import json
 from setuptools import setup, find_packages
 
-# Get the version number
-with open('./aiida_tbextraction/__init__.py') as f:
-    MATCH_EXPR = "__version__[^'\"]+(['\"])([^'\"]+)"
-    VERSION = re.search(MATCH_EXPR, f.read()).group(2).strip()
+SETUP_JSON_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'setup.json'
+)
+with open(SETUP_JSON_PATH, 'r') as json_file:
+    SETUP_KWARGS = json.load(json_file)
+
+EXTRAS_REQUIRE = SETUP_KWARGS['extras_require']
+EXTRAS_REQUIRE['dev'] = (
+    EXTRAS_REQUIRE['testing'] + EXTRAS_REQUIRE['docs'] +
+    EXTRAS_REQUIRE['dev_precommit']
+)
 
 if __name__ == '__main__':
-    setup(
-        name='aiida-tbextraction',
-        version=VERSION,
-        description='AiiDA Plugin for extracting tight-binding models',
-        author='Dominik Gresch',
-        author_email='greschd@gmx.ch',
-        url='https://aiida-tbextraction.readthedocs.io',
-        license='Apache 2.0',
-        classifiers=[
-            'Development Status :: 3 - Alpha', 'Environment :: Plugins',
-            'Framework :: AiiDA', 'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: Apache Software License',
-            'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3.6',
-            'Topic :: Scientific/Engineering :: Physics'
-        ],
-        keywords='tight-binding extraction aiida workflows',
-        packages=find_packages(exclude=['aiida']),
-        include_package_data=True,
-        setup_requires=['reentry'],
-        reentry_register=True,
-        install_requires=[
-            'aiida-core', 'aiida-wannier90', 'aiida-bands-inspect',
-            'aiida-tbmodels', 'aiida-optimize', 'fsc.export', 'aiida-tools',
-            'future'
-        ],
-        extras_require={
-            ':python_version < "3"': ['chainmap', 'singledispatch'],
-            'dev': [
-                'pymatgen; python_version>="3"',
-                'pymatgen<2019; python_version<"3"',
-                'aiida-pytest',
-                'ase',
-                'yapf==0.25',
-                'pre-commit',
-                'prospector==0.12.11',
-                'sphinx-rtd-theme',
-                'pylint==1.9.3',
-            ],
-            'strain': ['aiida-strain'],
-            'vasp': ['aiida-vasp'],
-        },
-        entry_points={},
-    )
+    setup(packages=find_packages(exclude=['aiida']), **SETUP_KWARGS)

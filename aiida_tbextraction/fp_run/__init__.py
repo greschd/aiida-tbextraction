@@ -6,13 +6,9 @@
 Workflows for running the first-principles calculations needed as input for the tight-binding calculation and evaluation.
 """
 
+# type : ignore
+
 from ._base import FirstPrinciplesRunBase
-from ._split_runs import SplitFirstPrinciplesRun
+from ._qe_run import QuantumEspressoFirstPrinciplesRun
 
-__all__ = _base.__all__ + _split_runs.__all__  # pylint: disable=undefined-variable
-
-try:
-    from ._vasp_run import VaspFirstPrinciplesRun
-    __all__ += _vasp_run.__all__  # pylint: disable=undefined-variable
-except ImportError:
-    pass
+__all__ = ("FirstPrinciplesRunBase", "QuantumEspressoFirstPrinciplesRun")
