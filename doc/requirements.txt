@@ -1,1 +1,2 @@
+aiida-core>=1.1<2
 git+https://github.com/aiidateam/aiida-wannier90.git@develop
