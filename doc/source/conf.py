@@ -4,48 +4,22 @@
 # Author: Dominik Gresch <greschd@gmx.ch>
 
 import os
-import sys
+import contextlib
 
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+from aiida.manage.configuration import load_documentation_profile
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'rtd_settings'
+load_documentation_profile()
 
-# on_rtd is whether we are on readthedocs.org, this line of code grabbed
+# checks whether we are on readthedocs.org, this line of code grabbed
 # from docs.readthedocs.org
-# NOTE: it is needed to have these lines before load_dbenv()
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    try:
+if os.environ.get(
+    'READTHEDOCS', None
+) != 'True':  # only import and set the theme if we're building docs locally
+    with contextlib.suppress(ImportError):
         import sphinx_rtd_theme
         html_theme = 'sphinx_rtd_theme'
         html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-    except ImportError:
-        # No sphinx_rtd_theme installed
-        pass
-    # Load the database environment by first loading the profile and then loading the backend through the manager
-    from aiida.manage.configuration import get_config, load_profile
-    from aiida.manage.manager import get_manager
-    config = get_config()
-    load_profile(config.default_profile_name)
-    get_manager().get_backend()
 else:
-    from aiida.manage import configuration
-    from aiida.manage.configuration import load_profile, reset_config
-    from aiida.manage.manager import get_manager
-
-    # Set the global variable to trigger shortcut behavior in `aiida.manager.configuration.load_config`
-    configuration.IN_RT_DOC_MODE = True
-
-    # First need to reset the config, because an empty one will have been loaded when `aiida` module got imported
-    reset_config()
-
-    # Load the profile: this will first load the config, which will be the dummy one for RTD purposes
-    load_profile()
-
-    # Finally load the database backend but without checking the schema because there is no actual database
-    get_manager()._load_backend(schema_check=False)
-
     # make sure all entry-points are detected, since readthedocs doesn't expose a way to do this
     # during post-install.
     import reentry
