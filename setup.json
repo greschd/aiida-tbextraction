@@ -61,7 +61,7 @@
       "aiida-strain"
     ],
     "qe": [
-      "aiida-quantumespresso"
+      "aiida-quantumespresso>=3.0.0a5"
     ]
   },
   "entry_points": {
