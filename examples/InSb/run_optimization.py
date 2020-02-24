@@ -6,6 +6,7 @@
 
 import os
 
+import numpy as np
 from ase.io.vasp import read_vasp
 
 from aiida import orm
@@ -27,6 +28,8 @@ def create_builder():
     builder.fp_run_workflow = QuantumEspressoFirstPrinciplesRun
 
     # Set the inputs for the QuantumEspressoFirstPrinciplesRun workflow
+    # common_qe_parameters =
+
     builder.fp_run = dict(
         code=orm.Code.get_from_string('pw-6.4.1'),
         parameters=orm.Dict(dict=dict( # Parameters common to all VASP calculations
@@ -58,21 +61,31 @@ def create_builder():
     )
 
     # Setting the k-points for the reference bandstructure
+    kpoints_list = []
+    kvals = np.linspace(0, 0.5, 20, endpoint=False)
+    kvals_rev = np.linspace(0.5, 0, 20, endpoint=False)
+    for k in kvals_rev:
+        kpoints_list.append((k, k, 0))  # Z to Gamma
+    for k in kvals:
+        kpoints_list.append((0, k, k))  # Gamma to X
+    for k in kvals:
+        kpoints_list.append((k, 0.5, 0.5))  # X to L
+    for k in kvals_rev:
+        kpoints_list.append((k, k, k))  # L to Gamma
+    for k in np.linspace(0, 0.375, 21, endpoint=True):
+        kpoints_list.append((k, k, 2 * k))  # Gamma to K
     builder.kpoints = orm.KpointsData()
-    builder.kpoints.set_kpoints_path([
-        ('Z', (0.5, 0.5, 0), 'G', (0., 0., 0.), 21),
-        ('G', (0., 0., 0.), 'X', (0., 0.5, 0.5), 21),
-        ('X', (0., 0.5, 0.5), 'L', (0.5, 0.5, 0.5), 21),
-        ('L', (0.5, 0.5, 0.5), 'G', (0., 0., 0.), 21),
-        ('G', (0., 0., 0.), 'K', (0.375, 0.375, 0.75), 21),
-    ])
+    builder.kpoints.set_kpoints(
+        kpoints_list,
+        labels=[(i * 20, label)
+                for i, label in enumerate(['Z', 'G', 'X', 'L', 'G', 'K'])]
+    )
 
     # Setting the k-points mesh used to run the SCF and Wannier calculations
     builder.kpoints_mesh = orm.KpointsData()
     builder.kpoints_mesh.set_kpoints_mesh([6, 6, 6])
 
-    # Setting the codes
-    builder.code_wannier90 = orm.Code.get_from_string('wannier90')
+    builder.wannier.code = orm.Code.get_from_string('wannier90')
     builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
 
     # Setting the workflow to evaluate the tight-binding models
@@ -108,7 +121,7 @@ def create_builder():
         list=['In : s; px; py; pz', 'Sb : px; py; pz']
     )
     # Set the resource requirements for the Wannier90 run
-    builder.wannier_calculation_kwargs = dict(
+    builder.wannier.metadata = dict(
         options=dict(
             resources={
                 'num_machines': 1,
