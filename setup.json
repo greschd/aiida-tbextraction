@@ -31,7 +31,6 @@
     "aiida-tbmodels>=0.2.0",
     "aiida-optimize>=0.3.1",
     "aiida-tools>=0.3.2",
-    "aiida-vasp",
     "numpy",
     "multipledispatch"
   ],

@@ -5,6 +5,7 @@
 # Author: Dominik Gresch <greschd@gmx.ch>
 
 import os
+import pathlib
 
 import numpy as np
 from ase.io.vasp import read_vasp
@@ -15,6 +16,34 @@ from aiida.engine.launch import submit
 from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
+
+# Define constants for Code and metadata
+# Modify these to match your configured codes, and adapt the metadata
+# as needed.
+METADATA_PW = {
+    'options': {
+        'resources': {
+            'num_machines': 1,
+            'num_mpiprocs_per_machine': 4
+        },
+        'withmpi': True,
+        'max_wallclock_seconds': 1200
+    }
+}
+CODE_PW = orm.Code.get_from_string('pw')
+METADATA_WANNIER = {
+    'options': {
+        'resources': {
+            'num_machines': 1,
+            'num_mpiprocs_per_machine': 1
+        },
+        'withmpi': False,
+        'max_wallclock_seconds': 1200
+    }
+}
+CODE_WANNIER = orm.Code.get_from_string('wannier90')
+METADATA_PW2WANNIER = METADATA_WANNIER
+CODE_PW2WANNIER = orm.Code.get_from_string('pw2wannier90')
 
 
 def create_builder():
@@ -28,37 +57,51 @@ def create_builder():
     builder.fp_run_workflow = QuantumEspressoFirstPrinciplesRun
 
     # Set the inputs for the QuantumEspressoFirstPrinciplesRun workflow
-    # common_qe_parameters =
-
-    builder.fp_run = dict(
-        code=orm.Code.get_from_string('pw-6.4.1'),
-        parameters=orm.Dict(dict=dict( # Parameters common to all VASP calculations
-            prec='N',
-            lsorbit=True,
-            ismear=0,
-            sigma=0.05,
-            gga='PE',
-            magmom='600*0.0',
-            nbands=36,
-            kpar=4,
-        )),
-        calculation_kwargs=dict(
-            options=dict( # Settings for the resource requirements
-                resources={'num_machines': 2, 'num_mpiprocs_per_machine': 18},
-                withmpi=True,
-                max_wallclock_seconds=60 * 60
-            )
+    common_qe_parameters = orm.Dict(
+        dict=dict(
+            CONTROL=dict(etot_conv_thr=1e-3),
+            SYSTEM=dict(noncolin=True, lspinorb=True, nbnd=36, ecutwfc=30),
         )
     )
 
-    # Setting the parameters specific for the bands calculation
-    builder.fp_run['bands'] = dict(
-        parameters=orm.Dict(dict=dict(lwave=False, isym=0))
-    )
-    # Setting the parameters specific for the wannier input calculation
-    builder.fp_run['to_wannier'] = dict(
-        parameters=orm.Dict(dict=dict(lwave=False, isym=0))
-    )
+    pseudo_dir = pathlib.Path(__file__
+                              ).parent.absolute() / 'inputs' / 'pseudos'
+    pseudos = {
+        'In':
+        orm.UpfData(
+            file=str(pseudo_dir / 'In.rel-pbe-dn-kjpaw_psl.1.0.0.UPF')
+        ),
+        'Sb':
+        orm.UpfData(file=str(pseudo_dir / 'Sb.rel-pbe-n-kjpaw_psl.1.0.0.UPF'))
+    }
+
+    # We use the same general Quantum ESPRESSO parameters for the
+    # scf, nscf, and bands calculations. The calculation type and
+    # k-points will be set by the workflow.
+    repeated_pw_inputs = {
+        'pseudos': pseudos,
+        'parameters': common_qe_parameters,
+        'metadata': METADATA_PW,
+        'code': CODE_PW
+    }
+
+    builder.fp_run = {
+        'scf': repeated_pw_inputs,
+        'bands': {
+            'pw': repeated_pw_inputs
+        },
+        'to_wannier': {
+            'nscf': repeated_pw_inputs,
+            'pw2wannier': {
+                'code': CODE_PW2WANNIER,
+                'metadata': METADATA_PW2WANNIER
+            },
+            'wannier': {
+                'code': CODE_WANNIER,
+                'metadata': METADATA_WANNIER
+            }
+        }
+    }
 
     # Setting the k-points for the reference bandstructure
     kpoints_list = []
@@ -85,7 +128,7 @@ def create_builder():
     builder.kpoints_mesh = orm.KpointsData()
     builder.kpoints_mesh.set_kpoints_mesh([6, 6, 6])
 
-    builder.wannier.code = orm.Code.get_from_string('wannier90')
+    builder.wannier.code = CODE_WANNIER
     builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
 
     # Setting the workflow to evaluate the tight-binding models
@@ -97,7 +140,7 @@ def create_builder():
     )
 
     # Set the initial energy window value
-    builder.initial_window = orm.List(list=[-4.5, -4, 6.5, 16])
+    builder.initial_window = orm.List(list=[-1, 3, 10, 18])
 
     # Tolerance for the energy window.
     builder.window_tol = orm.Float(1.5)
@@ -114,22 +157,16 @@ def create_builder():
             dis_num_iter=100,
             num_iter=0,
             spinors=True,
+            # exclude_bands=range(1, )
         )
     )
     # Choose the Wannier90 trial orbitals
     builder.wannier_projections = orm.List(
-        list=['In : s; px; py; pz', 'Sb : px; py; pz']
+        list=['In : s; pz; px; py', 'Sb : pz; px; py']
     )
     # Set the resource requirements for the Wannier90 run
-    builder.wannier.metadata = dict(
-        options=dict(
-            resources={
-                'num_machines': 1,
-                'tot_num_mpiprocs': 1
-            },
-            withmpi=False,
-        )
-    )
+    builder.wannier.metadata = METADATA_WANNIER
+
     # Set the symmetry file
     builder.symmetries = orm.SinglefileData(
         file=os.path.abspath('inputs/symmetries.hdf5')
@@ -137,11 +174,6 @@ def create_builder():
 
     # Pick the relevant bands from the reference calculation
     builder.slice_reference_bands = orm.List(list=list(range(12, 26)))
-
-    # Re-order the tight-binding basis to match the symmetry basis
-    builder.slice_tb_model = orm.List(
-        list=[0, 2, 3, 1, 5, 6, 4, 7, 9, 10, 8, 12, 13, 11]
-    )
 
     return builder
 

@@ -28,7 +28,7 @@ Next, we need to install and set up the codes that ``aiida-tbextraction`` uses. 
 * `bands-inspect <http://bands-inspect.readthedocs.io>`_
 * `symmetry-representation <http://z2pack.ethz.ch/symmetry-representation>`_ (only if you want to symmetrize the model)
 * `Wannier90 <http://wannier.org>`_
-* VASP, or another DFT code (currently only VASP is natively supported)
+* Quantum ESPRESSO, or another DFT code (currently only QE is natively supported)
 
 The packages ``tbmodels``, ``bands-inspect`` and ``symmetry-representation`` are Python 3 codes. As such, you can install them with
 

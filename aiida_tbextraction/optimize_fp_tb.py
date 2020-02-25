@@ -50,6 +50,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
                 'wannier_bands',
                 'wannier.parameters',
                 'wannier.local_input_folder',
+                'wannier.remote_input_folder',
                 'slice_idx',
             )
         )

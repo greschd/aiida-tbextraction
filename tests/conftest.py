@@ -41,10 +41,10 @@ def pytest_configure(config):
 
 def pytest_runtest_setup(item):  # pylint: disable=missing-docstring
     try:
-        vasp_marker = item.get_marker("qe")
+        qe_marker = item.get_marker("qe")
     except AttributeError:
-        vasp_marker = item.get_closest_marker('qe')
-    if vasp_marker is not None:
+        qe_marker = item.get_closest_marker('qe')
+    if qe_marker is not None:
         if item.config.getoption("--skip-qe"):
             pytest.skip("Test runs only with QE.")
 

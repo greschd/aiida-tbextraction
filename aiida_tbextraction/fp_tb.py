@@ -54,11 +54,8 @@ class FirstPrinciplesTightBinding(WorkChain):
                 'wannier.parameters',
                 'wannier.bands',
                 'wannier.kpoints',
-                'wannier.input_folder',
-                # 'wannier_bands',
-                # 'wannier_kpoints',
-                # 'wannier_parameters',
-                # 'wannier_input_folder',
+                'wannier.local_input_folder',
+                'wannier.remote_input_folder',
                 'slice_idx',
             )
         )

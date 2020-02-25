@@ -3,7 +3,7 @@
 # © 2017-2019, ETH Zurich, Institut für Theoretische Physik
 # Author: Dominik Gresch <greschd@gmx.ch>
 """
-Defines a workflow that calculates the reference bandstructure using VASP.
+Defines a workflow that calculates the reference bandstructure using Quantum ESPRESSO.
 """
 
 from aiida import orm
@@ -61,7 +61,7 @@ class QuantumEspressoReferenceBands(ReferenceBandsBase):
     @check_workchain_step
     def get_bands(self):
         """
-        Get the bands from the VASP calculation and crop the 'mesh' k-points if necessary.
+        Get the bands from the  Quantum ESPRESSO calculation.
         """
         bands = self.ctx.pw_calc.outputs.output_band
         self.report(str(bands.get_bands().shape))
