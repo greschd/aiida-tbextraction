@@ -22,7 +22,7 @@ from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'aiida.manage.tests.pytest_fixtures', 'aiida_pytest',
-    'aiida_pytest_mock_codes'
+    'aiida_mock_codes'
 ]
 
 

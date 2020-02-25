@@ -1,6 +1,6 @@
 {
   "name": "aiida-tbextraction",
-  "version": "0.2.0",
+  "version": "0.2.0b1",
   "description": "AiiDA Plugin for extracting tight-binding models",
   "author": "Dominik Gresch",
   "author_email": "greschd@gmx.ch",
@@ -41,7 +41,7 @@
       "aiida-pytest",
       "pymatgen",
       "pytest-datadir",
-      "aiida-pytest-mock-codes"
+      "aiida-mock-codes"
     ],
     "docs": [
       "sphinx",
