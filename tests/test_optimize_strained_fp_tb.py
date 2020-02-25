@@ -6,41 +6,34 @@
 Tests the workflow that optimizes a DFT-based tight-binding model for different strain values.
 """
 
-from __future__ import print_function
-
 import pytest
 
-from insb_sample import *  # pylint: disable=unused-wildcard-import
 
-
-@pytest.mark.vasp
+@pytest.mark.qe
 def test_strained_fp_tb(
     configure_with_daemon,  # pylint: disable=unused-argument
-    get_optimize_fp_tb_input,  # pylint: disable=redefined-outer-name
+    get_optimize_fp_tb_input,
 ):
     """
     Run the DFT tight-binding optimization workflow with strain on an InSb sample for three strain values.
     """
-    from aiida.work import run
-    from aiida.orm.code import Code
-    from aiida.orm.data.base import Str, List
+    from aiida.engine import run
+    from aiida import orm
     from aiida_tbextraction.optimize_strained_fp_tb import OptimizeStrainedFirstPrinciplesTightBinding
-    inputs = get_optimize_fp_tb_input
+    inputs = get_optimize_fp_tb_input()
 
-    inputs['strain_kind'] = Str('three_five.Biaxial001')
-    inputs['strain_parameters'] = Str('InSb')
+    inputs['strain_kind'] = orm.Str('three_five.Biaxial001')
+    inputs['strain_parameters'] = orm.Str('InSb')
 
-    strain_strengths = List()
-    strain_list = [-0.1, 0., 0.1]
-    strain_strengths.extend(strain_list)
-    inputs['strain_strengths'] = strain_strengths
+    strain_list = [-0.1, 0, 0.1]
+    inputs['strain_strengths'] = orm.List(list=strain_list)
 
-    inputs['symmetry_repr_code'] = Code.get_from_string('symmetry_repr')
+    inputs['symmetry_repr_code'] = orm.Code.get_from_string('symmetry_repr')
 
     result = run(OptimizeStrainedFirstPrinciplesTightBinding, **inputs)
     print(result)
     for value in strain_list:
-        suffix = '_{}'.format(value).replace('.', '_dot_')
+        suffix = '_{}'.format(value).replace('.', '_dot_').replace('-', 'm_')
         assert all(
             key + suffix in result
             for key in ['cost_value', 'tb_model', 'window']

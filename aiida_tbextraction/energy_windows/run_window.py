@@ -6,36 +6,29 @@
 Defines a workflow for running the tight-binding calculation and evaluation for a given energy window.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+from collections import ChainMap
 
 import numpy as np
-from fsc.export import export
 
-from aiida.orm import DataFactory
-from aiida.orm.data.base import List, Float
-from aiida.orm.calculation.inline import make_inline
-from aiida.work.workchain import WorkChain, ToContext, if_
-from aiida.common.links import LinkType
+from aiida import orm
+from aiida.engine import WorkChain, ToContext, if_, calcfunction
 
-from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
+from aiida_tools import check_workchain_step, get_outputs_dict
+from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from ..model_evaluation import ModelEvaluationBase
 from ..calculate_tb import TightBindingCalculation
 
+__all__ = ('RunWindow', )
 
-@export
+
 class RunWindow(WorkChain):
     """
     This workchain runs the tight-binding extraction and analysis for a given energy window.
     """
-
     @classmethod
     def define(cls, spec):
-        super(RunWindow, cls).define(spec)
+        super().define(spec)
         spec.expose_inputs(TightBindingCalculation)
         spec.expose_inputs(ModelEvaluationBase, exclude=['tb_model'])
         spec.input_namespace(
@@ -47,24 +40,28 @@ class RunWindow(WorkChain):
 
         spec.input(
             'window',
-            valid_type=List,
+            valid_type=orm.List,
             help=
             'Disentaglement energy windows used by Wannier90, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.'
         )
         spec.input(
             'wannier_bands',
-            valid_type=DataFactory('array.bands'),
+            valid_type=orm.BandsData,
             help=
-            'Input bandstructure for Wannier90, to be written to the ``wannier90.eig`` input file.'
+            "Parsed band structure from the ``*.eig`` file, used to determine "
+            "if the given energy window is valid. Note that this input is "
+            "assumed to be consistent with the ``*.eig`` file given in "
+            "'wannier.{local,remote}_input_folder'."
         )
         spec.input(
             'model_evaluation_workflow',
             help=
             'AiiDA workflow that will be used to evaluate the tight-binding model.',
-            **WORKCHAIN_INPUT_KWARGS
+            **PROCESS_INPUT_KWARGS
         )
 
         spec.expose_outputs(ModelEvaluationBase)
+        spec.outputs.dynamic = True
         spec.outline(
             if_(cls.window_valid
                 )(cls.calculate_model, cls.evaluate_bands, cls.finalize),
@@ -83,9 +80,11 @@ class RunWindow(WorkChain):
         """
         Check if a window is valid.
         """
-        window_list = self.inputs.window.get_attr('list')
+        window_list = self.inputs.window.get_list()
         win_min, froz_min, froz_max, win_max = window_list
-        num_wann = int(self.inputs.wannier_parameters.get_attr('num_wann'))
+        num_wann = int(
+            self.inputs.wannier.parameters.get_attribute('num_wann')
+        )
 
         window_invalid_str = 'Window [{}, ({}, {}), {}] is invalid'.format(
             *window_list
@@ -136,11 +135,9 @@ class RunWindow(WorkChain):
         """
         inputs = self.exposed_inputs(TightBindingCalculation)
         # set the energy window
-        inputs.update(
-            add_window_parameters_inline(
-                wannier_parameters=inputs.pop('wannier_parameters'),
-                window=self.inputs.window
-            )[1]
+        inputs['wannier']['parameters'] = add_window_parameters_calcfunc(
+            parameters=inputs['wannier']['parameters'],
+            window=self.inputs.window
         )
         self.report("Calculating tight-binding model.")
         return ToContext(
@@ -152,8 +149,8 @@ class RunWindow(WorkChain):
         """
         Add the tight-binding model to the outputs and run the evaluation workflow.
         """
-        tb_model = self.ctx.tbextraction_calc.out.tb_model
         self.report("Adding tight-binding model to output.")
+        tb_model = self.ctx.tbextraction_calc.outputs.tb_model
         self.out('tb_model', tb_model)
         self.report("Running model evaluation.")
         return ToContext(
@@ -172,28 +169,27 @@ class RunWindow(WorkChain):
         """
         Add the evaluation outputs.
         """
-        for label, node in self.ctx.model_evaluation_wf.get_outputs(
-            also_labels=True, link_type=LinkType.RETURN
-        ):
-            self.report("Adding {} to outputs.".format(label))
-            self.out(label, node)
+        self.report("Retrieving model evaluation outputs.")
+        self.out_many(get_outputs_dict(self.ctx.model_evaluation_wf))
 
     @check_workchain_step
     def abort_invalid(self):
         """
-        Abort when an invalid window is found. The 'cost_value' is set to infinity.
+        Abort when an invalid window is found. The 'cost_value' is set to a
+        very large number. Infinity cannot be serialized into the AiiDA
+        database.
         """
-        self.report('Window is invalid, assigning infinite cost_value.')
-        self.out('cost_value', Float('inf'))
+        self.report('Window is invalid, assigning very large cost_value.')
+        self.out('cost_value', orm.Float(314159265358979323).store())
 
 
-@make_inline
-def add_window_parameters_inline(wannier_parameters, window):
+@calcfunction
+def add_window_parameters_calcfunc(parameters, window):
     """
     Adds the window values to the given Wannier90 input parameters.
     """
-    param_dict = wannier_parameters.get_dict()
-    win_min, froz_min, froz_max, win_max = window.get_attr('list')
+    param_dict = parameters.get_dict()
+    win_min, froz_min, froz_max, win_max = window.get_list()
     param_dict.update(
         dict(
             dis_win_min=win_min,
@@ -202,4 +198,4 @@ def add_window_parameters_inline(wannier_parameters, window):
             dis_froz_max=froz_max,
         )
     )
-    return {'wannier_parameters': DataFactory('parameter')(dict=param_dict)}
+    return orm.Dict(dict=param_dict)

@@ -1,0 +1,3 @@
+# requirements for 'generate_symmetries' script
+pymatgen
+symmetry-representation

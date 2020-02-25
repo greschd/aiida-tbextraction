@@ -1,0 +1,14 @@
+For FP workchains:
+
+'common' inputs (do *not* repeat across namespaces):
+- structure
+- kpoints
+- kpoints_mesh
+- wannier_parameters
+- wannier_projections
+
+separate inputs (*do* repeat across namespaces)
+- code (_wannier90, _pw2wannier90, _pw <- bare when the only one)
+- pseudos
+- parameters
+- metadata

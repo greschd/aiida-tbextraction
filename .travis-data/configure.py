@@ -13,9 +13,8 @@ from os.path import join
 
 
 def get_path(codename):
-    return subprocess.check_output(
-        'which {}'.format(codename), shell=True
-    ).decode().strip()
+    return subprocess.check_output('which {}'.format(codename),
+                                   shell=True).decode().strip()
 
 
 TBMODELS_PATH = get_path('tbmodels')

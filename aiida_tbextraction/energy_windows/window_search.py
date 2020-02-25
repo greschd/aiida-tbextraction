@@ -8,52 +8,50 @@ Defines a workflow which optimizes the energy windows.
 
 import copy
 
-import numpy as np
-from fsc.export import export
+from aiida import orm
+from aiida.engine import WorkChain, ToContext
 
-from aiida.orm import load_node
-from aiida.orm.data.base import List, Float
-from aiida.orm.data.parameter import ParameterData
-from aiida.work.workchain import WorkChain, ToContext
-from aiida.common.links import LinkType
-
-from aiida_tools import check_workchain_step
+from aiida_tools import check_workchain_step, get_outputs_dict
+from aiida_optimize import OptimizationWorkChain
 from aiida_optimize.engines import NelderMead
-from aiida_optimize.workchain import OptimizationWorkChain
 
 from .run_window import RunWindow
 
+__all__ = ('WindowSearch', )
 
-@export
+
 class WindowSearch(WorkChain):
     """
     This workchain runs a series of possible energy windows and selects the best-matching tight-binding model.
     """
-
     @classmethod
     def define(cls, spec):
-        super(WindowSearch, cls).define(spec)
+        super().define(spec)
 
-        spec.expose_inputs(RunWindow, exclude=['window', 'wannier_kpoints'])
+        spec.expose_inputs(RunWindow, exclude=['window', 'wannier.kpoints'])
+        # Workaround for plumpy issue #135 (https://github.com/aiidateam/plumpy/issues/135)
+        spec.inputs['model_evaluation'].dynamic = True
         spec.input(
             'initial_window',
-            valid_type=List,
+            valid_type=orm.List,
             help=
             'Initial value for the disentanglement energy windows, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.'
         )
         spec.input(
             'window_tol',
-            valid_type=Float,
-            default=Float(0.5),
+            valid_type=orm.Float,
+            default=lambda: orm.Float(0.5),
             help='Tolerance in energy windows for the window optimization.'
         )
         spec.input(
             'cost_tol',
-            valid_type=Float,
-            default=Float(0.02),
+            valid_type=orm.Float,
+            default=lambda: orm.Float(0.02),
             help="Tolerance in the 'cost_value' for the window optimization."
         )
 
+        spec.output('window', valid_type=orm.List)
+        spec.outputs.dynamic = True
         spec.outline(cls.create_optimization, cls.finalize)
 
     @check_workchain_step
@@ -62,7 +60,7 @@ class WindowSearch(WorkChain):
         Run the optimization workchain.
         """
         self.report('Launching Window optimization.')
-        initial_window_list = self.inputs.initial_window.get_attr('list')
+        initial_window_list = self.inputs.initial_window.get_list()
         window_simplex = [initial_window_list]
         simplex_dist = 0.5
         for i in range(len(initial_window_list)):
@@ -70,24 +68,23 @@ class WindowSearch(WorkChain):
             window[i] += simplex_dist
             window_simplex.append(window)
 
+        runwindow_inputs = self.exposed_inputs(RunWindow)
+        runwindow_inputs['wannier']['kpoints'] = self.inputs.wannier_bands
         return ToContext(
             optimization=self.submit(
                 OptimizationWorkChain,
                 engine=NelderMead,
-                engine_kwargs=ParameterData(
+                engine_kwargs=orm.Dict(
                     dict=dict(
                         result_key='cost_value',
                         xtol=self.inputs.window_tol.value,
-                        ftol=np.inf,
+                        ftol=None,
                         input_key='window',
                         simplex=window_simplex
                     )
                 ),
-                calculation_workchain=RunWindow,
-                calculation_inputs=dict(
-                    wannier_kpoints=self.inputs.wannier_bands,
-                    **self.exposed_inputs(RunWindow)
-                )
+                evaluate_process=RunWindow,
+                evaluate=runwindow_inputs
             )
         )
 
@@ -97,14 +94,11 @@ class WindowSearch(WorkChain):
         Add the optimization results to the outputs.
         """
         self.report('Add optimization results to outputs.')
-        optimal_calc = load_node(
-            self.ctx.optimization.out.calculation_uuid.value
+        optimal_calc = orm.load_node(
+            self.ctx.optimization.outputs.optimal_process_uuid.value
         )
         self.report('Adding optimal window to outputs.')
-        self.out('window', optimal_calc.inp.window)
-        for label, node in optimal_calc.get_outputs(
-            also_labels=True, link_type=LinkType.RETURN
-        ):
-            self.report("Adding {} to outputs.".format(label))
-            self.out(label, node)
+        self.out('window', optimal_calc.inputs.window)
+        self.report("Adding outputs of the optimal calculation.")
+        self.out_many(get_outputs_dict(optimal_calc))
         self.report('Finished!')

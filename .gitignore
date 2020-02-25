@@ -1,3 +1,4 @@
+__pycache__
 *.pyc
 *.egg*
 .cache
@@ -6,3 +7,6 @@
 POTCAR
 PSCTR
 dist
+.vscode
+.mypy_cache
+.aiida-mock-codes.yml

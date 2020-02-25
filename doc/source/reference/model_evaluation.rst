@@ -4,5 +4,8 @@
 Evaluate Tight-Binding Models
 =============================
 
-.. automodule:: aiida_tbextraction.model_evaluation
-    :members:
+.. aiida-workchain:: ModelEvaluationBase
+    :module: aiida_tbextraction.model_evaluation
+
+.. aiida-workchain:: BandDifferenceModelEvaluation
+    :module: aiida_tbextraction.model_evaluation

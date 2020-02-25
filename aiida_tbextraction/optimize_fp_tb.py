@@ -6,36 +6,31 @@
 Defines the workflow that runs first-principles calculations and creates an optimized tight-binding model.
 """
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+import contextlib
+from collections import ChainMap
 
-from fsc.export import export
+from aiida import orm
+from aiida.engine import WorkChain, ToContext
+from aiida.common.exceptions import NotExistent
 
-from aiida.orm.data.base import List
-from aiida.orm.data.parameter import ParameterData
-from aiida.work.workchain import WorkChain, ToContext
-from aiida.common.links import LinkType
-
-from aiida_tools import check_workchain_step
-from aiida_tools.workchain_inputs import WORKCHAIN_INPUT_KWARGS, load_object
+from aiida_tools import check_workchain_step, get_outputs_dict
+from aiida_tools.process_inputs import PROCESS_INPUT_KWARGS, load_object
 
 from .energy_windows.window_search import WindowSearch
 from .fp_run import FirstPrinciplesRunBase
-from ._inline_calcs import merge_parameterdata_inline, slice_bands_inline
+from ._calcfunctions import merge_nested_dict, slice_bands_inline
 from .energy_windows.auto_guess import get_initial_window_inline
 
+__all__ = ('OptimizeFirstPrinciplesTightBinding', )
 
-@export
+
 class OptimizeFirstPrinciplesTightBinding(WorkChain):
     """
     Creates a tight-binding model by first running first-principles calculations to get a reference bandstructure and Wannier90 input, and then optimizing the energy window to get an optimized symmetric tight-binding model.
     """
-
     @classmethod
     def define(cls, spec):
-        super(OptimizeFirstPrinciplesTightBinding, cls).define(spec)
+        super().define(spec)
 
         # inputs which are inherited at the top level
         spec.expose_inputs(FirstPrinciplesRunBase, exclude=())
@@ -51,17 +46,21 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             WindowSearch,
             exclude=(
                 'initial_window',
-                'wannier_bands',
                 'reference_bands',
-                'wannier_parameters',
-                'wannier_input_folder',
+                'wannier_bands',
+                'wannier.parameters',
+                'wannier.local_input_folder',
+                'wannier.remote_input_folder',
                 'slice_idx',
             )
         )
+        # Workaround for plumpy issue #135 (https://github.com/aiidateam/plumpy/issues/135)
+        spec.inputs['model_evaluation'].dynamic = True
+
         # initial window is not required because it can be guessed.
         spec.input(
             'initial_window',
-            valid_type=List,
+            valid_type=orm.List,
             help=
             'Initial value for the disentanglement energy windows, given as a list ``[dis_win_min, dis_froz_min, dis_froz_max, dis_win_max]``.',
             required=False
@@ -70,23 +69,24 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         spec.input(
             'fp_run_workflow',
             help='Workflow which executes the first-principles calculations',
-            **WORKCHAIN_INPUT_KWARGS
+            **PROCESS_INPUT_KWARGS
         )
         spec.input(
             'slice_reference_bands',
-            valid_type=List,
+            valid_type=orm.List,
             required=False,
             help=
             'Indices for the reference bands which should be included in the model evaluation.'
         )
         spec.input(
             'slice_tb_model',
-            valid_type=List,
+            valid_type=orm.List,
             required=False,
             help='Indices for slicing (re-ordering) the tight-binding model.'
         )
 
         spec.expose_outputs(WindowSearch)
+        spec.outputs.dynamic = True
 
         spec.outline(cls.fp_run, cls.run_window_search, cls.finalize)
 
@@ -117,29 +117,34 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         self.report(
             "Merging 'wannier_settings' from input and wannier_input workflow."
         )
-        wannier_settings_explicit = inputs.pop(
-            'wannier_settings', ParameterData()
-        )
-        wannier_settings_from_wf = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_settings', ParameterData()
-        )
-        wannier_settings = merge_parameterdata_inline(
-            param_primary=wannier_settings_explicit,
-            param_secondary=wannier_settings_from_wf
-        )[1]
 
-        # prefer wannier_projections from wannier_input workflow if it exists
-        wannier_projections = self.ctx.fp_run.get_outputs_dict().get(
-            'wannier_projections', inputs.pop('wannier_projections', None)
-        )
+        fp_run_outputs = self.ctx.fp_run.outputs
+        wannier_namespace_inputs = inputs.pop('wannier', {})
+
+        with contextlib.suppress(NotExistent, KeyError):
+            wannier_settings_explicit = wannier_namespace_inputs['settings']
+            wannier_settings_from_wf = fp_run_outputs.wannier_settings
+            wannier_namespace_inputs['settings'] = merge_nested_dict(
+                dict_primary=wannier_settings_explicit,
+                dict_secondary=wannier_settings_from_wf
+            )
+
+        with contextlib.suppress(NotExistent):
+            wannier_namespace_inputs['projections'
+                                     ] = fp_run_outputs.wannier_projections
+
+        wannier_namespace_inputs['parameters'
+                                 ] = fp_run_outputs.wannier_parameters
+        wannier_namespace_inputs['local_input_folder'
+                                 ] = fp_run_outputs.wannier_input_folder
 
         # slice reference bands if necessary
-        reference_bands = self.ctx.fp_run.out.bands
+        reference_bands = fp_run_outputs.bands
         slice_reference_bands = self.inputs.get('slice_reference_bands', None)
         if slice_reference_bands is not None:
             reference_bands = slice_bands_inline(
                 bands=reference_bands, slice_idx=slice_reference_bands
-            )[1]
+            )
 
         # get slice_idx for window_search
         slice_idx = self.inputs.get('slice_tb_model', None)
@@ -147,27 +152,26 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             inputs['slice_idx'] = slice_idx
 
         self.report('Get or guess initial window.')
-        wannier_bands = self.ctx.fp_run.out.wannier_bands
+        wannier_bands = fp_run_outputs.wannier_bands
         initial_window = self.inputs.get('initial_window', None)
         if initial_window is None:
             initial_window = get_initial_window_inline(
                 wannier_bands=wannier_bands,
                 slice_reference_bands=self.inputs.get(
                     'slice_reference_bands',
-                    List(list=range(wannier_bands.get_bands().shape[1]))
+                    orm.List(
+                        list=list(range(wannier_bands.get_bands().shape[1]))
+                    )
                 )
-            )[1]
+            )
 
         self.report("Starting WindowSearch workflow.")
         return ToContext(
             window_search=self.submit(
                 WindowSearch,
                 reference_bands=reference_bands,
+                wannier=wannier_namespace_inputs,
                 wannier_bands=wannier_bands,
-                wannier_parameters=self.ctx.fp_run.out.wannier_parameters,
-                wannier_input_folder=self.ctx.fp_run.out.wannier_input_folder,
-                wannier_settings=wannier_settings,
-                wannier_projections=wannier_projections,
                 initial_window=initial_window,
                 **inputs
             )
@@ -179,8 +183,4 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
         Add the outputs of the window_search sub-workflow.
         """
         self.report("Adding outputs from WindowSearch workflow.")
-        window_search = self.ctx.window_search
-        for label, node in window_search.get_outputs(
-            also_labels=True, link_type=LinkType.RETURN
-        ):
-            self.out(label, node)
+        self.out_many(get_outputs_dict(self.ctx.window_search))

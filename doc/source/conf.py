@@ -4,36 +4,26 @@
 # Author: Dominik Gresch <greschd@gmx.ch>
 
 import os
-import sys
-import time
+import contextlib
 
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+from aiida.manage.configuration import load_documentation_profile
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'rtd_settings'
+load_documentation_profile()
 
-import aiida
-
-from aiida.backends import settings
-
-# We set that we are in documentation mode - even for local compilation
-settings.IN_DOC_MODE = True
-
-# on_rtd is whether we are on readthedocs.org, this line of code grabbed
+# checks whether we are on readthedocs.org, this line of code grabbed
 # from docs.readthedocs.org
-# NOTE: it is needed to have these lines before load_dbenv()
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    html_theme = 'sphinx_rtd_theme'
-    # Loading the dbenv. The backend should be fixed before compiling the
-    # documentation.
-    aiida.try_load_dbenv()
+if os.environ.get(
+    'READTHEDOCS', None
+) != 'True':  # only import and set the theme if we're building docs locally
+    with contextlib.suppress(ImportError):
+        import sphinx_rtd_theme
+        html_theme = 'sphinx_rtd_theme'
+        html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 else:
-    # Back-end settings for readthedocs online documentation.
-    # from aiida.backends import settings
-    settings.IN_RT_DOC_MODE = True
-    settings.BACKEND = "django"
-    settings.AIIDADB_PROFILE = "default"
+    # make sure all entry-points are detected, since readthedocs doesn't expose a way to do this
+    # during post-install.
+    import reentry
+    reentry.manager.scan()
 
 import aiida_tbextraction
 
@@ -67,9 +57,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'aiida-tbextraction'
-copyright = u'2017-{}, ETH Zurich'.format(time.localtime().tm_year)
-author = u'Dominik Gresch'
+project = 'aiida-tbextraction'
+copyright = '2017-2019, ETH Zurich'
+author = 'Dominik Gresch'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -147,7 +137,7 @@ latex_elements = {
 latex_documents = [
     (
         master_doc, 'aiida-tbextraction.tex',
-        u'aiida-tbextraction Documentation', u'Dominik Gresch', 'manual'
+        'aiida-tbextraction Documentation', 'Dominik Gresch', 'manual'
     ),
 ]
 
@@ -156,7 +146,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [(
-    master_doc, 'aiida-tbextraction', u'aiida-tbextraction Documentation',
+    master_doc, 'aiida-tbextraction', 'aiida-tbextraction Documentation',
     [author], 1
 )]
 
@@ -167,7 +157,7 @@ man_pages = [(
 #  dir menu entry, description, category)
 texinfo_documents = [
     (
-        master_doc, 'aiida-tbextraction', u'aiida-tbextraction Documentation',
+        master_doc, 'aiida-tbextraction', 'aiida-tbextraction Documentation',
         author, 'aiida-tbextraction', 'One line description of project.',
         'Miscellaneous'
     ),

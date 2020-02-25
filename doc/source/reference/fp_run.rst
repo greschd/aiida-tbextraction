@@ -7,17 +7,26 @@ Run First-Principles Calculations
 Complete First-Principles Calculations
 --------------------------------------
 
-.. automodule:: aiida_tbextraction.fp_run
-    :members:
+.. aiida-workchain:: FirstPrinciplesRunBase
+    :module: aiida_tbextraction.fp_run
+
+.. aiida-workchain:: QuantumEspressoFirstPrinciplesRun
+    :module: aiida_tbextraction.fp_run
 
 Reference Bands Workflows
 -------------------------
 
-.. automodule:: aiida_tbextraction.fp_run.reference_bands
-    :members:
+.. aiida-workchain:: ReferenceBandsBase
+    :module: aiida_tbextraction.fp_run.reference_bands
+
+.. aiida-workchain:: QuantumEspressoReferenceBands
+    :module: aiida_tbextraction.fp_run.reference_bands
 
 Wannier90 Input Workflows
 -------------------------
 
-.. automodule:: aiida_tbextraction.fp_run.wannier_input
-    :members:
+.. aiida-workchain:: WannierInputBase
+    :module: aiida_tbextraction.fp_run.wannier_input
+
+.. aiida-workchain:: QuantumEspressoWannierInput
+    :module: aiida_tbextraction.fp_run.wannier_input

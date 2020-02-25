@@ -6,29 +6,26 @@
 Tests for the band difference model evaluation workflow.
 """
 
-from __future__ import division, print_function, unicode_literals
-
 import pytest
 import numpy as np
 
+from aiida import orm
+
 
 @pytest.fixture
-def band_difference_builder(configure, sample):  # pylint: disable=unused-argument
+def band_difference_builder(configure, shared_datadir):  # pylint: disable=unused-argument
     """
     Create inputs for the band difference workflow.
     """
-    from aiida.orm import DataFactory
-    from aiida.orm.code import Code
     from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
     from aiida_bands_inspect.io import read_bands
 
     builder = BandDifferenceModelEvaluation.get_builder()
-    builder.tbmodels_code = Code.get_from_string('tbmodels')
-    builder.bands_inspect_code = Code.get_from_string('bands_inspect')
-    builder.tb_model = DataFactory('singlefile')(
-        file=sample('silicon/model.hdf5')
-    )
-    builder.reference_bands = read_bands(sample('silicon/bands.hdf5'))
+    builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
+    builder.code_bands_inspect = orm.Code.get_from_string('bands_inspect')
+    with (shared_datadir / 'silicon/model.hdf5').open('rb') as model_file:
+        builder.tb_model = orm.SinglefileData(file=model_file)
+    builder.reference_bands = read_bands(shared_datadir / 'silicon/bands.hdf5')
 
     return builder
 
@@ -37,7 +34,7 @@ def test_bandevaluation(configure_with_daemon, band_difference_builder):  # pyli
     """
     Run the band evaluation workflow.
     """
-    from aiida.work.launch import run
+    from aiida.engine.launch import run
     builder = band_difference_builder
     output = run(builder)
     assert np.isclose(output['cost_value'].value, 0.)
