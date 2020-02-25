@@ -3,7 +3,7 @@
 # © 2017-2019, ETH Zurich, Institut für Theoretische Physik
 # Author: Dominik Gresch <greschd@gmx.ch>
 """
-Defines a workflow for running the first-principles calculations using VASP.
+Defines a workflow for running the first-principles calculations using Quantum ESPRESSO.
 """
 
 from fsc.export import export
@@ -54,8 +54,7 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         )
 
         spec.expose_inputs(
-            QuantumEspressoWannierInput,
-            include=['structure', 'kpoints_mesh']
+            QuantumEspressoWannierInput, include=['structure', 'kpoints_mesh']
         )
         spec.expose_inputs(
             QuantumEspressoWannierInput,

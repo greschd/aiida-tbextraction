@@ -90,10 +90,8 @@ class TightBindingCalculation(WorkChain):
         wannier_inputs['parameters'] = orm.Dict(dict=wannier_parameters)
         wannier_inputs['settings'] = orm.Dict(
             dict=ChainMap(
-                wannier_inputs.get('settings', orm.Dict()).get_dict(), {
-                    "retrieve_hoppings": True,
-                    "additional_retrieve_list": ['*_centres.xyz', '*.win']
-                }
+                wannier_inputs.get('settings', orm.Dict()).get_dict(),
+                {"additional_retrieve_list": ['*.win']}
             )
         )
 
