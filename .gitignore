@@ -9,3 +9,4 @@ PSCTR
 dist
 .vscode
 .mypy_cache
+.aiida-mock-codes.yml
