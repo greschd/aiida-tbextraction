@@ -17,12 +17,14 @@ import numpy as np
 from ase.io.vasp import read_vasp
 from aiida import orm
 
+from aiida_vasp.data.potcar import PotcarData
+
 from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'aiida.manage.tests.pytest_fixtures', 'aiida_pytest',
-    'aiida_mock_codes'
+    'aiida_testing.mock_code'
 ]
 
 
@@ -93,6 +95,16 @@ def code_pw2wannier90(mock_code_factory, mock_codes_data_dir):  # pylint: disabl
         entry_point="quantumespresso.pw2wannier90",
         data_dir_abspath=mock_codes_data_dir,
         ignore_files=("_aiidasubmit.sh", )
+    )
+
+
+@pytest.fixture
+def code_vasp(mock_code_factory, mock_codes_data_dir):  # pylint: disable=redefined-outer-name
+    return mock_code_factory(
+        label='vasp',
+        entry_point='vasp.vasp',
+        data_dir_abspath=mock_codes_data_dir,
+        ignore_files=('_aiidasubmit.sh')
     )
 
 
@@ -246,6 +258,63 @@ def get_qe_specific_fp_run_inputs(
 
 
 @pytest.fixture
+def get_vasp_specific_fp_run_inputs(code_vasp):
+    """
+    Creates the InSb inputs for the VASP fp_run workflow.
+    """
+    def inner():
+        return {
+            'potentials': {
+                'In': PotcarData(),
+                'Sb': PotcarData()
+                # 'In': PotcarData.find_one(family='pbe', symbol='In_d'),
+                # 'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
+            },
+            'parameters':
+            orm.Dict(
+                dict=dict(
+                    ediff=1e-3,
+                    lsorbit=True,
+                    isym=0,
+                    ismear=0,
+                    sigma=0.05,
+                    gga='PE',
+                    encut=380,
+                    magmom='600*0.0',
+                    nbands=36,
+                    kpar=4,
+                    nelmin=0,
+                    lwave=False,
+                    aexx=0.25,
+                    lhfcalc=True,
+                    hfscreen=0.23,
+                    algo='N',
+                    time=0.4,
+                    precfock='normal',
+                )
+            ),
+            'code':
+            code_vasp,
+            'calculation_kwargs':
+            dict(
+                options=dict(
+                    resources={
+                        'num_machines': 2,
+                        'num_mpiprocs_per_machine': 18
+                    },
+                    withmpi=True,
+                    max_wallclock_seconds=1200
+                )
+            ),
+            'scf': {
+                'parameters': orm.Dict(dict=dict(isym=2))
+            }
+        }
+
+    return inner
+
+
+@pytest.fixture
 def get_fp_run_inputs(
     configure, get_top_level_insb_inputs, get_qe_specific_fp_run_inputs,
     test_data_dir
@@ -257,6 +326,22 @@ def get_fp_run_inputs(
 
         return dict(
             **get_top_level_insb_inputs(), **get_qe_specific_fp_run_inputs()
+        )
+
+    return inner
+
+
+@pytest.fixture
+def get_vasp_fp_run_inputs(
+    configure, get_top_level_insb_inputs, get_vasp_specific_fp_run_inputs,
+    test_data_dir
+):
+    """
+    Create input for the VASP InSb sample.
+    """
+    def inner():
+        return dict(
+            **get_top_level_insb_inputs(), **get_vasp_specific_fp_run_inputs()
         )
 
     return inner
