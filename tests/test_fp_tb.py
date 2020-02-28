@@ -12,7 +12,7 @@ import pytest
 @pytest.mark.qe
 def test_fp_tb(
     configure_with_daemon,  # pylint: disable=unused-argument
-    get_fp_tb_inputs,  # pylint: disable=redefined-outer-name
+    get_fp_tb_inputs,
 ):
     """
     Runs the DFT tight-binding workflow on an InSb sample.

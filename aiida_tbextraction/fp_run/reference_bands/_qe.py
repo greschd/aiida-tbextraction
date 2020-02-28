@@ -12,9 +12,9 @@ from aiida.engine import ToContext
 from aiida_tools import check_workchain_step
 from aiida_quantumespresso.calculations.pw import PwCalculation
 
-from . import ReferenceBandsBase
+from ._base import ReferenceBandsBase
 from ..._calcfunctions import merge_nested_dict
-from .._helpers._calcfunctions import flatten_bands_inline
+from .._helpers._calcfunctions import flatten_bands
 
 __all__ = ("QuantumEspressoReferenceBands", )
 
@@ -66,4 +66,4 @@ class QuantumEspressoReferenceBands(ReferenceBandsBase):
         bands = self.ctx.pw_calc.outputs.output_band
         self.report(str(bands.get_bands().shape))
         self.report("Flattening the output bands.")
-        self.out('bands', flatten_bands_inline(bands=bands))
+        self.out('bands', flatten_bands(bands=bands))

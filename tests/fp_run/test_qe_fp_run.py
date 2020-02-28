@@ -15,12 +15,11 @@ from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 
 
 @pytest.mark.qe
-def test_qe_fp_run(configure_with_daemon, assert_finished, get_fp_run_inputs):  # pylint: disable=unused-argument,redefined-outer-name,too-many-locals
+def test_qe_fp_run(configure_with_daemon, assert_finished, get_fp_run_inputs):  # pylint: disable=unused-argument
     """Calculates the Wannier90 inputs and reference bands from QE."""
 
     result, node = run_get_node(
-        QuantumEspressoFirstPrinciplesRun,
-        **get_fp_run_inputs()
+        QuantumEspressoFirstPrinciplesRun, **get_fp_run_inputs()
     )
     assert node.is_finished_ok
     assert all(
@@ -29,9 +28,7 @@ def test_qe_fp_run(configure_with_daemon, assert_finished, get_fp_run_inputs):  
             'bands'
         ]
     )
-    assert int(
-        result['wannier_parameters'].get_attribute('num_wann')
-    ) == 14
+    assert int(result['wannier_parameters'].get_attribute('num_wann')) == 14
     object_names = result['wannier_input_folder'].list_object_names()
     assert all(
         filename in object_names

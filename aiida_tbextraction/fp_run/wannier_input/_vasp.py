@@ -9,17 +9,15 @@ Defines a workflow that calculates the Wannier90 input files using VASP.
 from fsc.export import export
 import numpy as np
 
-from aiida.orm import Code
-from aiida.plugins import DataFactory, CalculationFactory
-from aiida.orm.nodes.data.array.bands import BandsData
+from aiida import orm
 from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
-from aiida_vasp.io.win import WinParser  # pylint: disable=import-error,useless-suppression
+from aiida_vasp.calcs.vasp2w90 import Vasp2w90Calculation
+from aiida_vasp.parsers.file_parsers.win import WinParser
 
 from . import WannierInputBase
-
-from .._helpers._calcfunctions import reduce_num_wann_inline
+from .._helpers._calcfunctions import reduce_num_wann
 
 
 @export
@@ -31,11 +29,10 @@ class VaspWannierInput(WannierInputBase):
     def define(cls, spec):
         super(VaspWannierInput, cls).define(spec)
 
-        ParameterData = orm.Dict
-        spec.input('code', valid_type=Code, help='Code that runs VASP.')
+        spec.input('code', valid_type=orm.Code, help='Code that runs VASP.')
         spec.input(
             'parameters',
-            valid_type=ParameterData,
+            valid_type=orm.Dict,
             help='Parameters for the Vasp2w90 calculation.'
         )
         spec.input_namespace(
@@ -55,7 +52,7 @@ class VaspWannierInput(WannierInputBase):
         self.report("Submitting VASP2W90 calculation.")
         return ToContext(
             vasp_calc=self.submit(
-                CalculationFactory('vasp.vasp2w90'),
+                Vasp2w90Calculation,
                 structure=self.inputs.structure,
                 potential={(kind, ): pot
                            for kind, pot in self.inputs.potentials.items()},
@@ -87,7 +84,7 @@ class VaspWannierInput(WannierInputBase):
         # reduce 'num_wann' if 'exclude_bands' is given
         self.out(
             'wannier_parameters',
-            reduce_num_wann_inline(vasp_calc_output.wannier_parameters)[1]
+            reduce_num_wann(vasp_calc_output.wannier_parameters)
         )
         self.out('wannier_bands', self.parse_wannier_bands(retrieved_folder))
         self.out('wannier_projections', vasp_calc_output.wannier_projections)
@@ -96,7 +93,7 @@ class VaspWannierInput(WannierInputBase):
         """
         Parse the Wannier90 bands from the .win and .eig files.
         """
-        bands = BandsData()
+        bands = orm.BandsData()
         bands.set_kpoints(
             self.parse_kpts(retrieved_folder.get_abs_path('wannier90.win'))
         )

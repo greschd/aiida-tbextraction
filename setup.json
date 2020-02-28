@@ -61,6 +61,9 @@
     ],
     "qe": [
       "aiida-quantumespresso>=3.0.0a5"
+    ],
+    "vasp": [
+      "aiida-vasp"
     ]
   },
   "entry_points": {
