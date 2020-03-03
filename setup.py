@@ -26,4 +26,14 @@ EXTRAS_REQUIRE['dev'] = (
 )
 
 if __name__ == '__main__':
-    setup(packages=find_packages(exclude=['aiida']), **SETUP_KWARGS)
+    setup(
+        packages=find_packages(exclude=['aiida']),
+        long_description=open(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), 'README.md'
+            ),
+            encoding='utf-8'
+        ).read(),
+        long_description_content_type="text/markdown",
+        **SETUP_KWARGS
+    )

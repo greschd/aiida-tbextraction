@@ -9,10 +9,12 @@ Defines a workflow for calculating a tight-binding model for a given Wannier90 i
 from collections import ChainMap
 
 from aiida import orm
-from aiida.plugins import CalculationFactory
 from aiida.engine import WorkChain, if_, ToContext
 
 from aiida_tools import check_workchain_step
+from aiida_tbmodels.calculations.parse import ParseCalculation
+from aiida_tbmodels.calculations.slice import SliceCalculation
+from aiida_tbmodels.calculations.symmetrize import SymmetrizeCalculation
 from aiida_wannier90.calculations import Wannier90Calculation
 
 __all__ = ('TightBindingCalculation', )
@@ -34,6 +36,21 @@ class TightBindingCalculation(WorkChain):
         )
         spec.expose_inputs(
             Wannier90Calculation, namespace='wannier', exclude=('structure', )
+        )
+        spec.expose_inputs(
+            ParseCalculation,
+            namespace='parse',
+            exclude=('code', 'metadata', 'wannier_folder')
+        )
+        spec.expose_inputs(
+            SliceCalculation,
+            namespace='slice',
+            exclude=('code', 'metadata', 'tb_model', 'slice_idx')
+        )
+        spec.expose_inputs(
+            SymmetrizeCalculation,
+            namespace='symmetrize',
+            exclude=('code', 'metadata', 'symmetries', 'tb_model')
         )
 
         spec.input(
@@ -103,11 +120,11 @@ class TightBindingCalculation(WorkChain):
             )
         )
 
-    def setup_tbmodels(self, calc_string):
+    def setup_tbmodels(self, calculation_class):
         """
         Helper function to create the builder for TBmodels calculations.
         """
-        builder = CalculationFactory(calc_string).get_builder()
+        builder = calculation_class.get_builder()
         builder.code = self.inputs.code_tbmodels
         builder.metadata.options = dict(
             resources={'num_machines': 1}, withmpi=False
@@ -123,33 +140,39 @@ class TightBindingCalculation(WorkChain):
         """
         Runs the calculation to parse the Wannier90 output.
         """
-        builder = self.setup_tbmodels('tbmodels.parse')
+        builder = self.setup_tbmodels(calculation_class=ParseCalculation)
         builder.wannier_folder = self.ctx.wannier_calc.outputs.retrieved
         builder.pos_kind = orm.Str('nearest_atom')
         self.report("Parsing Wannier90 output to tbmodels format.")
-        return ToContext(tbmodels_calc=self.submit(builder))
+        return ToContext(
+            tbmodels_calc=self.submit(builder, **self.inputs.parse)
+        )
 
     @check_workchain_step
     def slice(self):
         """
         Runs the calculation that slices (re-orders) the orbitals.
         """
-        builder = self.setup_tbmodels('tbmodels.slice')
+        builder = self.setup_tbmodels(calculation_class=SliceCalculation)
         builder.tb_model = self.tb_model
         builder.slice_idx = self.inputs.slice_idx
         self.report("Slicing tight-binding model.")
-        return ToContext(tbmodels_calc=self.submit(builder))
+        return ToContext(
+            tbmodels_calc=self.submit(builder, **self.inputs.slice)
+        )
 
     @check_workchain_step
     def symmetrize(self):
         """
         Runs the symmetrization calculation.
         """
-        builder = self.setup_tbmodels('tbmodels.symmetrize')
+        builder = self.setup_tbmodels(SymmetrizeCalculation)
         builder.tb_model = self.tb_model
         builder.symmetries = self.inputs.symmetries
         self.report("Symmetrizing tight-binding model.")
-        return ToContext(tbmodels_calc=self.submit(builder))
+        return ToContext(
+            tbmodels_calc=self.submit(builder, **self.inputs.symmetrize)
+        )
 
     @check_workchain_step
     def finalize(self):
