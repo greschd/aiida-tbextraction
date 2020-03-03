@@ -40,17 +40,27 @@ class TightBindingCalculation(WorkChain):
         spec.expose_inputs(
             ParseCalculation,
             namespace='parse',
-            exclude=('code', 'metadata', 'wannier_folder')
+            exclude=('code', 'metadata', 'wannier_folder'),
+            namespace_options={
+                'help': 'Parameters passed to the tbmodels parse calculation.'
+            }
         )
         spec.expose_inputs(
             SliceCalculation,
             namespace='slice',
-            exclude=('code', 'metadata', 'tb_model', 'slice_idx')
+            exclude=('code', 'metadata', 'tb_model', 'slice_idx'),
+            namespace_options={
+                'help': 'Parameters passed to the tbmodels slice calculation.'
+            }
         )
         spec.expose_inputs(
             SymmetrizeCalculation,
             namespace='symmetrize',
-            exclude=('code', 'metadata', 'symmetries', 'tb_model')
+            exclude=('code', 'metadata', 'symmetries', 'tb_model'),
+            namespace_options={
+                'help':
+                'Parameters passed to the tbmodels symmetrize calculation.'
+            }
         )
 
         spec.input(
