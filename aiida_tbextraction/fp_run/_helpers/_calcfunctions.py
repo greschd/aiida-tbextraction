@@ -59,20 +59,25 @@ def reduce_num_bands(wannier_parameters):
     wannier_param_dict = wannier_parameters.get_dict()
     if 'exclude_bands' in wannier_param_dict and 'num_bands' in wannier_param_dict:
         exclude_bands_val = wannier_param_dict.pop('exclude_bands')
-        if not isinstance(exclude_bands_val, str):
+        if isinstance(exclude_bands_val, str):
+            num_excluded = 0
+            for part in exclude_bands_val.split(','):
+                if '-' in part:
+                    lower, upper = [int(x) for x in part.split('-')]
+                    diff = (upper - lower) + 1
+                    assert diff > 0
+                    num_excluded += diff
+                else:
+                    num_excluded += 1
+        elif isinstance(exclude_bands_val, list) and all(
+            isinstance(idx, int) for idx in exclude_bands_val
+        ):
+            num_excluded = len(exclude_bands_val)
+        else:
             raise ValueError(
                 "Invalid value for 'exclude_bands': '{}'".
                 format(exclude_bands_val)
             )
-        num_excluded = 0
-        for part in exclude_bands_val.split(','):
-            if '-' in part:
-                lower, upper = [int(x) for x in part.split('-')]
-                diff = (upper - lower) + 1
-                assert diff > 0
-                num_excluded += diff
-            else:
-                num_excluded += 1
         wannier_param_dict['num_bands'] = int(
             wannier_param_dict['num_bands']
         ) - num_excluded
