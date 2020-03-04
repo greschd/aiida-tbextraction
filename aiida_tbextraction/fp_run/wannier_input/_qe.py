@@ -17,7 +17,7 @@ from aiida_quantumespresso.calculations.pw2wannier90 import Pw2wannier90Calculat
 
 from . import WannierInputBase
 
-from .._helpers._calcfunctions import make_explicit_kpoints
+from .._helpers._calcfunctions import make_explicit_kpoints, reduce_num_bands
 from ..._calcfunctions import merge_nested_dict
 
 __all__ = ("QuantumEspressoWannierInput", )
@@ -112,7 +112,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
             ), wannier_parameters_input
         )
 
-        self.out('wannier_parameters', wannier_parameters)
+        self.out('wannier_parameters', reduce_num_bands(wannier_parameters))
         if 'num_wann' not in wannier_parameters.keys():
             raise InputValidationError(
                 "The target number of Wannier functions 'num_wann' is not specified."

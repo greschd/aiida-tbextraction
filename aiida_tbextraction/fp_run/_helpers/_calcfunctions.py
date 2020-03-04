@@ -51,14 +51,14 @@ def make_explicit_kpoints(kpoints_mesh):
 
 
 @calcfunction
-def reduce_num_wann(wannier_parameters):
+def reduce_num_bands(wannier_parameters):
     """
-    Reduces the ``num_wann`` in a Wannier90 input by the number of bands
+    Reduces the ``num_bands`` in a Wannier90 input by the number of bands
     in its ``exclude_bands`` parameter.
     """
     wannier_param_dict = wannier_parameters.get_dict()
     if 'exclude_bands' in wannier_param_dict and 'num_bands' in wannier_param_dict:
-        exclude_bands_val = wannier_param_dict['exclude_bands']
+        exclude_bands_val = wannier_param_dict.pop('exclude_bands')
         if not isinstance(exclude_bands_val, str):
             raise ValueError(
                 "Invalid value for 'exclude_bands': '{}'".
