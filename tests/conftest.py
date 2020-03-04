@@ -265,10 +265,8 @@ def get_vasp_specific_fp_run_inputs(code_vasp):
     def inner():
         return {
             'potentials': {
-                'In': PotcarData(),
-                'Sb': PotcarData()
-                # 'In': PotcarData.find_one(family='pbe', symbol='In_d'),
-                # 'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
+                'In': PotcarData.find_one(family='pbe', symbol='In_d'),
+                'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
             },
             'parameters':
             orm.Dict(
