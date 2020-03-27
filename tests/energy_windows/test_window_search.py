@@ -14,6 +14,8 @@ import pymatgen
 import numpy as np
 
 from aiida import orm
+from aiida.orm import load_node
+from aiida.engine import run, submit
 from aiida_bands_inspect.io import read
 
 from aiida_tbextraction.energy_windows.window_search import WindowSearch
@@ -79,6 +81,7 @@ def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too
         },
         'withmpi': False
     }
+    builder.parse.calc.distance_ratio_threshold = orm.Float(2.)
 
     builder.symmetries = orm.SinglefileData(
         file=str((test_data_dir / 'symmetries.hdf5').resolve())
@@ -106,8 +109,6 @@ def test_window_search(configure_with_daemon, window_search_builder):  # pylint:
     """
     Run a window_search on the sample wannier input folder.
     """
-    from aiida.engine.launch import run
-
     result = run(window_search_builder)
     assert all(
         key in result for key in ['cost_value', 'tb_model', 'window', 'plot']
@@ -120,9 +121,6 @@ def test_window_search_submit(
     """
     Submit a window_search workflow.
     """
-    from aiida.orm import load_node
-    from aiida.engine.launch import submit
-
     pk = submit(window_search_builder).pk
     wait_for(pk)
     assert_finished(pk)

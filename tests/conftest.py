@@ -41,7 +41,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "qe: mark tests which run with QE")
 
 
-def pytest_runtest_setup(item):  # pylint: disable=missing-docstring
+def pytest_runtest_setup(item):  # pylint: disable=missing-function-docstring
     try:
         qe_marker = item.get_marker("qe")
     except AttributeError:
@@ -116,9 +116,8 @@ def generate_upf_data(test_data_dir):  # pylint: disable=redefined-outer-name
 
     def _generate_upf_data(element):
         """Return `UpfData` node."""
-        from aiida.orm import UpfData
 
-        return UpfData(file=os.path.abspath(pseudo_dir / f'{element}.upf'))
+        return orm.UpfData(file=os.path.abspath(pseudo_dir / f'{element}.upf'))
 
     return _generate_upf_data
 
@@ -381,6 +380,8 @@ def get_fp_tb_inputs(
         inputs['wannier'] = dict(
             code=code_wannier90, metadata=get_metadata_singlecore()
         )
+
+        inputs['parse']['calc']['distance_ratio_threshold'] = orm.Float(1.5)
 
         inputs['symmetries'] = orm.SinglefileData(
             file=str((test_data_dir / 'symmetries.hdf5').resolve())

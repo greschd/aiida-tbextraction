@@ -46,7 +46,7 @@ def _merge(obj1, obj2):  # pylint: disable=unused-argument
 
 
 @dispatch(dict, dict)  # type: ignore
-def _merge(dict1, dict2):  # pylint: disable=missing-docstring
+def _merge(dict1, dict2):  # pylint: disable=missing-function-docstring
     res = {}
     res.update(dict2)
     res.update(dict1)

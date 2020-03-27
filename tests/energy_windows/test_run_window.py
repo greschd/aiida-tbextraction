@@ -97,6 +97,7 @@ def run_window_builder(test_data_dir, code_wannier90):
             },
             'withmpi': False
         }
+        builder.parse.calc.distance_ratio_threshold = orm.Float(2.)
         if symmetries:
             builder.symmetries = orm.SinglefileData(
                 file=str(test_data_dir / 'symmetries.hdf5')

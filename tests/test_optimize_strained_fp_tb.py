@@ -8,6 +8,11 @@ Tests the workflow that optimizes a DFT-based tight-binding model for different 
 
 import pytest
 
+from aiida import orm
+from aiida.engine import run
+
+from aiida_tbextraction.optimize_strained_fp_tb import OptimizeStrainedFirstPrinciplesTightBinding
+
 
 @pytest.mark.qe
 def test_strained_fp_tb(
@@ -17,9 +22,6 @@ def test_strained_fp_tb(
     """
     Run the DFT tight-binding optimization workflow with strain on an InSb sample for three strain values.
     """
-    from aiida.engine import run
-    from aiida import orm
-    from aiida_tbextraction.optimize_strained_fp_tb import OptimizeStrainedFirstPrinciplesTightBinding
     inputs = get_optimize_fp_tb_input()
 
     inputs['strain_kind'] = orm.Str('three_five.Biaxial001')
