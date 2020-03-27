@@ -83,7 +83,9 @@ def reduce_num_bands(wannier_parameters):
         ) - num_excluded
         return orm.Dict(dict=wannier_param_dict)
     else:
-        return wannier_parameters
+        # The node needs to be cloned, because the calcfunction can not
+        # return an previously-created node.
+        return wannier_parameters.clone()
 
 
 @calcfunction
