@@ -28,7 +28,7 @@
     "aiida-core>=1.0.0<2",
     "aiida-wannier90>=2.0.0a1",
     "aiida-bands-inspect>=0.3.0",
-    "aiida-tbmodels>=0.3.0",
+    "aiida-tbmodels>=0.4.0rc1",
     "aiida-optimize>=0.3.1",
     "aiida-tools>=0.3.2",
     "numpy",

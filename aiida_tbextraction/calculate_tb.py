@@ -12,7 +12,7 @@ from aiida import orm
 from aiida.engine import WorkChain, if_, ToContext
 
 from aiida_tools import check_workchain_step
-from aiida_tbmodels.calculations.parse import ParseCalculation
+from aiida_tbmodels.workflows.parse import ParseWorkChain
 from aiida_tbmodels.calculations.slice import SliceCalculation
 from aiida_tbmodels.calculations.symmetrize import SymmetrizeCalculation
 from aiida_wannier90.calculations import Wannier90Calculation
@@ -38,50 +38,46 @@ class TightBindingCalculation(WorkChain):
             Wannier90Calculation, namespace='wannier', exclude=('structure', )
         )
         spec.expose_inputs(
-            ParseCalculation,
+            ParseWorkChain,
             namespace='parse',
-            exclude=('code', 'metadata', 'wannier_folder'),
+            exclude=('calc.code', 'calc.wannier_folder'),
             namespace_options={
                 'help': 'Parameters passed to the tbmodels parse calculation.'
             }
         )
+        # Change the default for 'pos_kind' to 'nearest_atom'.
+        spec.inputs['parse']['calc'][
+            'pos_kind'].default = lambda: orm.Str('nearest_atom')
+
         spec.expose_inputs(
             SliceCalculation,
             namespace='slice',
-            exclude=('code', 'metadata', 'tb_model', 'slice_idx'),
+            exclude=('code', 'tb_model', 'slice_idx'),
             namespace_options={
                 'help': 'Parameters passed to the tbmodels slice calculation.'
             }
         )
+        spec.expose_inputs(SliceCalculation, include=('slice_idx', ))
+        spec.inputs['slice_idx'].required = False
+
         spec.expose_inputs(
             SymmetrizeCalculation,
             namespace='symmetrize',
-            exclude=('code', 'metadata', 'symmetries', 'tb_model'),
+            exclude=('code', 'symmetries', 'tb_model'),
             namespace_options={
                 'help':
                 'Parameters passed to the tbmodels symmetrize calculation.'
             }
         )
+        spec.expose_inputs(SymmetrizeCalculation, include=('symmetries', ))
+        spec.inputs['symmetries'].required = False
 
         spec.input(
             'code_tbmodels',
             valid_type=orm.Code,
             help='Code that runs the TBmodels CLI.'
         )
-        spec.input(
-            'slice_idx',
-            valid_type=orm.List,
-            required=False,
-            help=
-            'Indices of the orbitals which are sliced (selected) from the tight-binding model. This can be used to either reduce the number of orbitals, or re-order the orbitals.'
-        )
-        spec.input(
-            'symmetries',
-            valid_type=orm.SinglefileData,
-            required=False,
-            help=
-            'File containing the symmetries which will be applied to the tight-binding model. The file must be in ``symmetry-representation`` HDF5 format.'
-        )
+
         spec.output(
             'tb_model',
             valid_type=orm.SinglefileData,
@@ -130,17 +126,6 @@ class TightBindingCalculation(WorkChain):
             )
         )
 
-    def setup_tbmodels(self, calculation_class):
-        """
-        Helper function to create the builder for TBmodels calculations.
-        """
-        builder = calculation_class.get_builder()
-        builder.code = self.inputs.code_tbmodels
-        builder.metadata.options = dict(
-            resources={'num_machines': 1}, withmpi=False
-        )
-        return builder
-
     @property
     def tb_model(self):
         return self.ctx.tbmodels_calc.outputs.tb_model
@@ -150,38 +135,40 @@ class TightBindingCalculation(WorkChain):
         """
         Runs the calculation to parse the Wannier90 output.
         """
-        builder = self.setup_tbmodels(calculation_class=ParseCalculation)
-        builder.wannier_folder = self.ctx.wannier_calc.outputs.retrieved
-        builder.pos_kind = orm.Str('nearest_atom')
+        inputs = self.exposed_inputs(ParseWorkChain, namespace='parse')
+
+        inputs['calc'].setdefault('code', self.inputs.code_tbmodels)
+        inputs['calc']['wannier_folder'
+                       ] = self.ctx.wannier_calc.outputs.retrieved
+
         self.report("Parsing Wannier90 output to tbmodels format.")
-        return ToContext(
-            tbmodels_calc=self.submit(builder, **self.inputs.parse)
-        )
+        return ToContext(tbmodels_calc=self.submit(ParseWorkChain, **inputs))
 
     @check_workchain_step
     def slice(self):
         """
         Runs the calculation that slices (re-orders) the orbitals.
         """
-        builder = self.setup_tbmodels(calculation_class=SliceCalculation)
-        builder.tb_model = self.tb_model
-        builder.slice_idx = self.inputs.slice_idx
+        inputs = self.exposed_inputs(SliceCalculation, namespace='slice')
+        inputs['tb_model'] = self.tb_model
+        inputs.setdefault('code', self.inputs.code_tbmodels)
         self.report("Slicing tight-binding model.")
-        return ToContext(
-            tbmodels_calc=self.submit(builder, **self.inputs.slice)
-        )
+        return ToContext(tbmodels_calc=self.submit(SliceCalculation, **inputs))
 
     @check_workchain_step
     def symmetrize(self):
         """
         Runs the symmetrization calculation.
         """
-        builder = self.setup_tbmodels(SymmetrizeCalculation)
-        builder.tb_model = self.tb_model
-        builder.symmetries = self.inputs.symmetries
+
+        inputs = self.exposed_inputs(
+            SymmetrizeCalculation, namespace='symmetrize'
+        )
+        inputs.setdefault('code', self.inputs.code_tbmodels)
+        inputs['tb_model'] = self.tb_model
         self.report("Symmetrizing tight-binding model.")
         return ToContext(
-            tbmodels_calc=self.submit(builder, **self.inputs.symmetrize)
+            tbmodels_calc=self.submit(SymmetrizeCalculation, **inputs)
         )
 
     @check_workchain_step

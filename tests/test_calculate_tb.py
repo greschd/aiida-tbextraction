@@ -87,6 +87,9 @@ def test_tbextraction(
         'withmpi': False
     }
     if symmetries:
+        # This is needed because otherwise the symmetrization doesn't work
+        builder.parse.calc.distance_ratio_threshold = orm.Float(2.)
+
         builder.symmetries = orm.SinglefileData(
             file=str(test_data_dir / 'symmetries.hdf5')
         )
