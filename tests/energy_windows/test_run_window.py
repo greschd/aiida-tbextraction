@@ -22,7 +22,7 @@ from aiida_tbextraction.energy_windows.run_window import RunWindow
 
 
 @pytest.fixture
-def run_window_builder(test_data_dir, code_wannier90):
+def run_window_builder(test_data_dir, code_wannier90, insb_structure):
     """
     Returns a function that creates the input for RunWindow tests.
     """
@@ -41,6 +41,7 @@ def run_window_builder(test_data_dir, code_wannier90):
         builder.wannier.code = code_wannier90
         builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
         builder.model_evaluation_workflow = BandDifferenceModelEvaluation
+        builder.reference_structure = insb_structure
         builder.reference_bands = read(test_data_dir / 'bands.hdf5')
         builder.model_evaluation = {
             'code_bands_inspect': orm.Code.get_from_string('bands_inspect'),

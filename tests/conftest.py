@@ -381,7 +381,11 @@ def get_fp_tb_inputs(
             code=code_wannier90, metadata=get_metadata_singlecore()
         )
 
-        inputs['parse']['calc']['distance_ratio_threshold'] = orm.Float(1.5)
+        inputs['parse'] = {
+            'calc': {
+                'distance_ratio_threshold': orm.Float(1.5)
+            }
+        }
 
         inputs['symmetries'] = orm.SinglefileData(
             file=str((test_data_dir / 'symmetries.hdf5').resolve())

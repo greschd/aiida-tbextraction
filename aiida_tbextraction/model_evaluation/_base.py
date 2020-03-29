@@ -14,7 +14,9 @@ __all__ = ('ModelEvaluationBase', )
 
 class ModelEvaluationBase(WorkChain):
     """
-    Base class for evaluating a tight-binding model. The workflow returns a cost measure, which should be minimized to get an optimal model.
+    Base class for evaluating a tight-binding model. The workflow
+    returns a cost measure, which should be minimized to get an optimal
+    model.
     """
     @classmethod
     def define(cls, spec):
@@ -28,6 +30,11 @@ class ModelEvaluationBase(WorkChain):
             'reference_bands',
             valid_type=orm.BandsData,
             help='Bandstructure of the reference model.'
+        )
+        spec.input(
+            'reference_structure',
+            valid_type=orm.StructureData,
+            help='Reference for the crystal structure.'
         )
         spec.input(
             'code_tbmodels',

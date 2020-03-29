@@ -23,7 +23,7 @@ from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 
 @pytest.fixture
-def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too-many-locals,useless-suppression
+def window_search_builder(test_data_dir, code_wannier90, insb_structure):  # pylint: disable=too-many-locals,useless-suppression
     """
     Sets up the process builder for window_search tests, and adds the inputs.
     """
@@ -47,6 +47,7 @@ def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too
         'code_bands_inspect': orm.Code.get_from_string('bands_inspect'),
     }
     builder.reference_bands = read(test_data_dir / 'bands.hdf5')
+    builder.reference_structure = insb_structure
 
     initial_window = orm.List()
     initial_window.extend([-4.5, -4, 6.5, 16])

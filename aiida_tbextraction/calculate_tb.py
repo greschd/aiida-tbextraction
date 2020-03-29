@@ -42,7 +42,7 @@ class TightBindingCalculation(WorkChain):
             namespace='parse',
             exclude=('calc.code', 'calc.wannier_folder'),
             namespace_options={
-                'help': 'Parameters passed to the tbmodels parse calculation.'
+                'help': 'Parameters passed to the tbmodels parse workflow.'
             }
         )
         # Change the default for 'pos_kind' to 'nearest_atom'.

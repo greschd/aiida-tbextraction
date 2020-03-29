@@ -8,5 +8,9 @@ Contains workflows for evaluating a tight-binding model.
 
 from ._base import ModelEvaluationBase
 from ._band_difference import BandDifferenceModelEvaluation
+from ._combined_evaluation import CombinedEvaluation
 
-__all__ = ["ModelEvaluationBase", "BandDifferenceModelEvaluation"]
+__all__ = (
+    "ModelEvaluationBase", "BandDifferenceModelEvaluation",
+    "CombinedEvaluation"
+)
