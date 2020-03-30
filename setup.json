@@ -68,6 +68,7 @@
     ]
   },
   "entry_points": {
+    "aiida.calculations": [],
     "aiida.workflows": [
       "tbextraction.fp_run.base = aiida_tbextraction.fp_run:FirstPrinciplesRunBase",
       "tbextraction.fp_run.reference_bands.base = aiida_tbextraction.fp_run.reference_bands:ReferenceBandsBase",
@@ -75,6 +76,8 @@
       "tbextraction.calculate_tb = aiida_tbextraction.calculate_tb:TightBindingCalculation",
       "tbextraction.model_evaluation.base = aiida_tbextraction.model_evaluation:ModelEvaluationBase",
       "tbextraction.model_evaluation.band_difference = aiida_tbextraction.model_evaluation:BandDifferenceModelEvaluation",
+      "tbextraction.model_evaluation.combined = aiida_tbextraction.model_evaluation:CombinedEvaluation",
+      "tbextraction.model_evaluation.maximum_orbital_distance = aiida_tbextraction.model_evaluation:MaximumOrbitalDistanceEvaluation",
       "tbextraction.energy_windows.run_window = aiida_tbextraction.energy_windows.run_window:RunWindow",
       "tbextraction.energy_windows.window_search = aiida_tbextraction.energy_windows.window_search:WindowSearch",
       "tbextraction.optimize_fp_tb = aiida_tbextraction.optimize_fp_tb:OptimizeFirstPrinciplesTightBinding",
