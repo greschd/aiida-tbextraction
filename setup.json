@@ -32,14 +32,15 @@
     "aiida-optimize>=0.3.1",
     "aiida-tools>=0.3.2",
     "numpy",
-    "multipledispatch"
+    "multipledispatch",
+    "tbmodels",
+    "pymatgen"
   ],
   "extras_require": {
     "testing": [
       "pytest>=3.6",
       "pytest-cov",
       "aiida-pytest",
-      "pymatgen",
       "pytest-datadir",
       "aiida-testing"
     ],

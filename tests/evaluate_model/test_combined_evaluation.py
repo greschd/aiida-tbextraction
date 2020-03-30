@@ -6,7 +6,6 @@
 Tests for the band difference model evaluation workflow.
 """
 
-import pymatgen
 import numpy as np
 
 from aiida import orm
@@ -18,7 +17,8 @@ from aiida_bands_inspect.io import read
 
 def test_combined_evaluation(
     configure_with_daemon,  # pylint: disable=unused-argument
-    shared_datadir
+    shared_datadir,
+    silicon_structure
 ):
     """
     Run the combined evaluation workflow by using the band difference
@@ -27,11 +27,7 @@ def test_combined_evaluation(
     builder = CombinedEvaluation.get_builder()
     builder.code_tbmodels = orm.Code.get(label='tbmodels')
 
-    structure = orm.StructureData()
-    structure.set_pymatgen(
-        pymatgen.Structure.from_file(shared_datadir / 'silicon' / 'si.cif')
-    )
-    builder.reference_structure = structure
+    builder.reference_structure = silicon_structure
 
     builder.reference_bands = read(shared_datadir / 'silicon' / 'bands.hdf5')
 

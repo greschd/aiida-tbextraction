@@ -8,6 +8,9 @@ Test for the workflow that optimizes DFT-based tight-binding models.
 
 import pytest
 
+from aiida.engine import run
+from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
+
 
 @pytest.mark.qe
 def test_fp_tb(
@@ -17,9 +20,6 @@ def test_fp_tb(
     """
     Runs the DFT tight-binding optimization workflow on an InSb sample.
     """
-    from aiida.engine import run
-    from aiida_tbextraction.optimize_fp_tb import OptimizeFirstPrinciplesTightBinding
-
     result = run(
         OptimizeFirstPrinciplesTightBinding, **get_optimize_fp_tb_input()
     )

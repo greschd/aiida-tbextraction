@@ -7,7 +7,6 @@ Tests for the band difference model evaluation workflow.
 """
 
 import pytest
-import pymatgen
 import numpy as np
 
 from aiida import orm
@@ -18,7 +17,7 @@ from aiida_bands_inspect.io import read
 
 
 @pytest.fixture
-def band_difference_builder(configure, shared_datadir):  # pylint: disable=unused-argument
+def band_difference_builder(configure, shared_datadir, silicon_structure):  # pylint: disable=unused-argument
     """
     Create inputs for the band difference workflow.
     """
@@ -26,14 +25,10 @@ def band_difference_builder(configure, shared_datadir):  # pylint: disable=unuse
     builder = BandDifferenceModelEvaluation.get_builder()
     builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
     builder.code_bands_inspect = orm.Code.get_from_string('bands_inspect')
-    with (shared_datadir / 'silicon/model.hdf5').open('rb') as model_file:
+    with (shared_datadir / 'silicon' / 'model.hdf5').open('rb') as model_file:
         builder.tb_model = orm.SinglefileData(file=model_file)
     builder.reference_bands = read(shared_datadir / 'silicon/bands.hdf5')
-    structure = orm.StructureData()
-    structure.set_pymatgen(
-        pymatgen.Structure.from_file(shared_datadir / 'silicon' / 'si.cif')
-    )
-    builder.reference_structure = structure
+    builder.reference_structure = silicon_structure
 
     return builder
 

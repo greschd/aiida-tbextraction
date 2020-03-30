@@ -46,7 +46,7 @@ class CombinedEvaluation(ModelEvaluationBase):
         spec.inputs.validator = cls._validate_inputs
 
         spec.exit_code(
-            300, 'SUBPROCESS_FAILED', help="An evaluation process failed."
+            300, 'SUBPROCESS_FAILED', message="An evaluation process failed."
         )
 
         spec.output_namespace(

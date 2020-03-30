@@ -9,8 +9,9 @@ Contains workflows for evaluating a tight-binding model.
 from ._base import ModelEvaluationBase
 from ._band_difference import BandDifferenceModelEvaluation
 from ._combined_evaluation import CombinedEvaluation
+from ._pos_distance import MaximumOrbitalDistance
 
 __all__ = (
     "ModelEvaluationBase", "BandDifferenceModelEvaluation",
-    "CombinedEvaluation"
+    "CombinedEvaluation", "MaximumOrbitalDistance"
 )
