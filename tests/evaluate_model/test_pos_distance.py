@@ -12,7 +12,7 @@ import numpy as np
 from aiida import orm
 from aiida.engine.launch import run_get_node
 
-from aiida_tbextraction.model_evaluation import MaximumOrbitalDistance
+from aiida_tbextraction.model_evaluation import MaximumOrbitalDistanceEvaluation
 from aiida_bands_inspect.io import read
 
 
@@ -25,7 +25,7 @@ def test_pos_distance_evaluation(
     Run the model evaluation that gets the maximum distance between
     model orbitals and crystal positions.
     """
-    builder = MaximumOrbitalDistance.get_builder()
+    builder = MaximumOrbitalDistanceEvaluation.get_builder()
     builder.code_tbmodels = orm.Code.get(label='tbmodels')
 
     builder.reference_structure = silicon_structure
@@ -47,7 +47,7 @@ def test_pos_distance_uc_not_matching(
     Test that passing a reference structure and tight-binding model
     which have non-matching unit cells raises the correct exit code.
     """
-    builder = MaximumOrbitalDistance.get_builder()
+    builder = MaximumOrbitalDistanceEvaluation.get_builder()
     builder.code_tbmodels = orm.Code.get(label='tbmodels')
 
     structure = orm.StructureData()

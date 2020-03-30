@@ -43,7 +43,7 @@ def get_max_distance(tb_model, structure):
     return orm.Float(max_dist)
 
 
-class MaximumOrbitalDistance(ModelEvaluationBase):
+class MaximumOrbitalDistanceEvaluation(ModelEvaluationBase):
     """
     Evaluate the maximum distance between model orbitals and crystal
     atoms.
