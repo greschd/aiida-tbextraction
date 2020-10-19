@@ -13,7 +13,7 @@ from aiida.engine import ToContext
 
 from aiida_tools import check_workchain_step
 
-from aiida_quantumespresso.calculations.pw import PwCalculation
+from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
 
 from .._calcfunctions import merge_nested_dict
 from .wannier_input import QuantumEspressoWannierInput
@@ -37,7 +37,7 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         super().define(spec)
 
         spec.expose_inputs(
-            PwCalculation, namespace='scf', exclude=['structure', 'kpoints']
+            PwBaseWorkChain, namespace='scf', exclude=['structure', 'kpoints']
         )
         spec.expose_inputs(
             QuantumEspressoReferenceBands, include=['structure', 'kpoints']
@@ -82,16 +82,15 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         """
         self.report('Launching SCF calculation.')
 
-        inputs = self.exposed_inputs(PwCalculation, namespace='scf')
-        inputs['parameters'] = merge_nested_dict(
+        inputs = self.exposed_inputs(PwBaseWorkChain, namespace='scf')
+        inputs['pw']['parameters'] = merge_nested_dict(
             orm.Dict(dict={'CONTROL': {
                 'calculation': 'scf'
-            }}), inputs.get('parameters', orm.Dict())
+            }}), inputs['pw'].get('parameters', orm.Dict())
         )
         return ToContext(
             scf=self.submit(
-                PwCalculation,
-                structure=self.inputs.structure,
+                PwBaseWorkChain,
                 kpoints=self.inputs.kpoints_mesh,
                 **inputs
             )
@@ -106,7 +105,7 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         bands_inputs = self.exposed_inputs(
             QuantumEspressoReferenceBands, namespace='bands'
         )
-        bands_inputs['pw']['parent_folder'
+        bands_inputs['bands']['pw']['parent_folder'
                            ] = self.ctx.scf.outputs.remote_folder
         bands_run = self.submit(QuantumEspressoReferenceBands, **bands_inputs)
 
@@ -114,7 +113,7 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         wannier_inputs = self.exposed_inputs(
             QuantumEspressoWannierInput, namespace='to_wannier'
         )
-        wannier_inputs['nscf']['parent_folder'
+        wannier_inputs['nscf']['pw']['parent_folder'
                                ] = self.ctx.scf.outputs.remote_folder
 
         if 'wannier_parameters' in self.inputs:
