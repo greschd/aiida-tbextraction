@@ -17,8 +17,6 @@ import numpy as np
 from ase.io.vasp import read_vasp
 from aiida import orm
 
-from aiida_vasp.data.potcar import PotcarData
-
 from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
@@ -49,6 +47,11 @@ def pytest_runtest_setup(item):  # pylint: disable=missing-function-docstring
     if qe_marker is not None:
         if item.config.getoption("--skip-qe"):
             pytest.skip("Test runs only with QE.")
+
+
+@pytest.fixture(scope='session', autouse=True)
+def set_localhost_interval(configure):
+    orm.Computer.get(label='localhost').set_minimum_job_poll_interval(0.)
 
 
 @pytest.fixture(scope='session')
@@ -261,6 +264,8 @@ def get_vasp_specific_fp_run_inputs(code_vasp):
     """
     Creates the InSb inputs for the VASP fp_run workflow.
     """
+    from aiida_vasp.data.potcar import PotcarData  # pylint: disable=import-outside-toplevel
+
     def inner():
         return {
             'potentials': {

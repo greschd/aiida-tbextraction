@@ -36,7 +36,9 @@ class QuantumEspressoReferenceBands(ReferenceBandsBase):
         # cannot put everything at the top-level because 'metadata'
         # would then be interpreted at the workchain level
         spec.expose_inputs(
-            PwBaseWorkChain, exclude=['structure', 'kpoints'], namespace='bands'
+            PwBaseWorkChain,
+            exclude=['structure', 'kpoints'],
+            namespace='bands'
         )
 
         spec.outline(cls.run_calc, cls.get_bands)
