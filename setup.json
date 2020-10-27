@@ -42,7 +42,8 @@
       "pytest-cov",
       "aiida-pytest",
       "pytest-datadir",
-      "aiida-testing"
+      "aiida-testing",
+      "ase"
     ],
     "docs": [
       "sphinx",
