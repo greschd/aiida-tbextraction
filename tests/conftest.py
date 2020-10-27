@@ -26,6 +26,11 @@ pytest_plugins = [  # pylint: disable=invalid-name
 ]
 
 
+@pytest.fixture(scope='session', autouse=True)
+def set_localhost_interval(configure):
+    orm.Computer.get(label='localhost').set_minimum_job_poll_interval(0.)
+
+
 def pytest_addoption(parser):
     parser.addoption(
         '--skip-qe',
@@ -48,10 +53,6 @@ def pytest_runtest_setup(item):  # pylint: disable=missing-function-docstring
         if item.config.getoption("--skip-qe"):
             pytest.skip("Test runs only with QE.")
 
-
-@pytest.fixture(scope='session', autouse=True)
-def set_localhost_interval(configure):
-    orm.Computer.get(label='localhost').set_minimum_job_poll_interval(0.)
 
 
 @pytest.fixture(scope='session')
@@ -179,11 +180,15 @@ def get_repeated_pw_input(
     the top-level workchain.
     """
     def _get_repeated_pw_input():
+        options = get_metadata_singlecore()
         return {
-            'pseudos': insb_pseudos_qe,
-            'parameters': insb_common_qe_parameters,
-            'metadata': get_metadata_singlecore(),
-            'code': code_pw
+            'pw': {
+                'pseudos': insb_pseudos_qe,
+                'structure': insb_structure,
+                'parameters': insb_common_qe_parameters,
+                'metadata': options,
+                'code': code_pw
+            }
         }
 
     return _get_repeated_pw_input
@@ -241,7 +246,9 @@ def get_qe_specific_fp_run_inputs(
         return {
             'scf': get_repeated_pw_input(),
             'bands': {
-                'pw': get_repeated_pw_input()
+                'bands': {
+                    'pw': get_repeated_pw_input()['pw']
+                }
             },
             'to_wannier': {
                 'nscf': get_repeated_pw_input(),

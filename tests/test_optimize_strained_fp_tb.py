@@ -33,10 +33,8 @@ def test_strained_fp_tb(
     inputs['symmetry_repr_code'] = orm.Code.get_from_string('symmetry_repr')
 
     result = run(OptimizeStrainedFirstPrinciplesTightBinding, **inputs)
-    print(result)
     for value in strain_list:
         suffix = '_{}'.format(value).replace('.', '_dot_').replace('-', 'm_')
-        assert all(
-            key + suffix in result
-            for key in ['cost_value', 'tb_model', 'window']
-        )
+        for key in ['cost_value', 'tb_model', 'window']:
+            key_suffix = key + suffix
+            assert key_suffix in result
