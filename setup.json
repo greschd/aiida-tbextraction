@@ -42,7 +42,7 @@
       "pytest-cov",
       "aiida-pytest",
       "pytest-datadir",
-      "aiida-testing",
+      "aiida-testing @ git+https://github.com/aiidateam/aiida-testing.git@develop",
       "ase"
     ],
     "docs": [
