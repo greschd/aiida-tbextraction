@@ -33,8 +33,7 @@ def run_window_builder(test_data_dir, code_wannier90, insb_structure):
         input_folder_path = test_data_dir / 'wannier_input_folder'
         for filename in os.listdir(input_folder_path):
             input_folder.put_object_from_file(
-                path=str((input_folder_path / filename).resolve()),
-                key=filename
+                str((input_folder_path / filename).resolve()), filename
             )
         builder.wannier.local_input_folder = input_folder
 

@@ -38,11 +38,10 @@ class QuantumEspressoWannierInput(WannierInputBase):
             namespace='wannier'
         )
 
-        spec.expose_inputs(PwBaseWorkChain, include=['structure'])
         spec.expose_inputs(
             PwBaseWorkChain,
             namespace='nscf',
-            exclude=['structure', 'kpoints']
+            exclude=['pw.structure', 'kpoints']
         )
 
         spec.expose_inputs(
@@ -79,6 +78,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
                 }
             ), nscf_inputs['pw'].get('parameters', orm.Dict())
         )
+        nscf_inputs['pw']['structure'] = self.inputs.structure
         return ToContext(
             nscf=self.submit(
                 PwBaseWorkChain,

@@ -1,5 +1,0 @@
-mock_code:
-  wannier90: /home/a-dogres/codes/wannier90-3.0.0/wannier90.x
-  pw: /home/a-dogres/codes/qe-6.4.1/bin/pw.x
-  pw2wannier90: /home/a-dogres/codes/qe-6.4.1/bin/pw2wannier90.x
-  vasp: /bin/true

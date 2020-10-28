@@ -1,0 +1,5 @@
+mock_code:
+  wannier90: <PATH TO wannier90.x>
+  pw: <PATH TO pw.x>
+  pw2wannier90: <PATH TO pw2wannier90.x>
+  vasp: <PATH TO VASP>

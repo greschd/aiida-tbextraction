@@ -37,7 +37,9 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
         super().define(spec)
 
         spec.expose_inputs(
-            PwBaseWorkChain, namespace='scf', exclude=['structure', 'kpoints']
+            PwBaseWorkChain,
+            namespace='scf',
+            exclude=['pw.structure', 'kpoints']
         )
         spec.expose_inputs(
             QuantumEspressoReferenceBands, include=['structure', 'kpoints']
@@ -88,6 +90,7 @@ class QuantumEspressoFirstPrinciplesRun(FirstPrinciplesRunBase):
                 'calculation': 'scf'
             }}), inputs['pw'].get('parameters', orm.Dict())
         )
+        inputs['pw']['structure'] = self.inputs.structure
         return ToContext(
             scf=self.submit(
                 PwBaseWorkChain, kpoints=self.inputs.kpoints_mesh, **inputs

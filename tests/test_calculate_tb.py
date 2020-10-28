@@ -34,8 +34,7 @@ def test_tbextraction(
     wannier_input_folder_path = test_data_dir / 'wannier_input_folder'
     for filename in os.listdir(wannier_input_folder_path):
         wannier_input_folder.put_object_from_file(
-            path=str((wannier_input_folder_path / filename).resolve()),
-            key=filename
+            str((wannier_input_folder_path / filename).resolve()), filename
         )
     builder.wannier.local_input_folder = wannier_input_folder
 
