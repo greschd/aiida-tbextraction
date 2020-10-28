@@ -1,5 +1,5 @@
 mock_code:
-  wannier90: /home/dmarchand/Install/qe-6.6/bin/wannier90.x 
-  pw: /home/dmarchand/Install/qe-6.6/bin/pw.x
-  pw2wannier90: /home/dmarchand/Install/qe-6.6/bin/pw2wannier90.x
-  vasp: /bin/true
+  wannier90: <PATH TO wannier90.x>
+  pw: <PATH TO pw.x>
+  pw2wannier90: <PATH TO pw2wannier90.x>
+  vasp: <PATH TO VASP>

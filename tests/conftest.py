@@ -31,11 +31,16 @@ def set_localhost_interval(configure):
     orm.Computer.get(label='localhost').set_minimum_job_poll_interval(0.)
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser):  # pylint: disable=missing-function-docstring
     parser.addoption(
         '--skip-qe',
         action='store_true',
         help='Skip tests which require Quantum ESPRESSO.'
+    )
+    parser.addoption(
+        '--skip-vasp',
+        action='store_true',
+        help='Skip tests which require VASP.'
     )
 
 
@@ -47,12 +52,16 @@ def pytest_configure(config):
 def pytest_runtest_setup(item):  # pylint: disable=missing-function-docstring
     try:
         qe_marker = item.get_marker("qe")
+        vasp_marker = item.get_marker("vasp")
     except AttributeError:
         qe_marker = item.get_closest_marker('qe')
+        vasp_marker = item.get_closest_marker('vasp')
     if qe_marker is not None:
         if item.config.getoption("--skip-qe"):
-            pytest.skip("Test runs only with QE.")
-
+            pytest.skip("Test needs Quantum ESPRESSO.")
+    if vasp_marker is not None:
+        if item.config.getoption("--skip-vasp"):
+            pytest.skip("Test needs VASP.")
 
 
 @pytest.fixture(scope='session')
@@ -184,7 +193,6 @@ def get_repeated_pw_input(
         return {
             'pw': {
                 'pseudos': insb_pseudos_qe,
-                'structure': insb_structure,
                 'parameters': insb_common_qe_parameters,
                 'metadata': options,
                 'code': code_pw
@@ -246,9 +254,7 @@ def get_qe_specific_fp_run_inputs(
         return {
             'scf': get_repeated_pw_input(),
             'bands': {
-                'bands': {
-                    'pw': get_repeated_pw_input()['pw']
-                }
+                'bands': get_repeated_pw_input()
             },
             'to_wannier': {
                 'nscf': get_repeated_pw_input(),

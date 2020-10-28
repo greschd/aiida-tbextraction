@@ -35,6 +35,7 @@ def test_strained_fp_tb(
     result = run(OptimizeStrainedFirstPrinciplesTightBinding, **inputs)
     for value in strain_list:
         suffix = '_{}'.format(value).replace('.', '_dot_').replace('-', 'm_')
+        suffix_old = '_{}'.format(value).replace('.',
+                                                 '_dot_').replace('-', '_m_')
         for key in ['cost_value', 'tb_model', 'window']:
-            key_suffix = key + suffix
-            assert key_suffix in result
+            assert (key + suffix in result) or (key + suffix_old in result)
