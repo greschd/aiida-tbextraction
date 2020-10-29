@@ -17,7 +17,6 @@ import numpy as np
 from ase.io.vasp import read_vasp
 from aiida import orm
 
-from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 pytest_plugins = [  # pylint: disable=invalid-name
@@ -47,6 +46,7 @@ def pytest_addoption(parser):  # pylint: disable=missing-function-docstring
 def pytest_configure(config):
     # register additional marker
     config.addinivalue_line("markers", "qe: mark tests which run with QE")
+    config.addinivalue_line("markers", "vasp: mark tests which run with VASP")
 
 
 def pytest_runtest_setup(item):  # pylint: disable=missing-function-docstring
@@ -371,6 +371,8 @@ def get_fp_tb_inputs(
     Returns the input for DFT-based tight-binding workflows (without optimization).
     """
     def inner():
+        from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun  # pylint: disable=import-outside-toplevel
+
         inputs = get_top_level_insb_inputs()
 
         inputs['fp_run_workflow'] = QuantumEspressoFirstPrinciplesRun

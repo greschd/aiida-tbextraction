@@ -6,17 +6,20 @@
 Tests for running the DFT calculations needed as input for the tight-binding calculation.
 """
 
+# pylint: disable=import-outside-toplevel
+
 import pytest
 
 from aiida.engine.launch import run_get_node
-from aiida_quantumespresso.calculations.pw import PwCalculation
-
-from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 
 
 @pytest.mark.qe
 def test_qe_fp_run(configure_with_daemon, assert_finished, get_fp_run_inputs):  # pylint: disable=unused-argument
     """Calculates the Wannier90 inputs and reference bands from QE."""
+
+    from aiida_quantumespresso.calculations.pw import PwCalculation
+
+    from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 
     result, node = run_get_node(
         QuantumEspressoFirstPrinciplesRun, **get_fp_run_inputs()

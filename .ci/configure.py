@@ -9,17 +9,19 @@ Usage: python configure.py travis_data_folder config_input_file config_output_fi
 
 import sys
 import subprocess
-from os.path import join
+from os.path import join, abspath
 
 
 def get_path(codename):
-    return subprocess.check_output('which {}'.format(codename),
-                                   shell=True).decode().strip()
+    return abspath(
+        subprocess.check_output('which {}'.format(codename),
+                                shell=True).decode().strip()
+    )
 
 
 TBMODELS_PATH = get_path('tbmodels')
 BANDS_INSPECT_PATH = get_path('bands-inspect')
-WANNIER_PATH = join(sys.argv[1], 'wannier90/wannier90.x')
+WANNIER_PATH = abspath(join(sys.argv[1], 'wannier90/wannier90.x'))
 
 with open(sys.argv[2], 'r') as f:
     RES = f.read().format(

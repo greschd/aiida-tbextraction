@@ -21,10 +21,7 @@ EXTRAS_REQUIRE = SETUP_KWARGS['extras_require']
 EXTRAS_REQUIRE['docs'] += EXTRAS_REQUIRE['qe'] + EXTRAS_REQUIRE[
     'vasp'] + EXTRAS_REQUIRE['strain']
 # define a "full" development install
-EXTRAS_REQUIRE['dev'] = (
-    EXTRAS_REQUIRE['testing'] + EXTRAS_REQUIRE['docs'] +
-    EXTRAS_REQUIRE['dev_precommit']
-)
+EXTRAS_REQUIRE['dev'] += (EXTRAS_REQUIRE['testing'] + EXTRAS_REQUIRE['docs'])
 
 if __name__ == '__main__':
     setup(

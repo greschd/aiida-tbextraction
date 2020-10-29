@@ -14,7 +14,7 @@ from aiida.engine import ToContext
 from aiida_tools import check_workchain_step
 from aiida_vasp.calcs.vasp import VaspCalculation
 
-from . import ReferenceBandsBase
+from ._base import ReferenceBandsBase
 from .._helpers._calcfunctions import (
     flatten_bands, crop_bands, merge_kpoints
 )

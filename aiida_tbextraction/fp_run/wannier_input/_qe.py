@@ -15,7 +15,7 @@ from aiida_wannier90.calculations import Wannier90Calculation
 from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
 from aiida_quantumespresso.calculations.pw2wannier90 import Pw2wannier90Calculation
 
-from . import WannierInputBase
+from ._base import WannierInputBase
 
 from .._helpers._calcfunctions import make_explicit_kpoints, reduce_num_bands
 from ..._calcfunctions import merge_nested_dict

@@ -50,7 +50,7 @@
       "sphinx-rtd-theme",
       "sphinxcontrib-details-directive"
     ],
-    "dev_precommit": [
+    "dev": [
       "yapf==0.29",
       "pre-commit==2.2.0",
       "prospector==1.2.0",

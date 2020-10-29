@@ -6,11 +6,11 @@
 Tests for running the DFT calculations needed as input for the tight-binding calculation, using VASP
 """
 
+# pylint: disable=import-outside-toplevel
+
 import pytest
 
 from aiida.engine.launch import run_get_node
-
-from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
 
 
 @pytest.mark.vasp
@@ -20,6 +20,7 @@ def test_combined_fp_run(
     """
     Calculates the Wannier90 inputs from VASP with hybrid functionals.
     """
+    from aiida_tbextraction.fp_run import VaspFirstPrinciplesRun
 
     result, node = run_get_node(
         VaspFirstPrinciplesRun, **get_vasp_fp_run_inputs()

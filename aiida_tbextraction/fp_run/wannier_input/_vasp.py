@@ -16,7 +16,7 @@ from aiida_tools import check_workchain_step
 from aiida_vasp.calcs.vasp2w90 import Vasp2w90Calculation
 from aiida_vasp.parsers.file_parsers.win import WinParser
 
-from . import WannierInputBase
+from ._base import WannierInputBase
 from .._helpers._calcfunctions import reduce_num_bands
 
 
