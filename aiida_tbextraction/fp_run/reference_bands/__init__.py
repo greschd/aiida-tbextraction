@@ -7,6 +7,13 @@ Contains workflows for calculating the reference bandstructure with first-princi
 """
 
 from ._base import ReferenceBandsBase
-from ._qe import QuantumEspressoReferenceBands
+from .._check_imports import HAS_QE, HAS_VASP
 
-__all__ = ("ReferenceBandsBase", "QuantumEspressoReferenceBands")
+__all__ = ["ReferenceBandsBase"]
+
+if HAS_QE:
+    from ._qe import QuantumEspressoReferenceBands
+    __all__.append("QuantumEspressoReferenceBands")
+if HAS_VASP:
+    from ._vasp import VaspReferenceBands
+    __all__.append("VaspReferenceBands")

@@ -28,32 +28,34 @@
     "aiida-core>=1.0.0<2",
     "aiida-wannier90>=2.0.0a1",
     "aiida-bands-inspect>=0.3.0",
-    "aiida-tbmodels>=0.3.0",
+    "aiida-tbmodels>=0.4.0rc1",
     "aiida-optimize>=0.3.1",
     "aiida-tools>=0.3.2",
     "numpy",
-    "multipledispatch"
+    "multipledispatch",
+    "tbmodels",
+    "pymatgen"
   ],
   "extras_require": {
     "testing": [
       "pytest>=3.6",
       "pytest-cov",
       "aiida-pytest",
-      "pymatgen",
       "pytest-datadir",
-      "aiida-mock-codes"
+      "aiida-testing @ git+https://github.com/aiidateam/aiida-testing.git@develop",
+      "ase"
     ],
     "docs": [
       "sphinx",
       "sphinx-rtd-theme",
       "sphinxcontrib-details-directive"
     ],
-    "dev_precommit": [
-      "yapf==0.28",
-      "pre-commit",
-      "prospector==1.1.7",
-      "pylint==2.3.1",
-      "mypy==0.740",
+    "dev": [
+      "yapf==0.29",
+      "pre-commit==2.2.0",
+      "prospector==1.2.0",
+      "pylint==2.4.4",
+      "mypy==0.770",
       "pymatgen"
     ],
     "strain": [
@@ -61,9 +63,13 @@
     ],
     "qe": [
       "aiida-quantumespresso>=3.0.0a5"
+    ],
+    "vasp": [
+      "aiida-vasp"
     ]
   },
   "entry_points": {
+    "aiida.calculations": [],
     "aiida.workflows": [
       "tbextraction.fp_run.base = aiida_tbextraction.fp_run:FirstPrinciplesRunBase",
       "tbextraction.fp_run.reference_bands.base = aiida_tbextraction.fp_run.reference_bands:ReferenceBandsBase",
@@ -71,6 +77,8 @@
       "tbextraction.calculate_tb = aiida_tbextraction.calculate_tb:TightBindingCalculation",
       "tbextraction.model_evaluation.base = aiida_tbextraction.model_evaluation:ModelEvaluationBase",
       "tbextraction.model_evaluation.band_difference = aiida_tbextraction.model_evaluation:BandDifferenceModelEvaluation",
+      "tbextraction.model_evaluation.combined = aiida_tbextraction.model_evaluation:CombinedEvaluation",
+      "tbextraction.model_evaluation.maximum_orbital_distance = aiida_tbextraction.model_evaluation:MaximumOrbitalDistanceEvaluation",
       "tbextraction.energy_windows.run_window = aiida_tbextraction.energy_windows.run_window:RunWindow",
       "tbextraction.energy_windows.window_search = aiida_tbextraction.energy_windows.window_search:WindowSearch",
       "tbextraction.optimize_fp_tb = aiida_tbextraction.optimize_fp_tb:OptimizeFirstPrinciplesTightBinding",

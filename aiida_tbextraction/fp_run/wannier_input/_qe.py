@@ -12,12 +12,12 @@ from aiida.common.exceptions import InputValidationError
 
 from aiida_tools import check_workchain_step
 from aiida_wannier90.calculations import Wannier90Calculation
-from aiida_quantumespresso.calculations.pw import PwCalculation
+from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
 from aiida_quantumespresso.calculations.pw2wannier90 import Pw2wannier90Calculation
 
-from . import WannierInputBase
+from ._base import WannierInputBase
 
-from .._helpers._calcfunctions import make_explicit_kpoints
+from .._helpers._calcfunctions import make_explicit_kpoints, reduce_num_bands
 from ..._calcfunctions import merge_nested_dict
 
 __all__ = ("QuantumEspressoWannierInput", )
@@ -38,9 +38,10 @@ class QuantumEspressoWannierInput(WannierInputBase):
             namespace='wannier'
         )
 
-        spec.expose_inputs(PwCalculation, include=['structure'])
         spec.expose_inputs(
-            PwCalculation, namespace='nscf', exclude=['structure', 'kpoints']
+            PwBaseWorkChain,
+            namespace='nscf',
+            exclude=['pw.structure', 'kpoints']
         )
 
         spec.expose_inputs(
@@ -64,8 +65,8 @@ class QuantumEspressoWannierInput(WannierInputBase):
         Run the NSCF and wannier90 -pp calculation.
         """
         self.report("Submitting pw.x NSCF calculation.")
-        nscf_inputs = self.exposed_inputs(PwCalculation, namespace='nscf')
-        nscf_inputs['parameters'] = merge_nested_dict(
+        nscf_inputs = self.exposed_inputs(PwBaseWorkChain, namespace='nscf')
+        nscf_inputs['pw']['parameters'] = merge_nested_dict(
             orm.Dict(
                 dict={
                     'CONTROL': {
@@ -75,11 +76,12 @@ class QuantumEspressoWannierInput(WannierInputBase):
                         'nosym': True
                     }
                 }
-            ), nscf_inputs.get('parameters', orm.Dict())
+            ), nscf_inputs['pw'].get('parameters', orm.Dict())
         )
+        nscf_inputs['pw']['structure'] = self.inputs.structure
         return ToContext(
             nscf=self.submit(
-                PwCalculation,
+                PwBaseWorkChain,
                 kpoints=make_explicit_kpoints(self.inputs.kpoints_mesh),
                 **nscf_inputs
             )
@@ -112,7 +114,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
             ), wannier_parameters_input
         )
 
-        self.out('wannier_parameters', wannier_parameters)
+        self.out('wannier_parameters', reduce_num_bands(wannier_parameters))
         if 'num_wann' not in wannier_parameters.keys():
             raise InputValidationError(
                 "The target number of Wannier functions 'num_wann' is not specified."

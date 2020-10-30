@@ -4,8 +4,8 @@ computers:
     description: localhost
     transport: local
     scheduler: direct
-    work_directory: /tmp/test_aiida_tbmodels_run
-    prepend_text: 'unset PYTHONPATH'
+    work_directory: /tmp/test_aiida_tbextraction_run
+    prepend_text: "unset PYTHONPATH"
 
 codes:
   tbmodels:

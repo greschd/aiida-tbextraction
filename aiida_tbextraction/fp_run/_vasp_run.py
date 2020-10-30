@@ -18,10 +18,10 @@ from aiida_tools import check_workchain_step
 
 from aiida_vasp.calcs.vasp import VaspCalculation  # pylint: disable=import-error,useless-suppression
 
+from .._calcfunctions import merge_nested_dict
 from .wannier_input import VaspWannierInput
 from .reference_bands import VaspReferenceBands
 from ._base import FirstPrinciplesRunBase
-from .._calcfunctions import merge_parameterdata_inline
 
 
 @export
@@ -37,7 +37,7 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         spec.input('code', valid_type=orm.Code, help='Code that runs VASP.')
         spec.input(
             'parameters',
-            valid_type=ParameterData,
+            valid_type=orm.Dict,
             help=
             'Parameters passed to all VASP calculations, unless explicitly overwritten.'
         )
@@ -84,15 +84,15 @@ class VaspFirstPrinciplesRun(FirstPrinciplesRunBase):
         if ns_parameters is None:
             parameters = self.inputs.parameters
         else:
-            parameters = merge_parameterdata_inline(
-                param_primary=ns_parameters,
-                param_secondary=self.inputs.parameters
-            )[1]
+            parameters = merge_nested_dict(
+                dict_primary=ns_parameters,
+                dict_secondary=self.inputs.parameters
+            )
             if force_parameters:
-                parameters = merge_parameterdata_inline(
-                    param_primary=orm.Dict(dict=force_parameters).store(),
-                    param_secondary=parameters
-                )[1]
+                parameters = merge_nested_dict(
+                    dict_primary=orm.Dict(dict=force_parameters).store(),
+                    dict_secondary=parameters
+                )
         calculation_kwargs = copy.deepcopy(
             dict(
                 ChainMap(

@@ -62,16 +62,15 @@ def add_initial_window_inline(
     )):
         return {'result': orm.Dict(dict=wannier_param_dict)}
     else:
-        window_dict = {
-            key: value
-            for key, value in zip(
+        window_dict = dict(
+            zip(
                 window_keys,
                 guess_window(
                     wannier_bands=wannier_bands,
                     slice_reference_bands=slice_reference_bands
                 )
             )
-        }
+        )
         return merge_nested_dict(
             dict_primary=wannier_parameters,
             dict_secondary=orm.Dict(dict=window_dict)

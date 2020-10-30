@@ -11,4 +11,5 @@ Reference
     calculate_tb.rst
     model_evaluation.rst
     energy_windows.rst
+    fp_tb.rst
     optimize_tb.rst

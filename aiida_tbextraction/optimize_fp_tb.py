@@ -46,6 +46,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             WindowSearch,
             exclude=(
                 'initial_window',
+                'reference_structure',
                 'reference_bands',
                 'wannier_bands',
                 'wannier.parameters',
@@ -170,6 +171,7 @@ class OptimizeFirstPrinciplesTightBinding(WorkChain):
             window_search=self.submit(
                 WindowSearch,
                 reference_bands=reference_bands,
+                reference_structure=self.inputs.structure,
                 wannier=wannier_namespace_inputs,
                 wannier_bands=wannier_bands,
                 initial_window=initial_window,

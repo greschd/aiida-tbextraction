@@ -9,3 +9,6 @@ Evaluate Tight-Binding Models
 
 .. aiida-workchain:: BandDifferenceModelEvaluation
     :module: aiida_tbextraction.model_evaluation
+
+.. aiida-workchain:: CombinedEvaluation
+    :module: aiida_tbextraction.model_evaluation

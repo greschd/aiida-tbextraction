@@ -7,6 +7,13 @@ Contains workflows for calculating the Wannier90 input files with first-principl
 """
 
 from ._base import WannierInputBase
-from ._qe import QuantumEspressoWannierInput
+from .._check_imports import HAS_QE, HAS_VASP
 
-__all__ = ("WannierInputBase", "QuantumEspressoWannierInput")
+__all__ = ["WannierInputBase"]
+
+if HAS_QE:
+    from ._qe import QuantumEspressoWannierInput
+    __all__.append("QuantumEspressoWannierInput")
+if HAS_VASP:
+    from ._vasp import VaspWannierInput
+    __all__.append("VaspWannierInput")

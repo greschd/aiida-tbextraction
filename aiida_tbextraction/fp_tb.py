@@ -81,7 +81,8 @@ class FirstPrinciplesTightBinding(WorkChain):
         )
 
         spec.expose_inputs(
-            ModelEvaluationBase, exclude=['tb_model', 'reference_bands']
+            ModelEvaluationBase,
+            exclude=['tb_model', 'reference_bands', 'reference_structure']
         )
         spec.input_namespace(
             'model_evaluation',
@@ -211,6 +212,7 @@ class FirstPrinciplesTightBinding(WorkChain):
                 load_object(self.inputs.model_evaluation_workflow),
                 tb_model=tb_model,
                 reference_bands=reference_bands,
+                reference_structure=self.inputs.structure,
                 **ChainMap(
                     self.inputs.model_evaluation,
                     self.exposed_inputs(ModelEvaluationBase),

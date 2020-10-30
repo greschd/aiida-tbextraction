@@ -35,7 +35,8 @@ class WannierInputBase(WorkChain):
             'wannier_parameters',
             valid_type=orm.Dict,
             required=False,
-            help='Parameters of the Wannier calculation. This output needs to be set if the parameters are modified by the workchain in any way.'
+            help=
+            'Parameters of the Wannier calculation. This output needs to be set if the parameters are modified by the workchain in any way.'
         )
         spec.input(
             'wannier_projections',

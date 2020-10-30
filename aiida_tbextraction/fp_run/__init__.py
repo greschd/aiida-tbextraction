@@ -6,9 +6,16 @@
 Workflows for running the first-principles calculations needed as input for the tight-binding calculation and evaluation.
 """
 
-# type : ignore
+import contextlib
 
 from ._base import FirstPrinciplesRunBase
-from ._qe_run import QuantumEspressoFirstPrinciplesRun
+from ._check_imports import HAS_QE, HAS_VASP
 
-__all__ = ("FirstPrinciplesRunBase", "QuantumEspressoFirstPrinciplesRun")
+__all__ = ["FirstPrinciplesRunBase"]
+
+if HAS_QE:
+    from ._qe_run import QuantumEspressoFirstPrinciplesRun
+    __all__.append("QuantumEspressoFirstPrinciplesRun")
+if HAS_VASP:
+    from ._vasp_run import VaspFirstPrinciplesRun
+    __all__.append("VaspFirstPrinciplesRun")

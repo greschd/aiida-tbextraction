@@ -14,6 +14,8 @@ import pymatgen
 import numpy as np
 
 from aiida import orm
+from aiida.orm import load_node
+from aiida.engine import run, submit
 from aiida_bands_inspect.io import read
 
 from aiida_tbextraction.energy_windows.window_search import WindowSearch
@@ -21,7 +23,7 @@ from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 
 @pytest.fixture
-def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too-many-locals,useless-suppression
+def window_search_builder(test_data_dir, code_wannier90, insb_structure):  # pylint: disable=too-many-locals,useless-suppression
     """
     Sets up the process builder for window_search tests, and adds the inputs.
     """
@@ -32,7 +34,7 @@ def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too
     input_folder_path = test_data_dir / 'wannier_input_folder'
     for filename in os.listdir(input_folder_path):
         input_folder.put_object_from_file(
-            path=str((input_folder_path / filename).resolve()), key=filename
+            str((input_folder_path / filename).resolve()), filename
         )
     builder.wannier.local_input_folder = input_folder
 
@@ -45,6 +47,7 @@ def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too
         'code_bands_inspect': orm.Code.get_from_string('bands_inspect'),
     }
     builder.reference_bands = read(test_data_dir / 'bands.hdf5')
+    builder.reference_structure = insb_structure
 
     initial_window = orm.List()
     initial_window.extend([-4.5, -4, 6.5, 16])
@@ -79,6 +82,7 @@ def window_search_builder(test_data_dir, code_wannier90):  # pylint: disable=too
         },
         'withmpi': False
     }
+    builder.parse.calc.distance_ratio_threshold = orm.Float(2.)
 
     builder.symmetries = orm.SinglefileData(
         file=str((test_data_dir / 'symmetries.hdf5').resolve())
@@ -106,8 +110,6 @@ def test_window_search(configure_with_daemon, window_search_builder):  # pylint:
     """
     Run a window_search on the sample wannier input folder.
     """
-    from aiida.engine.launch import run
-
     result = run(window_search_builder)
     assert all(
         key in result for key in ['cost_value', 'tb_model', 'window', 'plot']
@@ -120,9 +122,6 @@ def test_window_search_submit(
     """
     Submit a window_search workflow.
     """
-    from aiida.orm import load_node
-    from aiida.engine.launch import submit
-
     pk = submit(window_search_builder).pk
     wait_for(pk)
     assert_finished(pk)

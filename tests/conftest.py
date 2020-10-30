@@ -17,36 +17,51 @@ import numpy as np
 from ase.io.vasp import read_vasp
 from aiida import orm
 
-from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun
 from aiida_tbextraction.model_evaluation import BandDifferenceModelEvaluation
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'aiida.manage.tests.pytest_fixtures', 'aiida_pytest',
-    'aiida_mock_codes'
+    'aiida_testing.mock_code'
 ]
 
 
-def pytest_addoption(parser):
+@pytest.fixture(scope='session', autouse=True)
+def set_localhost_interval(configure):
+    orm.Computer.get(label='localhost').set_minimum_job_poll_interval(0.)
+
+
+def pytest_addoption(parser):  # pylint: disable=missing-function-docstring
     parser.addoption(
         '--skip-qe',
         action='store_true',
         help='Skip tests which require Quantum ESPRESSO.'
+    )
+    parser.addoption(
+        '--skip-vasp',
+        action='store_true',
+        help='Skip tests which require VASP.'
     )
 
 
 def pytest_configure(config):
     # register additional marker
     config.addinivalue_line("markers", "qe: mark tests which run with QE")
+    config.addinivalue_line("markers", "vasp: mark tests which run with VASP")
 
 
-def pytest_runtest_setup(item):  # pylint: disable=missing-docstring
+def pytest_runtest_setup(item):  # pylint: disable=missing-function-docstring
     try:
         qe_marker = item.get_marker("qe")
+        vasp_marker = item.get_marker("vasp")
     except AttributeError:
         qe_marker = item.get_closest_marker('qe')
+        vasp_marker = item.get_closest_marker('vasp')
     if qe_marker is not None:
         if item.config.getoption("--skip-qe"):
-            pytest.skip("Test runs only with QE.")
+            pytest.skip("Test needs Quantum ESPRESSO.")
+    if vasp_marker is not None:
+        if item.config.getoption("--skip-vasp"):
+            pytest.skip("Test needs VASP.")
 
 
 @pytest.fixture(scope='session')
@@ -96,6 +111,16 @@ def code_pw2wannier90(mock_code_factory, mock_codes_data_dir):  # pylint: disabl
     )
 
 
+@pytest.fixture
+def code_vasp(mock_code_factory, mock_codes_data_dir):  # pylint: disable=redefined-outer-name
+    return mock_code_factory(
+        label='vasp',
+        entry_point='vasp.vasp',
+        data_dir_abspath=mock_codes_data_dir,
+        ignore_files=('_aiidasubmit.sh')
+    )
+
+
 @pytest.fixture(scope='session')
 def generate_upf_data(test_data_dir):  # pylint: disable=redefined-outer-name
     """Return a `UpfData` instance for the given element a file for which should exist in `./data/pseudos`."""
@@ -104,9 +129,8 @@ def generate_upf_data(test_data_dir):  # pylint: disable=redefined-outer-name
 
     def _generate_upf_data(element):
         """Return `UpfData` node."""
-        from aiida.orm import UpfData
 
-        return UpfData(file=os.path.abspath(pseudo_dir / f'{element}.upf'))
+        return orm.UpfData(file=os.path.abspath(pseudo_dir / f'{element}.upf'))
 
     return _generate_upf_data
 
@@ -165,11 +189,14 @@ def get_repeated_pw_input(
     the top-level workchain.
     """
     def _get_repeated_pw_input():
+        options = get_metadata_singlecore()
         return {
-            'pseudos': insb_pseudos_qe,
-            'parameters': insb_common_qe_parameters,
-            'metadata': get_metadata_singlecore(),
-            'code': code_pw
+            'pw': {
+                'pseudos': insb_pseudos_qe,
+                'parameters': insb_common_qe_parameters,
+                'metadata': options,
+                'code': code_pw
+            }
         }
 
     return _get_repeated_pw_input
@@ -227,7 +254,7 @@ def get_qe_specific_fp_run_inputs(
         return {
             'scf': get_repeated_pw_input(),
             'bands': {
-                'pw': get_repeated_pw_input()
+                'bands': get_repeated_pw_input()
             },
             'to_wannier': {
                 'nscf': get_repeated_pw_input(),
@@ -239,6 +266,63 @@ def get_qe_specific_fp_run_inputs(
                     'code': code_pw2wannier90,
                     'metadata': get_metadata_singlecore()
                 }
+            }
+        }
+
+    return inner
+
+
+@pytest.fixture
+def get_vasp_specific_fp_run_inputs(code_vasp):
+    """
+    Creates the InSb inputs for the VASP fp_run workflow.
+    """
+    from aiida_vasp.data.potcar import PotcarData  # pylint: disable=import-outside-toplevel
+
+    def inner():
+        return {
+            'potentials': {
+                'In': PotcarData.find_one(family='pbe', symbol='In_d'),
+                'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
+            },
+            'parameters':
+            orm.Dict(
+                dict=dict(
+                    ediff=1e-3,
+                    lsorbit=True,
+                    isym=0,
+                    ismear=0,
+                    sigma=0.05,
+                    gga='PE',
+                    encut=380,
+                    magmom='600*0.0',
+                    nbands=36,
+                    kpar=4,
+                    nelmin=0,
+                    lwave=False,
+                    aexx=0.25,
+                    lhfcalc=True,
+                    hfscreen=0.23,
+                    algo='N',
+                    time=0.4,
+                    precfock='normal',
+                )
+            ),
+            'code':
+            code_vasp,
+            'calculation_kwargs':
+            dict(
+                options=dict(
+                    resources={
+                        'num_machines': 2,
+                        'num_mpiprocs_per_machine': 18
+                    },
+                    withmpi=True,
+                    max_wallclock_seconds=1200
+                )
+            ),
+            'scf': {
+                'parameters': orm.Dict(dict=dict(isym=2))
             }
         }
 
@@ -263,6 +347,22 @@ def get_fp_run_inputs(
 
 
 @pytest.fixture
+def get_vasp_fp_run_inputs(
+    configure, get_top_level_insb_inputs, get_vasp_specific_fp_run_inputs,
+    test_data_dir
+):
+    """
+    Create input for the VASP InSb sample.
+    """
+    def inner():
+        return dict(
+            **get_top_level_insb_inputs(), **get_vasp_specific_fp_run_inputs()
+        )
+
+    return inner
+
+
+@pytest.fixture
 def get_fp_tb_inputs(
     configure, get_top_level_insb_inputs, get_qe_specific_fp_run_inputs,
     get_metadata_singlecore, test_data_dir, code_wannier90
@@ -271,6 +371,8 @@ def get_fp_tb_inputs(
     Returns the input for DFT-based tight-binding workflows (without optimization).
     """
     def inner():
+        from aiida_tbextraction.fp_run import QuantumEspressoFirstPrinciplesRun  # pylint: disable=import-outside-toplevel
+
         inputs = get_top_level_insb_inputs()
 
         inputs['fp_run_workflow'] = QuantumEspressoFirstPrinciplesRun
@@ -298,6 +400,12 @@ def get_fp_tb_inputs(
         inputs['wannier'] = dict(
             code=code_wannier90, metadata=get_metadata_singlecore()
         )
+
+        inputs['parse'] = {
+            'calc': {
+                'distance_ratio_threshold': orm.Float(1.5)
+            }
+        }
 
         inputs['symmetries'] = orm.SinglefileData(
             file=str((test_data_dir / 'symmetries.hdf5').resolve())

@@ -22,7 +22,7 @@ from aiida_tbextraction.energy_windows.run_window import RunWindow
 
 
 @pytest.fixture
-def run_window_builder(test_data_dir, code_wannier90):
+def run_window_builder(test_data_dir, code_wannier90, insb_structure):
     """
     Returns a function that creates the input for RunWindow tests.
     """
@@ -33,14 +33,14 @@ def run_window_builder(test_data_dir, code_wannier90):
         input_folder_path = test_data_dir / 'wannier_input_folder'
         for filename in os.listdir(input_folder_path):
             input_folder.put_object_from_file(
-                path=str((input_folder_path / filename).resolve()),
-                key=filename
+                str((input_folder_path / filename).resolve()), filename
             )
         builder.wannier.local_input_folder = input_folder
 
         builder.wannier.code = code_wannier90
         builder.code_tbmodels = orm.Code.get_from_string('tbmodels')
         builder.model_evaluation_workflow = BandDifferenceModelEvaluation
+        builder.reference_structure = insb_structure
         builder.reference_bands = read(test_data_dir / 'bands.hdf5')
         builder.model_evaluation = {
             'code_bands_inspect': orm.Code.get_from_string('bands_inspect'),
@@ -97,6 +97,7 @@ def run_window_builder(test_data_dir, code_wannier90):
             },
             'withmpi': False
         }
+        builder.parse.calc.distance_ratio_threshold = orm.Float(2.)
         if symmetries:
             builder.symmetries = orm.SinglefileData(
                 file=str(test_data_dir / 'symmetries.hdf5')
