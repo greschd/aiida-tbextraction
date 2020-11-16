@@ -149,7 +149,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
                 settings=orm.Dict(
                     dict={
                         'ADDITIONAL_RETRIEVE_LIST':
-                        ['aiida.mmn', 'aiida.eig', 'aiida.amn']
+                        ['aiida.mmn', 'aiida.eig', 'aiida.amn', 'UNK*']
                     }
                 ),
                 **self.exposed_inputs(
