@@ -7,6 +7,7 @@ Defines a workflow that calculates the Wannier90 input files using Quantum ESPRE
 """
 
 import copy
+import gc
 import io
 import more_itertools
 import re
@@ -358,7 +359,9 @@ class SplitPw2wannier90(WorkChain):
         
         # get a sorted list of mmn pw2wann calcs
         pw2wann_calcs = sorted([x for x in self.ctx
-                               if 'pw2wann_mmn_only_' in x])
+                               if 'pw2wann_mmn_only_' in x],
+                               , key=lambda x: int(x.split('_')[-1]))
+
         pw2wann_calcs = [self.ctx[x] for x in pw2wann_calcs]
         assert len(newindex_bandgroups) == len(pw2wann_calcs)
 
@@ -380,8 +383,12 @@ class SplitPw2wannier90(WorkChain):
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_file = os.path.join(tmp_dir,'aiida.mmn')
             write_mmn(output_file, mmn_collected, kpb_kidx, kpb_g)
-            #TODO discuss whether we can flush mmn_collected from 
-            #     memory at this point
+
+            # mmn_collected might be very large so we want to remove 
+            # it from memory before reading in a copy
+            del mmn_collected
+            gc.collect()  # for paranoia's sake run garbage collection
+
             with open(output_file, mode='rb') as f:
                 mmn_collected_aiida = SinglefileData(file=f)
         
