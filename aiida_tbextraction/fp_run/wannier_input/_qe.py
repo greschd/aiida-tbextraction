@@ -13,7 +13,7 @@ from aiida.common.exceptions import InputValidationError
 from aiida_tools import check_workchain_step
 from aiida_wannier90.calculations import Wannier90Calculation
 from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
-from aiida_quantumespresso.calculations.pw2wannier90 import Pw2wannier90Calculation
+from aiida_tbextraction.fp_run.wannier_input.pw2wann import SplitPw2wannier90
 
 from ._base import WannierInputBase
 
@@ -41,13 +41,16 @@ class QuantumEspressoWannierInput(WannierInputBase):
         spec.expose_inputs(
             PwBaseWorkChain,
             namespace='nscf',
-            exclude=['pw.structure', 'kpoints']
+            exclude=['structure', 'kpoints']
         )
 
         spec.expose_inputs(
-            Pw2wannier90Calculation,
+            SplitPw2wannier90,
             namespace='pw2wannier',
-            exclude=['parent_folder', 'nnkp_file']
+            exclude=[
+                'number_bands', 'pw2wannier.parent_folder',
+                'pw2wannier.nnkp_file'
+            ]
         )
 
         # Exposing inputs from a calculation incorrectly sets the
@@ -141,21 +144,24 @@ class QuantumEspressoWannierInput(WannierInputBase):
         Run the pw2wannier90 calculation.
         """
         self.report("Submitting pw2wannier90 calculation.")
+
+        pw2wannier_inputs = self.exposed_inputs(
+            SplitPw2wannier90, namespace='pw2wannier'
+        )
+        pw2wannier_inputs['pw2wannier']['parent_folder'
+                                        ] = self.ctx.nscf.outputs.remote_folder
+        pw2wannier_inputs['pw2wannier'][
+            'nnkp_file'] = self.ctx.wannier90_preproc.outputs.nnkp_file
+
+        num_bands = self.ctx.wannier90_preproc.inputs.parameters.get_dict(
+        )['num_bands']
+        pw2wannier_inputs['number_bands'] = orm.Int(num_bands)
+
+        pw2wannier_inputs['pw2wannier'][
+            'nnkp_file'] = self.ctx.wannier90_preproc.outputs.nnkp_file
+
         return ToContext(
-            pw2wannier90=self.submit(
-                Pw2wannier90Calculation,
-                parent_folder=self.ctx.nscf.outputs.remote_folder,
-                nnkp_file=self.ctx.wannier90_preproc.outputs.nnkp_file,
-                settings=orm.Dict(
-                    dict={
-                        'ADDITIONAL_RETRIEVE_LIST':
-                        ['aiida.mmn', 'aiida.eig', 'aiida.amn', 'UNK*']
-                    }
-                ),
-                **self.exposed_inputs(
-                    Pw2wannier90Calculation, namespace='pw2wannier'
-                ),
-            )
+            pw2wannier90=self.submit(SplitPw2wannier90, **pw2wannier_inputs)
         )
 
     @check_workchain_step
@@ -163,7 +169,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
         """
         Get the pw2wannier90 result and create the necessary outputs.
         """
-        pw2wann_retrieved_folder = self.ctx.pw2wannier90.outputs.retrieved
+        pw2wann_retrieved_folder = self.ctx.pw2wannier90.outputs.pw2wannier_collected
         pw2wann_folder_list = pw2wann_retrieved_folder.list_object_names()
         assert all(
             filename in pw2wann_folder_list
