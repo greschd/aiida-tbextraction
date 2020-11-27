@@ -6,9 +6,16 @@
 Defines a workflow that calculates the Wannier90 input files using Quantum ESPRESSO pw.x.
 """
 
-import more_itertools
 import copy
 import io
+import more_itertools
+import re
+import tempfile
+import os
+import shutil
+
+import numpy as np
+from w90utils.io import  write_mmn
 
 from collections import ChainMap
 from aiida import orm
@@ -119,8 +126,111 @@ def get_exclude_bands(all_bands, target_bands, batch_size):
     ]
     return exclude_bands, run_bands_indices
 
+# TODO: confirm this function should stay here
+def load_mmn_file(mmn_file):
+    """
+    Parameters
+    ----------
+    mmn_file :
+        Path to mmn output file.
+    """
+    with open(mmn_file, "r") as f:
+        f.readline()
 
-class Pw2Wannier90Chain(WorkChain):
+        re_int = re.compile(r"[\d]+")
+
+        # read the first line
+        num_bands, num_kpts, num_neighbors = (
+            int(i) for i in re.findall(re_int, f.readline())
+        )
+
+        # read the rest of the file
+        lines = (line for line in f if line)
+
+        step = num_bands * num_bands + 1
+
+        res = np.zeros((num_kpts, num_neighbors, num_bands, num_bands), dtype=complex)
+
+        def grouper(iterable, group_size):
+            """Collect data into fixed-length chunks or blocks"""
+            args = [iter(iterable)] * group_size
+            return zip(*args)
+
+        blocks = grouper(lines, step)
+
+        re_float = re.compile(r"[0-9.\-E]+")
+        for i, block in enumerate(blocks):
+            k_idx = i // num_neighbors
+            neighbor_idx = i % num_neighbors
+            block = iter(block)
+            next(block)  # skip index header
+
+            def to_complex(blockline):
+                real_part, imag_part = re.findall(re_float, blockline)
+                return float(real_part) + 1j * float(imag_part)
+
+
+            res[k_idx, neighbor_idx] = np.array(
+                [
+                    [to_complex(next(block)) for _ in range(num_bands)]
+                    for _ in range(num_bands)
+                ],
+            dtype=complex).T  # Do we need the .T?
+    return res
+
+def get_pw2wann_mmn(pw2wann_calc,prefix="aiida"):
+    """
+    Parameters
+    ----------
+    pw2wann_calc :
+         An AiiDA pw2wannier90 completed calcjob
+    """
+    filename = prefix+".mmn"
+    folder = pw2wann_calc.outputs.retrieved 
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        with folder.open(filename, "rb") as in_f:
+            output_file = os.path.join(tmp_dir, filename)
+            with open(output_file, "wb") as out_f:
+                shutil.copyfileobj(fsrc=in_f, fdst=out_f)
+        mmn_content = load_mmn_file(output_file)
+        return mmn_content
+
+def get_nnkp_indexes(nnkp_file):
+    """
+    Parameters
+    ----------
+    nnkp_file :
+        An AiiDA nnkp_file SingleFileData output from
+        a pw2wannier90 calcjob.
+    """
+    nnkp_content = nnkp_file.get_content().splitlines()
+
+    kpoint_line = nnkp_content.index('begin kpoints')+1
+    num_kpoints = int(nnkp_content[kpoint_line])
+
+    nnkpts_line = nnkp_content.index('begin nnkpts')
+    num_kpoints_neighbors = int(nnkp_content[nnkpts_line+1])
+
+    kpb_kidx = np.zeros([num_kpoints, num_kpoints_neighbors])
+    kpb_g    = np.zeros([num_kpoints, num_kpoints_neighbors, 3])
+
+    start_line = nnkpts_line+2
+    for i in range(num_kpoints):
+        for j in range(num_kpoints_neighbors):
+            nnkp_shift = i*num_kpoints_neighbors+j
+            nnkp_line = start_line+nnkp_shift
+            nnkp_line_content = nnkp_content[nnkp_line]
+
+            _, kpt_nb, r0, r1, r2 = [int(x) for x in nnkp_line_content.split()]
+            kpb_kidx[i][j] = kpt_nb - 1 #watch out forpython/fortran indexing
+            kpb_g[i][j][0] = r0
+            kpb_g[i][j][1] = r1
+            kpb_g[i][j][2] = r2
+    return kpb_kidx, kpb_g 
+
+
+
+class SplitPw2wannier90(WorkChain):
     """
     Workchain for handling pw2wannier calculations
     """
@@ -128,7 +238,6 @@ class Pw2Wannier90Chain(WorkChain):
     def define(cls, spec):
         super().define(spec)
 
-        #TODO: discuss metadata
         spec.expose_inputs(
             Pw2wannier90Calculation,
             namespace='pw2wann',
@@ -151,6 +260,7 @@ class Pw2Wannier90Chain(WorkChain):
         spec.inputs.validator = None
 
         spec.outline(cls.run_pw2wannier90, cls.get_result)
+        spec.output('mmn_collected', valid_type=SinglefileData)
 
     @check_workchain_step
     def run_pw2wannier90(self):
@@ -203,14 +313,15 @@ class Pw2Wannier90Chain(WorkChain):
         all_bands = range(1, int(number_bands) + 1)
         old_excludebands = get_old_excludebands(nnkp_file)
         target_bands = [x for x in all_bands if x not in old_excludebands]
+        self.ctx.number_output_bands = len(target_bands)
 
         exclude_bandgroups, newindex_bandgroups = get_exclude_bands(
             all_bands, target_bands, bands_batchsize
         )
-        self.ctx.exclude_band_groups = newindex_bandgroups
+        self.ctx.newindex_bandgroups = newindex_bandgroups
 
         for i, exclude_band_group in enumerate(exclude_bandgroups):
-            exclude_band_group = List(list=exclude_bandgroups)
+            exclude_band_group = List(list=exclude_band_group)
             new_nnkp_file = get_new_nnkpfile(nnkp_file, exclude_band_group)
             # 4. submit all the mmn calculations
             #from aiida_msq.tools.pprint_aiida import pprint_aiida
@@ -237,23 +348,46 @@ class Pw2Wannier90Chain(WorkChain):
         """
         Get the pw2wannier90 result and create the necessary outputs.
         """
-        # TODO: replace this with something that works
+        newindex_bandgroups = self.ctx.newindex_bandgroups
 
-        # pw2wann_retrieved_folder = self.ctx.pw2wannier90.outputs.retrieved
-        # pw2wann_folder_list = pw2wann_retrieved_folder.list_object_names()
-        # assert all(
-        # filename in pw2wann_folder_list
-        # for filename in ['aiida.amn', 'aiida.mmn', 'aiida.eig']
-        # )
-        # self.report("Adding Wannier90 inputs to output.")
-        # self.out('wannier_input_folder', pw2wann_retrieved_folder)
+        # get kpt indexing information
+        nnkp_file = self.inputs.pw2wann.nnkp_file
+        kpb_kidx, kpb_g = get_nnkp_indexes(nnkp_file)
+        nkpt, nkpt_neigh = kpb_kidx.shape
 
-        # # The bands in aiida.eig are the same as the NSCF output up to
-        # # writing / parsing error.
-        # # NOTE: If this ends up being problematic for the 'invalid window'
-        # # detection, maybe add fuzzing there, since it is not possible
-        # # to always perfectly map aiida.eig to a floating-point value.
-        # # Discrepancy should be roughly ~< 1e-06
-        # self.out('wannier_bands', self.ctx.nscf.outputs.output_band)
-        # if 'wannier_projections' in self.inputs:
-        # self.out('wannier_projections', self.inputs.wannier_projections)
+        
+        # get a sorted list of mmn pw2wann calcs
+        pw2wann_calcs = sorted([x for x in self.ctx
+                               if 'pw2wann_mmn_only_' in x])
+        pw2wann_calcs = [self.ctx[x] for x in pw2wann_calcs]
+        assert len(newindex_bandgroups) == len(pw2wann_calcs)
+
+        # get number of bands and all bands
+        number_output_bands = int(self.ctx.number_output_bands)
+
+        # collect all the pw2wann mmn matrices in one spot
+        mmn_collected = np.zeros([nkpt, nkpt_neigh, number_output_bands, number_output_bands],
+                                dtype=complex)
+        for i in range(len(pw2wann_calcs)):
+            mmn_i = get_pw2wann_mmn(pw2wann_calcs[i])
+            newindex_bandgroup = newindex_bandgroups[i]
+            for j in range(len(newindex_bandgroup)):
+                bnd = newindex_bandgroup[j]
+                mmn_collected[:,:,bnd,newindex_bandgroup] = mmn_i[:,:,j,:]
+
+        # NOTE: it would be nice if mmn_collected could be stored directly
+        # write store and set the collected_mmn file
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_file = os.path.join(tmp_dir,'aiida.mmn')
+            write_mmn(output_file, mmn_collected, kpb_kidx, kpb_g)
+            #TODO discuss whether we can flush mmn_collected from 
+            #     memory at this point
+            with open(output_file, mode='rb') as f:
+                mmn_collected_aiida = SinglefileData(file=f)
+        
+        #TODO discuss how we want to set the outputs of this workchain
+        #     (ideally would have a retrieved folder for backwards-compatibility)
+        mmn_collected_aiida.store()
+        self.out('mmn_collected', mmn_collected_aiida)
+
+        # TODO: set outputs from amn calculation
