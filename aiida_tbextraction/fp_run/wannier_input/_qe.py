@@ -41,7 +41,7 @@ class QuantumEspressoWannierInput(WannierInputBase):
         spec.expose_inputs(
             PwBaseWorkChain,
             namespace='nscf',
-            exclude=['structure', 'kpoints']
+            exclude=['pw.structure', 'kpoints']
         )
 
         spec.expose_inputs(
