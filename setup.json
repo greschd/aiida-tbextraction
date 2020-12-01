@@ -34,7 +34,9 @@
     "numpy",
     "multipledispatch",
     "tbmodels",
-    "pymatgen"
+    "pymatgen",
+    "more_itertools",
+    "wannier90-utils @ git+https://github.com/greschd/wannier90-utils@c22ae9249c19ada8f45711aebe89ab20802c1654"
   ],
   "extras_require": {
     "testing": [
