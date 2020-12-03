@@ -263,8 +263,12 @@ def get_qe_specific_fp_run_inputs(
                     'metadata': get_metadata_singlecore()
                 },
                 'pw2wannier': {
-                    'code': code_pw2wannier90,
-                    'metadata': get_metadata_singlecore()
+                    # Use a huge batchsize to force it all at once
+                    'bands_batchsize': orm.Int(10000),
+                    'pw2wannier': {
+                        'code': code_pw2wannier90,
+                        'metadata': get_metadata_singlecore()
+                    },
                 }
             }
         }
