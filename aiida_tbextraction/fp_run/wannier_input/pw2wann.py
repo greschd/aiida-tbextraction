@@ -9,19 +9,18 @@ Defines a workflow that calculates the Wannier90 input files using Quantum ESPRE
 import copy
 import gc
 import io
-import more_itertools
 import re
 import tempfile
 import os
+from collections import ChainMap
 
 import numpy as np
-from w90utils.io import write_mmn
+import more_itertools
 
-from collections import ChainMap
+from w90utils.io import write_mmn
 from aiida import orm
 from aiida.orm import Int, List, SinglefileData, FolderData
 from aiida.engine import WorkChain, calcfunction
-
 from aiida_tools import check_workchain_step
 from aiida_quantumespresso.calculations.pw2wannier90 import Pw2wannier90Calculation
 
@@ -345,6 +344,7 @@ class SplitPw2wannier90(WorkChain):
         # get kpt indexing information
         nnkp_file = self.inputs.pw2wannier.nnkp_file
         kpb_kidx, kpb_g = get_nnkp_indexes(nnkp_file)
+        # pylint: disable=unpacking-non-sequence
         nkpt, nkpt_neigh = kpb_kidx.shape
 
         # get a sorted list of mmn pw2wann calcs
@@ -380,8 +380,8 @@ class SplitPw2wannier90(WorkChain):
         # Writing mmn file, unfortunately this is a bit messy because
         # write_mmn dumps to a file which must be read again later
         mmn_filename = "aiida.mmn"
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            output_file = os.path.join(tmp_dir, mmn_filename)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            output_file = tmp_file.name
             write_mmn(output_file, mmn_collected, kpb_kidx, kpb_g)
 
             # mmn_collected might be very large so we want to remove
@@ -389,9 +389,7 @@ class SplitPw2wannier90(WorkChain):
             del mmn_collected
             gc.collect()  # for paranoia's sake run garbage collection
 
-            with open(output_file, mode='r') as f_in:
-                with folder.open(mmn_filename, mode='w') as f_out:
-                    f_out.write(f_in.read())
+            folder.put_object_from_file(output_file, path=mmn_filename)
 
         # writing amn, eig (and any other) outputs
         filenames = ['aiida.eig', 'aiida.amn']
