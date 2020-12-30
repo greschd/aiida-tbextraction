@@ -391,17 +391,17 @@ class SplitPw2wannier90(WorkChain):
 
             folder.put_object_from_file(output_file, path=mmn_filename)
 
-        # writing amn, eig (and any other) outputs
+        # writing .amn and .eig outputs
+        # TODO: Write also any other outputs produced by the 'no MMN'
+        # pw2wannier90 run.
         filenames = ['aiida.eig', 'aiida.amn']
         no_mmn_calc = self.ctx['pw2wann_no_mmn']
         r_folder = no_mmn_calc.outputs.remote_folder
-        for filename in filenames:
-            with tempfile.TemporaryDirectory() as tmp_dir:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            for filename in filenames:
                 output_file = os.path.join(tmp_dir, filename)
                 r_folder.getfile(filename, output_file)
-                with open(output_file, mode='r') as f_in:
-                    with folder.open(filename, mode='w') as f_out:
-                        f_out.write(f_in.read())
+            folder.put_object_from_tree(os.path.abspath(tmp_dir))
 
         folder.store()
         self.out('pw2wannier_collected', folder)

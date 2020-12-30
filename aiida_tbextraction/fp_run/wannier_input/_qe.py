@@ -13,7 +13,7 @@ from aiida.common.exceptions import InputValidationError
 from aiida_tools import check_workchain_step
 from aiida_wannier90.calculations import Wannier90Calculation
 from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
-from aiida_tbextraction.fp_run.wannier_input.pw2wann import SplitPw2wannier90
+from aiida_tbextraction.fp_run.wannier_input.pw2wannier import SplitPw2wannier90
 
 from ._base import WannierInputBase
 
