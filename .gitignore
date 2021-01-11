@@ -10,3 +10,5 @@ dist
 .vscode
 .mypy_cache
 .aiida-testing-config.yml
+.coverage*
+htmlcov

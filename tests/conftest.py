@@ -240,6 +240,10 @@ def get_top_level_insb_inputs(configure, insb_structure):
     return inner
 
 
+# use very large batchsize to force one batch
+_DEFAULT_PW2WANNIER_BANDS_BATCHSIZE = 10000
+
+
 @pytest.fixture
 def get_qe_specific_fp_run_inputs(
     configure, code_pw, code_wannier90, code_pw2wannier90,
@@ -250,7 +254,7 @@ def get_qe_specific_fp_run_inputs(
     higher-level workflows (fp_tb, optimize_*), these are passed
     in the 'fp_run' namespace.
     """
-    def inner():
+    def inner(pw2wannier_bands_batchsize=_DEFAULT_PW2WANNIER_BANDS_BATCHSIZE):
         return {
             'scf': get_repeated_pw_input(),
             'bands': {
@@ -263,8 +267,7 @@ def get_qe_specific_fp_run_inputs(
                     'metadata': get_metadata_singlecore()
                 },
                 'pw2wannier': {
-                    # Use a huge batchsize to force it all at once
-                    'bands_batchsize': orm.Int(10000),
+                    'bands_batchsize': orm.Int(pw2wannier_bands_batchsize),
                     'pw2wannier': {
                         'code': code_pw2wannier90,
                         'metadata': get_metadata_singlecore()
@@ -341,10 +344,13 @@ def get_fp_run_inputs(
     """
     Create input for the QE InSb sample.
     """
-    def inner():
+    def inner(pw2wannier_bands_batchsize=_DEFAULT_PW2WANNIER_BANDS_BATCHSIZE):
 
         return dict(
-            **get_top_level_insb_inputs(), **get_qe_specific_fp_run_inputs()
+            **get_top_level_insb_inputs(),
+            **get_qe_specific_fp_run_inputs(
+                pw2wannier_bands_batchsize=pw2wannier_bands_batchsize
+            )
         )
 
     return inner

@@ -42,7 +42,7 @@
     "testing": [
       "pytest>=3.6",
       "pytest-cov",
-      "aiida-pytest",
+      "aiida-pytest>=0.1.0a8",
       "pytest-datadir",
       "aiida-testing @ git+https://github.com/aiidateam/aiida-testing.git@develop",
       "ase"

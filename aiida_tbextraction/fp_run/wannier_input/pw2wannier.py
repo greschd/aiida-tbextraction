@@ -91,7 +91,15 @@ def get_combinations(target_bands, batch_size):
     """
     target_bands = list(target_bands)
     batch_size = int(batch_size)
+
+    # The logic for combining parts only works if there are at least
+    # two batches, because we do not explicitly cover the diagonal
+    # calculation.
+    if batch_size >= len(target_bands):
+        return [target_bands]
+
     batched_bands = list(more_itertools.chunked(target_bands, batch_size))
+    assert len(batched_bands) >= 2
     run_bands = []
     for i, part_a in enumerate(batched_bands):
         for part_b in batched_bands[i + 1:]:
@@ -365,14 +373,10 @@ class SplitPw2wannier90(WorkChain):
         ],
                                  dtype=complex)
 
-        # pylint: disable=consider-using-enumerate
-        for i in range(len(pw2wann_calcs)):
-            mmn_i = get_pw2wann_mmn(pw2wann_calcs[i])
-            newindex_bandgroup = newindex_bandgroups[i]
-            for j in range(len(newindex_bandgroup)):
-                bnd = newindex_bandgroup[j]
-                mmn_collected[:, :, bnd, newindex_bandgroup] = mmn_i[:, :,
-                                                                     j, :]
+        for (calc, band_group) in zip(pw2wann_calcs, newindex_bandgroups):
+            mmn_collected[np.ix_(
+                np.arange(nkpt), np.arange(nkpt_neigh), band_group, band_group
+            )] = get_pw2wann_mmn(calc)
 
         # prep the output folder
         folder = FolderData()
