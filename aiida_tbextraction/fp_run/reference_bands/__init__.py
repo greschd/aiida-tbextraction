@@ -14,6 +14,6 @@ __all__ = ["ReferenceBandsBase"]
 if HAS_QE:
     from ._qe import QuantumEspressoReferenceBands
     __all__.append("QuantumEspressoReferenceBands")
-if HAS_VASP:
-    from ._vasp import VaspReferenceBands
-    __all__.append("VaspReferenceBands")
+# if HAS_VASP:
+#     from ._vasp import VaspReferenceBands
+#     __all__.append("VaspReferenceBands")

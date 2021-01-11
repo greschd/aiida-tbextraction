@@ -34,13 +34,15 @@
     "numpy",
     "multipledispatch",
     "tbmodels",
-    "pymatgen"
+    "pymatgen",
+    "more_itertools",
+    "wannier90-utils @ git+https://github.com/greschd/wannier90-utils@c22ae9249c19ada8f45711aebe89ab20802c1654"
   ],
   "extras_require": {
     "testing": [
-      "pytest>=3.6",
+      "pytest~=6.0",
       "pytest-cov",
-      "aiida-pytest",
+      "aiida-pytest>=0.1.0a8",
       "pytest-datadir",
       "aiida-testing @ git+https://github.com/aiidateam/aiida-testing.git@develop",
       "ase"
@@ -63,9 +65,6 @@
     ],
     "qe": [
       "aiida-quantumespresso>=3.0.0a5"
-    ],
-    "vasp": [
-      "aiida-vasp"
     ]
   },
   "entry_points": {
