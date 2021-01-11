@@ -18,8 +18,10 @@ with open(SETUP_JSON_PATH, 'r') as json_file:
 
 EXTRAS_REQUIRE = SETUP_KWARGS['extras_require']
 # sphinx needs to be able to import these requirements
-EXTRAS_REQUIRE['docs'] += EXTRAS_REQUIRE['qe'] + EXTRAS_REQUIRE[
-    'vasp'] + EXTRAS_REQUIRE['strain']
+EXTRAS_REQUIRE['docs'] += (
+    EXTRAS_REQUIRE['qe'] + EXTRAS_REQUIRE['strain']
+    #  + EXTRAS_REQUIRE['vasp']
+)
 # define a "full" development install
 EXTRAS_REQUIRE['dev'] += (EXTRAS_REQUIRE['testing'] + EXTRAS_REQUIRE['docs'])
 

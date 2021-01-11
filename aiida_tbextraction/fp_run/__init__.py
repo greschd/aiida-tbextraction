@@ -16,6 +16,6 @@ __all__ = ["FirstPrinciplesRunBase"]
 if HAS_QE:
     from ._qe_run import QuantumEspressoFirstPrinciplesRun
     __all__.append("QuantumEspressoFirstPrinciplesRun")
-if HAS_VASP:
-    from ._vasp_run import VaspFirstPrinciplesRun
-    __all__.append("VaspFirstPrinciplesRun")
+# if HAS_VASP:
+#     from ._vasp_run import VaspFirstPrinciplesRun
+#     __all__.append("VaspFirstPrinciplesRun")

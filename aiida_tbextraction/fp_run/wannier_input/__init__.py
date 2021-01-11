@@ -14,6 +14,6 @@ __all__ = ["WannierInputBase"]
 if HAS_QE:
     from ._qe import QuantumEspressoWannierInput
     __all__.append("QuantumEspressoWannierInput")
-if HAS_VASP:
-    from ._vasp import VaspWannierInput
-    __all__.append("VaspWannierInput")
+# if HAS_VASP:
+#     from ._vasp import VaspWannierInput
+#     __all__.append("VaspWannierInput")

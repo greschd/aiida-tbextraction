@@ -279,61 +279,61 @@ def get_qe_specific_fp_run_inputs(
     return inner
 
 
-@pytest.fixture
-def get_vasp_specific_fp_run_inputs(code_vasp):
-    """
-    Creates the InSb inputs for the VASP fp_run workflow.
-    """
-    from aiida_vasp.data.potcar import PotcarData  # pylint: disable=import-outside-toplevel
+# @pytest.fixture
+# def get_vasp_specific_fp_run_inputs(code_vasp):
+#     """
+#     Creates the InSb inputs for the VASP fp_run workflow.
+#     """
+#     from aiida_vasp.data.potcar import PotcarData
 
-    def inner():
-        return {
-            'potentials': {
-                'In': PotcarData.find_one(family='pbe', symbol='In_d'),
-                'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
-            },
-            'parameters':
-            orm.Dict(
-                dict=dict(
-                    ediff=1e-3,
-                    lsorbit=True,
-                    isym=0,
-                    ismear=0,
-                    sigma=0.05,
-                    gga='PE',
-                    encut=380,
-                    magmom='600*0.0',
-                    nbands=36,
-                    kpar=4,
-                    nelmin=0,
-                    lwave=False,
-                    aexx=0.25,
-                    lhfcalc=True,
-                    hfscreen=0.23,
-                    algo='N',
-                    time=0.4,
-                    precfock='normal',
-                )
-            ),
-            'code':
-            code_vasp,
-            'calculation_kwargs':
-            dict(
-                options=dict(
-                    resources={
-                        'num_machines': 2,
-                        'num_mpiprocs_per_machine': 18
-                    },
-                    withmpi=True,
-                    max_wallclock_seconds=1200
-                )
-            ),
-            'scf': {
-                'parameters': orm.Dict(dict=dict(isym=2))
-            }
-        }
+#     def inner():
+#         return {
+#             'potentials': {
+#                 'In': PotcarData.find_one(family='pbe', symbol='In_d'),
+#                 'Sb': PotcarData.find_one(family='pbe', symbol='Sb')
+#             },
+#             'parameters':
+#             orm.Dict(
+#                 dict=dict(
+#                     ediff=1e-3,
+#                     lsorbit=True,
+#                     isym=0,
+#                     ismear=0,
+#                     sigma=0.05,
+#                     gga='PE',
+#                     encut=380,
+#                     magmom='600*0.0',
+#                     nbands=36,
+#                     kpar=4,
+#                     nelmin=0,
+#                     lwave=False,
+#                     aexx=0.25,
+#                     lhfcalc=True,
+#                     hfscreen=0.23,
+#                     algo='N',
+#                     time=0.4,
+#                     precfock='normal',
+#                 )
+#             ),
+#             'code':
+#             code_vasp,
+#             'calculation_kwargs':
+#             dict(
+#                 options=dict(
+#                     resources={
+#                         'num_machines': 2,
+#                         'num_mpiprocs_per_machine': 18
+#                     },
+#                     withmpi=True,
+#                     max_wallclock_seconds=1200
+#                 )
+#             ),
+#             'scf': {
+#                 'parameters': orm.Dict(dict=dict(isym=2))
+#             }
+#         }
 
-    return inner
+#     return inner
 
 
 @pytest.fixture
