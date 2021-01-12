@@ -259,7 +259,7 @@ class SplitPw2wannier90(WorkChain):
             'bands_batchsize',
             valid_type=Int,
             help='The batch size for creating groups of bands to calculate. '
-            'Each calculation will have at most bands_batchsize'
+            'Each calculation will have at most `bands_batchsize` bands.'
         )
 
         # Exposing inputs from a calculation incorrectly sets the
@@ -270,7 +270,7 @@ class SplitPw2wannier90(WorkChain):
         spec.output('pw2wannier_collected', valid_type=FolderData)
 
     @check_workchain_step
-    def run_pw2wannier90(self):
+    def run_pw2wannier90(self):  # pylint: disable=too-many-locals
         """
         Run the pw2wannier90 calculation.
         """
@@ -279,7 +279,22 @@ class SplitPw2wannier90(WorkChain):
         nnkp_file = self.inputs.pw2wannier.nnkp_file
         number_bands = self.inputs.number_bands
         bands_batchsize = self.inputs.bands_batchsize
-        bands_groupsize = max(int(bands_batchsize / 2), 1)
+
+        # The `bands_groupsize` can be at most `bands_batchsize / 2` to
+        # ensure that no calculation (which each contain two groups)
+        # contains more than `bands_batchsize` bands.
+        # To distribute the load roughly equally over all calculations,
+        # we choose the smallest `bands_groupsize` that still results
+        # in the minimum possible number of groups (and therefore number
+        # of calculations).
+        # NOTE: This isn't an ideal way to split up the bands, because
+        # only one group is allowed to be smaller than `band_groupsize`,
+        # so if needed this can be improved further.
+        bands_max_groupsize = max(int(bands_batchsize / 2), 1)
+        num_band_groups = np.ceil(number_bands / bands_max_groupsize
+                                  ).astype(int)
+        bands_groupsize = np.ceil(number_bands / num_band_groups).astype(int)
+        assert bands_max_groupsize >= bands_groupsize
 
         # 2. submit the amn-enabled calculation
         amn_settings = orm.Dict(dict={'PARENT_FOLDER_SYMLINK': True})
