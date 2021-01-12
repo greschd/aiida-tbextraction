@@ -36,7 +36,7 @@
     "tbmodels",
     "pymatgen",
     "more_itertools",
-    "wannier90-utils @ git+https://github.com/greschd/wannier90-utils@c22ae9249c19ada8f45711aebe89ab20802c1654"
+    "wannier90-utils @ git+https://github.com/greschd/wannier90-utils@03a9c9f121b4499fc9b325d6ce9ac0b3d731ecaf"
   ],
   "extras_require": {
     "testing": [

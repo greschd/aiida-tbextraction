@@ -300,7 +300,7 @@ class SplitPw2wannier90(WorkChain):
         )
         self.to_context(**{key: future})
 
-        # 3. generate a list of nnkp files to permutate over
+        # 3. generate a list of nnkp files to iterate over
         mmn_settings = orm.Dict(dict={'PARENT_FOLDER_SYMLINK': True})
         mmn_parameters = orm.Dict(
             dict={'INPUTPP': {
@@ -322,8 +322,6 @@ class SplitPw2wannier90(WorkChain):
             exclude_band_group = List(list=exclude_band_group)
             new_nnkp_file = get_new_nnkpfile(nnkp_file, exclude_band_group)
             # 4. submit all the mmn calculations
-            #from aiida_msq.tools.pprint_aiida import pprint_aiida
-            #pprint_aiida(
 
             future = self.submit(
                 Pw2wannier90Calculation,
