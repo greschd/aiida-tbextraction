@@ -6,12 +6,13 @@
 Defines a workflow that calculates the Wannier90 input files using Quantum ESPRESSO pw.x.
 """
 
-import copy
 import gc
 import io
 import re
-import tempfile
 import os
+import math
+import copy
+import tempfile
 from collections import ChainMap
 
 import numpy as np
@@ -277,8 +278,8 @@ class SplitPw2wannier90(WorkChain):
         # 1. collect the inputs set at the beginning from the ctx
         self.report("Submitting pw2wannier90 calculation.")
         nnkp_file = self.inputs.pw2wannier.nnkp_file
-        number_bands = self.inputs.number_bands
-        bands_batchsize = self.inputs.bands_batchsize
+        number_bands = self.inputs.number_bands.value
+        bands_batchsize = self.inputs.bands_batchsize.value
 
         # The `bands_groupsize` can be at most `bands_batchsize / 2` to
         # ensure that no calculation (which each contain two groups)
@@ -290,10 +291,10 @@ class SplitPw2wannier90(WorkChain):
         # NOTE: This isn't an ideal way to split up the bands, because
         # only one group is allowed to be smaller than `band_groupsize`,
         # so if needed this can be improved further.
-        bands_max_groupsize = max(int(bands_batchsize / 2), 1)
-        num_band_groups = np.ceil(number_bands / bands_max_groupsize
-                                  ).astype(int)
-        bands_groupsize = np.ceil(number_bands / num_band_groups).astype(int)
+        bands_max_groupsize = max(math.floor(bands_batchsize / 2), 1)
+        num_band_groups = math.ceil(number_bands / bands_max_groupsize
+                                  )
+        bands_groupsize = math.ceil(number_bands / num_band_groups)
         assert bands_max_groupsize >= bands_groupsize
 
         # 2. submit the amn-enabled calculation
@@ -323,7 +324,7 @@ class SplitPw2wannier90(WorkChain):
                 'write_unk': False
             }}
         )
-        all_bands = range(1, int(number_bands) + 1)
+        all_bands = range(1, number_bands + 1)
         old_excludebands = get_old_excludebands(nnkp_file)
         target_bands = [x for x in all_bands if x not in old_excludebands]
         self.ctx.number_output_bands = len(target_bands)
